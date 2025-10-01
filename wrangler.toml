@@ -1,0 +1,36 @@
+name = "menuforge"
+main = "src/worker.ts"
+compatibility_date = "2025-10-01"
+
+[observability]
+enabled = true
+
+[vars]
+EMBED_MODEL = "@cf/baai/bge-large-en-v1.5"
+CHAT_MODEL = "@cf/meta/llama-3.1-70b-instruct"
+
+[ai]
+binding = "AI"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "menuforge-db"
+database_id = "41c9ca55-100b-4d50-9b58-92e95ac7b918"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "fd78ee533c6044938537b0318de76203"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "menuforge-snapshots"
+
+[[r2_buckets]]
+binding = "R2_IMAGES"
+bucket_name = "menuforge-images"
+
+[browser]
+binding = "BROWSER"
+
+[triggers]
+crons = ["0 */3 * * *"]
