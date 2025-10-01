@@ -183,15 +183,15 @@ curl -s -X PUT "$BASE_URL/api/menus/$MENU_ID" \
 Download a recipe as a printable document:
 
 ```bash
-# Download recipe as PDF/HTML
-curl -s "$BASE_URL/api/recipes/$RECIPE_ID_1/print.pdf?size=letter" \
+# Download recipe as HTML
+curl -s "$BASE_URL/api/recipes/$RECIPE_ID_1/print" \
   -o /tmp/recipe.html
 
 # Check if file was created
 ls -lh /tmp/recipe.html
 ```
 
-**Expected Result**: HTML file (or PDF in production) containing the formatted recipe.
+**Expected Result**: HTML file containing the formatted recipe (PDF generation would require Browser Rendering API implementation).
 
 ### 8. Track Events
 

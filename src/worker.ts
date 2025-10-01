@@ -12,6 +12,30 @@ app.use('/*', cors());
 // Health check
 app.get('/', (c) => c.json({ status: 'ok', service: 'MenuForge' }));
 
+// CDN - Serve images from R2
+app.get('/cdn/images/*', async (c) => {
+  try {
+    const key = c.req.path.replace('/cdn/images/', '');
+    const object = await c.env.R2_IMAGES.get(key);
+
+    if (object === null) {
+      return c.notFound();
+    }
+
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
+    headers.set('etag', object.httpEtag);
+    headers.set('cache-control', 'public, max-age=31536000, immutable');
+
+    return new Response(object.body, {
+      headers,
+    });
+  } catch (error) {
+    console.error('Image serve error:', error);
+    return c.notFound();
+  }
+});
+
 // Auth - Dev login
 app.post('/api/auth/dev-login', async (c) => {
   try {
@@ -540,9 +564,11 @@ app.post('/api/search/scrape', async (c) => {
 });
 
 // Print - PDF
-app.get('/api/recipes/:id/print.pdf', async (c) => {
+// Print - Recipe as HTML (or PDF with Browser Rendering)
+app.get('/api/recipes/:id/print', async (c) => {
   try {
     const id = c.req.param('id');
+    const format = c.req.query('format') || 'html'; // 'html' or 'pdf'
     
     const recipe = await c.env.DB.prepare(
       'SELECT * FROM recipes WHERE id = ?'
@@ -552,7 +578,7 @@ app.get('/api/recipes/:id/print.pdf', async (c) => {
       return c.json({ error: 'Recipe not found' }, 404);
     }
     
-    // Generate simple HTML for PDF
+    // Generate print-optimized HTML
     const html = `
 <!DOCTYPE html>
 <html>
@@ -596,17 +622,20 @@ app.get('/api/recipes/:id/print.pdf', async (c) => {
 </html>
     `;
     
-    // In production, would use Browser Rendering to generate PDF
-    // For now, return HTML as a placeholder
+    // Return HTML for now. In production with Browser Rendering API, could generate PDF
+    // To generate PDF: use Browser Rendering API to render HTML and convert to PDF
+    const contentType = format === 'pdf' ? 'application/pdf' : 'text/html';
+    const extension = format === 'pdf' ? 'html' : 'html'; // PDF generation would be implemented with Browser Rendering
+    
     return new Response(html, {
       headers: {
-        'Content-Type': 'text/html',
-        'Content-Disposition': `attachment; filename="recipe-${id}.html"`,
+        'Content-Type': contentType === 'application/pdf' ? 'text/html' : contentType,
+        'Content-Disposition': `attachment; filename="recipe-${id}.${extension}"`,
       },
     });
   } catch (error) {
-    console.error('Print PDF error:', error);
-    return c.json({ error: 'Failed to generate PDF' }, 500);
+    console.error('Print error:', error);
+    return c.json({ error: 'Failed to generate printable recipe' }, 500);
   }
 });
 

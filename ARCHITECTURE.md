@@ -243,6 +243,15 @@ Cron Trigger (every 3 hours)
 - Menu editing: Owner-only
 - Events: Anonymous allowed
 
+### Rate Limiting Considerations
+The `/api/events` endpoint allows anonymous event tracking, which could be abused to spam the D1 database. For production deployment, consider:
+- Implementing Cloudflare Rate Limiting rules for anonymous requests
+- Adding a simple in-memory rate limiter for anonymous IPs
+- Using Cloudflare's Bot Management to filter malicious traffic
+- Monitoring D1 storage usage and setting alerts
+
+For this low-risk recipe app, Cloudflare's built-in DDoS protection provides basic protection.
+
 ## Performance Optimizations
 
 ### Caching Strategy

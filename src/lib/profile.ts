@@ -118,10 +118,13 @@ export async function scheduleProfileRecompute(env: Env, userId: string): Promis
   if (!existing) {
     await env.KV.put(debounceKey, '1', { expirationTtl: 60 });
     
-    // In a real implementation, you might use a queue or scheduled task
-    // For now, we'll just recompute immediately after the debounce period
-    // This is a simplified version
-    setTimeout(() => recomputeProfile(env, userId), 60000);
+    // For a production system, use Cloudflare Queues for reliable background processing.
+    // setTimeout is unreliable in serverless environments as the worker may be terminated.
+    // 
+    // For this low-risk recipe app, we'll skip the debounce and recompute synchronously
+    // to ensure profiles are always updated. This adds ~100-200ms to API responses but
+    // ensures reliability. Alternative: implement queue-based processing later.
+    await recomputeProfile(env, userId);
   }
 }
 

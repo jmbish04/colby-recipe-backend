@@ -81,7 +81,7 @@ npm run dev
 1. **Clone and install dependencies**:
 ```bash
 git clone <your-repo>
-cd menuforge
+cd <project-directory>
 npm install
 ```
 
@@ -354,10 +354,14 @@ curl -X POST https://menuforge.workers.dev/api/search/scrape \
 
 ### Print
 
-#### Download Recipe PDF
+#### Download Recipe as HTML
 ```bash
-curl "https://menuforge.workers.dev/api/recipes/RECIPE_ID/print.pdf?size=letter" \
-  -o recipe.pdf
+curl "https://menuforge.workers.dev/api/recipes/RECIPE_ID/print" \
+  -o recipe.html
+
+# Or with format parameter (pdf format not yet implemented)
+curl "https://menuforge.workers.dev/api/recipes/RECIPE_ID/print?format=html" \
+  -o recipe.html
 ```
 
 ### Chat
@@ -429,8 +433,8 @@ MENU_ID=$(curl -X POST https://menuforge.workers.dev/api/menus/generate \
 
 curl https://menuforge.workers.dev/api/menus/$MENU_ID
 
-# 8. Generate PDF
-curl "https://menuforge.workers.dev/api/recipes/RECIPE_ID_1/print.pdf" -o recipe.pdf
+# 8. Generate printable HTML
+curl "$BASE_URL/api/recipes/RECIPE_ID_1/print" -o recipe.html
 
 # 9. Track events
 curl -X POST https://menuforge.workers.dev/api/events \
