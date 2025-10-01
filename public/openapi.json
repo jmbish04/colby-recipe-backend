@@ -1,0 +1,429 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MenuForge API",
+    "version": "1.1.0",
+    "description": "API for MenuForge chat, transcription, ingestion, personalization, and observability."
+  },
+  "servers": [
+    { "url": "https://{account}.workers.dev", "variables": { "account": { "default": "example" } } }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "RecipeSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "cuisine": { "type": ["string", "null"] },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "heroImageUrl": { "type": ["string", "null"] }
+        },
+        "required": ["id", "title", "tags"]
+      },
+      "ChatIngredientsRequest": {
+        "type": "object",
+        "properties": {
+          "ingredients": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "theme": { "type": "string" },
+          "tools": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "userId": { "type": "string" }
+        },
+        "required": ["ingredients"]
+      },
+      "ChatIngredientsResponse": {
+        "type": "object",
+        "properties": {
+          "suggestions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/RecipeSummary" }
+          },
+          "message": { "type": "string" }
+        },
+        "required": ["suggestions", "message"]
+      },
+      "TranscribeResponse": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string" }
+        },
+        "required": ["text"]
+      },
+      "IngestionRequest": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri" }
+        },
+        "required": ["url"]
+      },
+      "NormalizedRecipe": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "cuisine": { "type": "string" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "heroImageUrl": { "type": "string" },
+          "yield": { "type": "string" },
+          "prepTimeMinutes": { "type": ["integer", "null"] },
+          "cookTimeMinutes": { "type": ["integer", "null"] },
+          "totalTimeMinutes": { "type": ["integer", "null"] },
+          "ingredients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "quantity": { "type": "string" },
+                "notes": { "type": "string" }
+              },
+              "required": ["name"]
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "instruction": { "type": "string" }
+              },
+              "required": ["instruction"]
+            }
+          },
+          "tools": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "notes": { "type": "string" },
+          "sourceUrl": { "type": "string" }
+        },
+        "required": ["id", "title", "ingredients", "steps"]
+      },
+      "IngestionResponse": {
+        "type": "object",
+        "properties": {
+          "recipe": { "$ref": "#/components/schemas/NormalizedRecipe" }
+        },
+        "required": ["recipe"]
+      },
+      "Preferences": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string" },
+          "cuisines": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "dislikedIngredients": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "favoredTools": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "notes": { "type": "string" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["userId", "cuisines", "dislikedIngredients", "favoredTools"]
+      },
+      "PreferencesRequest": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string" },
+          "cuisines": { "oneOf": [ { "type": "array", "items": { "type": "string" } }, { "type": "string" } ] },
+          "dislikedIngredients": { "oneOf": [ { "type": "array", "items": { "type": "string" } }, { "type": "string" } ] },
+          "favoredTools": { "oneOf": [ { "type": "array", "items": { "type": "string" } }, { "type": "string" } ] },
+          "notes": { "type": "string" }
+        },
+        "required": ["userId"]
+      },
+      "LogsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ts": { "type": "string" },
+                "level": { "type": "string" },
+                "route": { "type": "string" },
+                "method": { "type": "string" },
+                "status": { "type": "integer" },
+                "ms": { "type": "integer" },
+                "msg": { "type": "string" },
+                "meta": { "type": "object" }
+              },
+              "required": ["ts", "level", "route", "method", "status", "ms", "msg", "meta"]
+            }
+          }
+        },
+        "required": ["items"]
+      }
+    }
+  },
+  "security": [
+    { "ApiKey": [] },
+    { "Bearer": [] }
+  ],
+  "paths": {
+    "/api/chat/ingredients": {
+      "post": {
+        "summary": "Generate recipe suggestions from ingredients",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChatIngredientsRequest" },
+              "example": {
+                "ingredients": ["peach", "basil", "goat cheese"],
+                "theme": "summer picnic",
+                "tools": ["air_fryer"],
+                "userId": "household-123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chat response and recipe suggestions",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChatIngredientsResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/transcribe": {
+      "post": {
+        "summary": "Transcribe audio to text",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transcription text",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TranscribeResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ingest/url": {
+      "post": {
+        "summary": "Ingest a recipe from a URL",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/IngestionRequest" },
+              "example": { "url": "https://example.com/recipes/roasted-peaches" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Normalized recipe payload",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IngestionResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ingest/image": {
+      "post": {
+        "summary": "Ingest a recipe from image uploads",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" }
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Normalized recipe payload",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IngestionResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/prefs": {
+      "get": {
+        "summary": "Get stored user preferences",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User preferences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "preferences": { "$ref": "#/components/schemas/Preferences" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Upsert user preferences",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PreferencesRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated preferences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "preferences": { "$ref": "#/components/schemas/Preferences" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/themes/suggest": {
+      "get": {
+        "summary": "Suggest recipes for a seasonal or ingredient theme",
+        "parameters": [
+          {
+            "name": "seed",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "peach"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Theme recommendations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "theme": { "type": "string" },
+                    "recipes": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/RecipeSummary" }
+                    }
+                  },
+                  "required": ["theme", "recipes"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/logs": {
+      "get": {
+        "summary": "Fetch recent structured request logs",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 100 }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Log entries",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LogsResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

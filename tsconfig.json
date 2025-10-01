@@ -14,7 +14,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["@cloudflare/workers-types"]
+    "types": ["./.wrangler/types/runtime.d.ts"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", ".wrangler"]
