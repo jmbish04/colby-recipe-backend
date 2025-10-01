@@ -148,7 +148,7 @@ This will start the worker on `http://localhost:8787`
 ## Project Structure
 
 ```
-colby-recipe-backend/
+menuforge/
 ├── src/
 │   ├── worker.ts           # Main worker entry point with Hono routes
 │   ├── lib/
