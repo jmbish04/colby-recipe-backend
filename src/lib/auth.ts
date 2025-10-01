@@ -9,6 +9,8 @@ export interface Env {
   BROWSER: Fetcher;
   EMBED_MODEL: string;
   CHAT_MODEL: string;
+  ASSETS: Fetcher;
+  WORKER_API_KEY: string;
 }
 
 export async function resolveUser(c: Context<{ Bindings: Env }>): Promise<string> {

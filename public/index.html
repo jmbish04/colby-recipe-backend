@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Colby Recipe Backend</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f8f9fb;
+      --fg: #222;
+      --card: #ffffffcc;
+      --accent: #2563eb;
+      --muted: #55627a;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--fg);
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 1.5rem 1rem 1rem;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    header h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.75rem;
+    }
+
+    header p {
+      margin: 0;
+      max-width: 720px;
+      color: var(--muted);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      gap: 1.5rem;
+      padding: 1.5rem clamp(1rem, 5vw, 3rem) 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    section {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    section h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .tester form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid rgba(100, 116, 139, 0.35);
+      font: inherit;
+      background: rgba(255, 255, 255, 0.9);
+      box-sizing: border-box;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    }
+
+    .headers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .header-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 1fr) minmax(120px, 1.5fr) auto;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .header-row input {
+      width: 100%;
+    }
+
+    .header-row button {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      background: rgba(148, 163, 184, 0.25);
+      cursor: pointer;
+    }
+
+    .header-row button:hover {
+      background: rgba(148, 163, 184, 0.4);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .actions button {
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .actions button:disabled {
+      opacity: 0.6;
+      cursor: progress;
+    }
+
+    .response {
+      background: rgba(15, 23, 42, 0.9);
+      color: #f8fafc;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow: hidden;
+    }
+
+    .response h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .response pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: rgba(148, 163, 184, 0.16);
+      padding: 0.75rem;
+      border-radius: 10px;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    footer {
+      padding: 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .header-row {
+        grid-template-columns: 1fr 1fr auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Colby Recipe Backend</h1>
+    <p>Colby powers recipe ingestion, personalization, and menu planning for MenuForge. Use the authenticated REST API to scan recipes, manage favorites, build menus, and more. Explore the full schema in the <a href="/openapi.json">OpenAPI specification</a>.</p>
+  </header>
+  <main>
+    <section>
+      <h2>Quick Start</h2>
+      <p>The Worker exposes a JSON API under <code>/api/</code> for recipes, favorites, menu generation, search utilities, and chat. Typical flow:</p>
+      <ul>
+        <li>Scan a recipe with <code>POST /api/recipes/scan</code> or <code>/batch-scan</code>.</li>
+        <li>Query ranked recipes via <code>GET /api/recipes</code>.</li>
+        <li>Track engagement with favorites, ratings, and custom events.</li>
+        <li>Generate a weekly menu using <code>POST /api/menus/generate</code>.</li>
+      </ul>
+      <p>Responses are JSON unless otherwise noted (e.g., printable recipes return HTML). See <a href="/openapi.json">/openapi.json</a> for structured details.</p>
+    </section>
+    <section>
+      <h2>Authentication</h2>
+      <p>All API routes require the Worker API key.</p>
+      <ul>
+        <li><strong>Header:</strong> <code>Authorization: Bearer &lt;WORKER_API_KEY&gt;</code></li>
+        <li><strong>or Header:</strong> <code>X-API-Key: &lt;WORKER_API_KEY&gt;</code></li>
+      </ul>
+      <p>When also sending user session tokens, prefer keeping <code>Authorization</code> for the session value and include the Worker key via <code>X-API-Key</code>. Unauthorized requests return <code>401</code> with <code>WWW-Authenticate: Bearer realm="worker"</code>. Store your key securely; the tester below keeps it in <code>localStorage</code> on this device only.</p>
+    </section>
+    <section class="tester">
+      <h2>API Tester</h2>
+      <form id="api-form">
+        <div>
+          <label for="path">Request path</label>
+          <input id="path" name="path" type="text" value="/api/recipes" autocomplete="off" required>
+        </div>
+        <div>
+          <label for="method">HTTP method</label>
+          <select id="method" name="method">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>PATCH</option>
+            <option>DELETE</option>
+          </select>
+        </div>
+        <div>
+          <label>Headers</label>
+          <div class="headers" id="headers"></div>
+          <div class="actions">
+            <button type="button" id="add-header" style="background: rgba(148, 163, 184, 0.25); color: var(--fg);">Add header</button>
+          </div>
+        </div>
+        <div>
+          <label for="body">Request body (JSON)</label>
+          <textarea id="body" name="body" placeholder='{"example":true}'></textarea>
+        </div>
+        <div class="actions">
+          <button id="send" type="submit">Send request</button>
+        </div>
+      </form>
+      <div class="response" id="response" hidden>
+        <h3 id="response-status">Status</h3>
+        <pre id="response-headers"></pre>
+        <pre id="response-body"></pre>
+      </div>
+    </section>
+  </main>
+  <footer>
+    Built for MenuForge • Need schema details? <a href="/openapi.json">Download the OpenAPI document</a>.
+  </footer>
+  <script>
+    const headersContainer = document.getElementById('headers');
+    const addHeaderBtn = document.getElementById('add-header');
+    const apiForm = document.getElementById('api-form');
+    const methodSelect = document.getElementById('method');
+    const bodyField = document.getElementById('body');
+    const sendBtn = document.getElementById('send');
+    const responseCard = document.getElementById('response');
+    const responseStatus = document.getElementById('response-status');
+    const responseHeaders = document.getElementById('response-headers');
+    const responseBody = document.getElementById('response-body');
+    const API_KEY_STORAGE = 'colby-api-key';
+
+    function createHeaderRow(key = '', value = '', options = {}) {
+      const row = document.createElement('div');
+      row.className = 'header-row';
+
+      const keyInput = document.createElement('input');
+      keyInput.className = 'header-key';
+      keyInput.type = 'text';
+      keyInput.placeholder = 'Header name';
+      keyInput.value = key;
+      if (options.readonlyKey) {
+        keyInput.readOnly = true;
+        keyInput.tabIndex = -1;
+        keyInput.style.background = 'rgba(148, 163, 184, 0.15)';
+      }
+
+      const valueInput = document.createElement('input');
+      valueInput.className = 'header-value';
+      valueInput.type = 'text';
+      valueInput.placeholder = 'Header value';
+      valueInput.value = value;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.textContent = '✕';
+      removeBtn.title = 'Remove header';
+      removeBtn.addEventListener('click', () => row.remove());
+
+      if (options.locked) {
+        removeBtn.disabled = true;
+        removeBtn.style.visibility = 'hidden';
+      }
+
+      row.appendChild(keyInput);
+      row.appendChild(valueInput);
+      row.appendChild(removeBtn);
+
+      if (options.storageKey) {
+        const saved = localStorage.getItem(options.storageKey);
+        if (saved) {
+          valueInput.value = saved;
+        }
+        valueInput.addEventListener('input', () => {
+          localStorage.setItem(options.storageKey, valueInput.value);
+        });
+      }
+
+      headersContainer.appendChild(row);
+      return row;
+    }
+
+    createHeaderRow('X-API-Key', '', { storageKey: API_KEY_STORAGE });
+    createHeaderRow('Content-Type', 'application/json');
+
+    addHeaderBtn.addEventListener('click', () => {
+      createHeaderRow();
+    });
+
+    methodSelect.addEventListener('change', () => {
+      const method = methodSelect.value.toUpperCase();
+      const allowBody = !['GET', 'HEAD'].includes(method);
+      bodyField.disabled = !allowBody;
+      if (!allowBody) {
+        bodyField.placeholder = 'Request body not sent for ' + method + ' requests';
+      } else {
+        bodyField.placeholder = '{"example":true}';
+      }
+    });
+
+    apiForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const rawPath = document.getElementById('path').value.trim();
+      const method = methodSelect.value.toUpperCase();
+      const headers = new Headers();
+
+      headersContainer.querySelectorAll('.header-row').forEach((row) => {
+        const key = row.querySelector('.header-key').value.trim();
+        const value = row.querySelector('.header-value').value;
+        if (key) {
+          headers.set(key, value);
+        }
+      });
+
+      let url;
+      if (/^https?:\/\//i.test(rawPath)) {
+        url = rawPath;
+      } else {
+        const normalized = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+        url = new URL(normalized, window.location.origin).toString();
+      }
+
+      let body = undefined;
+      if (!['GET', 'HEAD'].includes(method)) {
+        const content = bodyField.value.trim();
+        if (content) {
+          try {
+            body = JSON.stringify(JSON.parse(content));
+          } catch (error) {
+            alert('Request body must be valid JSON.');
+            return;
+          }
+        }
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending…';
+      responseCard.hidden = false;
+      responseStatus.textContent = 'Awaiting response…';
+      responseHeaders.textContent = '';
+      responseBody.textContent = '';
+
+      try {
+        const res = await fetch(url, { method, headers, body });
+        const statusLine = `${res.status} ${res.statusText}`;
+        responseStatus.textContent = `Status: ${statusLine}`;
+
+        const headerEntries = Array.from(res.headers.entries())
+          .map(([k, v]) => `${k}: ${v}`)
+          .join('\n');
+        responseHeaders.textContent = headerEntries || '(no headers)';
+
+        const text = await res.text();
+        let formatted = text;
+        try {
+          formatted = JSON.stringify(JSON.parse(text), null, 2);
+        } catch (error) {
+          // Not JSON; leave as text
+        }
+        responseBody.textContent = formatted || '(empty body)';
+      } catch (error) {
+        responseStatus.textContent = 'Request failed';
+        responseHeaders.textContent = '';
+        responseBody.textContent = String(error);
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send request';
+      }
+    });
+  </script>
+</body>
+</html>
