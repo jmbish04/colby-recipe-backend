@@ -102,14 +102,15 @@ app.post('/api/recipes/batch-scan', async (c) => {
     }
     
     const results = [];
-    for (const url of urls) {
+    const promises = urls.map(async (url) => {
       try {
         const result = await scrapeAndExtract(c.env, url);
-        results.push({ url, success: true, id: result.id });
+        return { url, success: true, id: result.id };
       } catch (error) {
-        results.push({ url, success: false, error: String(error) });
+        return { url, success: false, error: String(error) };
       }
-    }
+    });
+    const results = await Promise.all(promises);
     
     return c.json({ results });
   } catch (error) {
