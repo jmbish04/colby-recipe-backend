@@ -121,9 +121,9 @@ export async function scheduleProfileRecompute(env: Env, userId: string): Promis
     // For a production system, use Cloudflare Queues for reliable background processing.
     // setTimeout is unreliable in serverless environments as the worker may be terminated.
     // 
-    // For this low-risk recipe app, we'll skip the debounce and recompute synchronously
-    // to ensure profiles are always updated. This adds ~100-200ms to API responses but
-    // ensures reliability. Alternative: implement queue-based processing later.
+    // For this low-risk recipe app, we recompute the profile synchronously within a 60s debounce
+    // to ensure profiles are updated reliably without using queues. This adds minor latency
+    // to the triggering request.
     await recomputeProfile(env, userId);
   }
 }
