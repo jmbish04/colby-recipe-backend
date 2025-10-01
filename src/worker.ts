@@ -624,12 +624,12 @@ app.get('/api/recipes/:id/print', async (c) => {
     
     // Return HTML for now. In production with Browser Rendering API, could generate PDF
     // To generate PDF: use Browser Rendering API to render HTML and convert to PDF
-    const contentType = format === 'pdf' ? 'application/pdf' : 'text/html';
-    const extension = format === 'pdf' ? 'html' : 'html'; // PDF generation would be implemented with Browser Rendering
+    const contentType = 'text/html';
+    const extension = 'html';
     
     return new Response(html, {
       headers: {
-        'Content-Type': contentType === 'application/pdf' ? 'text/html' : contentType,
+        'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="recipe-${id}.${extension}"`,
       },
     });
