@@ -48,9 +48,14 @@ export async function enrichRecipe(env: Env, candidateData: any): Promise<any> {
     
     // Try to extract JSON from the response
     let jsonStr = response.response;
-    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[0];
+    const jsonBlockMatch = jsonStr.match(/```json\n([\s\S]*?)\n```/);
+    if (jsonBlockMatch && jsonBlockMatch[1]) {
+      jsonStr = jsonBlockMatch[1];
+    } else {
+      const rawJsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+      if (rawJsonMatch) {
+        jsonStr = rawJsonMatch[0];
+      }
     }
     
     const enriched = JSON.parse(jsonStr);
