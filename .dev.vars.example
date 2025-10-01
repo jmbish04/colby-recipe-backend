@@ -1,0 +1,7 @@
+# Example environment variables for local development
+# Copy this file to .dev.vars and fill in your values
+# .dev.vars is gitignored
+
+# These are already set in wrangler.toml, but you can override them here if needed
+# EMBED_MODEL="@cf/baai/bge-large-en-v1.5"
+# CHAT_MODEL="@cf/meta/llama-3.1-70b-instruct"

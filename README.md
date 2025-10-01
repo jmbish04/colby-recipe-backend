@@ -24,6 +24,8 @@ A serverless backend for recipe management and meal planning, built on Cloudflar
 
 ## Setup
 
+### Quick Start
+
 1. **Install dependencies**:
 ```bash
 npm install
@@ -65,6 +67,140 @@ Run locally:
 ```bash
 npm run dev
 ```
+
+## Detailed Setup Instructions
+
+### Prerequisites
+
+- Node.js 18+ (recommended: use [nvm](https://github.com/nvm-sh/nvm))
+- A Cloudflare account with Workers enabled
+- Wrangler CLI (installed via npm install)
+
+### Step-by-Step Setup
+
+1. **Clone and install dependencies**:
+```bash
+git clone <your-repo>
+cd colby-recipe-backend
+npm install
+```
+
+2. **Login to Cloudflare**:
+```bash
+npx wrangler login
+```
+
+3. **Create D1 database**:
+```bash
+npx wrangler d1 create menuforge-db
+```
+
+Copy the output `database_id` and update `wrangler.toml`:
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "menuforge-db"
+database_id = "YOUR_DATABASE_ID_HERE"  # Replace this
+```
+
+4. **Initialize database schema**:
+```bash
+npx wrangler d1 execute menuforge-db --file=./src/sql/schema.sql
+```
+
+5. **Create KV namespace**:
+```bash
+npx wrangler kv:namespace create KV
+```
+
+Copy the output `id` and update `wrangler.toml`:
+```toml
+[[kv_namespaces]]
+binding = "KV"
+id = "YOUR_KV_ID_HERE"  # Replace this
+```
+
+6. **Create R2 buckets**:
+```bash
+npx wrangler r2 bucket create menuforge-snapshots
+npx wrangler r2 bucket create menuforge-images
+```
+
+7. **Deploy to Cloudflare**:
+```bash
+npm run deploy
+```
+
+Your worker will be available at `https://menuforge.YOUR_SUBDOMAIN.workers.dev`
+
+### Local Development
+
+To run the worker locally with hot reloading:
+
+```bash
+npm run dev
+```
+
+This will start the worker on `http://localhost:8787`
+
+**Note**: Local development will use simulated bindings. For full functionality, you may need to test against the deployed version.
+
+## Project Structure
+
+```
+colby-recipe-backend/
+├── src/
+│   ├── worker.ts           # Main worker entry point with Hono routes
+│   ├── lib/
+│   │   ├── auth.ts         # Authentication (CF Access + dev tokens)
+│   │   ├── ai.ts           # Workers AI helpers (embed, enrich, chat)
+│   │   ├── scrape.ts       # Web scraping and recipe extraction
+│   │   └── profile.ts      # User preference learning and ranking
+│   └── sql/
+│       └── schema.sql      # D1 database schema
+├── wrangler.toml           # Cloudflare Workers configuration
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+## Key Concepts
+
+### Recipe Enrichment
+
+When a recipe is scraped:
+1. HTML is fetched and JSON-LD data is extracted
+2. Workers AI normalizes the recipe into a consistent format
+3. AI generates alternative cooking methods (Tokit, air fryer, rice cooker, bread machine)
+4. Original HTML and images are stored in R2
+5. Metadata is stored in D1
+
+### User Learning
+
+The system learns user preferences through events:
+- **click_tile**: +0.1 weight
+- **open_full**: +0.3 weight
+- **favorite**: +1.2 weight
+- **cooked/add_to_menu**: +1.6 weight
+- **rated**: -2 to +2 weight based on stars (1-5)
+
+Weights decay exponentially with a 90-day half-life, then are clamped to [-3, +3].
+
+### Search Ranking
+
+Search results are ranked by:
+1. **Freshness**: Newer recipes score higher
+2. **Tag preferences**: User's tag weights × 0.2
+3. **Cuisine preferences**: User's cuisine weights × 0.3
+
+### Scheduled Crawling
+
+Every 3 hours:
+1. Load seed URLs from KV (or use defaults)
+2. Discover recipe links from seeds
+3. Enqueue up to 5 links per seed
+4. Process up to 20 queued URLs
+5. Mark as done or error
 
 ## API Endpoints
 

@@ -2,12 +2,7 @@ import { Env } from './auth';
 import { enrichRecipe } from './ai';
 
 export async function scrapeAndExtract(env: Env, url: string): Promise<any> {
-  let browser;
-  
   try {
-    // Launch browser using Browser Rendering API
-    browser = await env.BROWSER.fetch('http://localhost');
-    
     // Note: Actual Browser Rendering API usage would be through puppeteer
     // For this implementation, we'll simulate the scraping process
     // In production, you would use:
@@ -152,7 +147,7 @@ async function upsertRecipe(env: Env, recipe: any): Promise<void> {
     id, source_url, source_domain, title, author, hero_image_url,
     cuisine, tags, yield: recipeYield, time_prep_min, time_cook_min, time_total_min,
     calories_per_serving, ingredients_json, steps_json, equipment_json,
-    nutrition_json, allergens_json, source_blocks_json, alternatives_json, confidence
+    nutrition_json, allergens_json, confidence
   } = recipe;
   
   await env.DB.prepare(

@@ -3,7 +3,7 @@ import { cors } from 'hono/cors';
 import { Env, resolveUser, generateToken } from './lib/auth';
 import { scrapeAndExtract } from './lib/scrape';
 import { chat } from './lib/ai';
-import { recomputeProfile, scheduleProfileRecompute, getUserProfile } from './lib/profile';
+import { scheduleProfileRecompute, getUserProfile } from './lib/profile';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -351,7 +351,7 @@ app.post('/api/menus/generate', async (c) => {
     }
     
     const body = await c.req.json();
-    const { week_start, constraints } = body;
+    const { week_start } = body;
     
     // Get user profile for boosting
     const profile = await getUserProfile(c.env, userId);
@@ -505,7 +505,7 @@ app.get('/api/search/suggest', async (c) => {
 app.post('/api/search/scrape', async (c) => {
   try {
     const body = await c.req.json();
-    const { urls, query } = body;
+    const { urls } = body;
     
     if (urls) {
       // Enqueue URLs
@@ -543,7 +543,6 @@ app.post('/api/search/scrape', async (c) => {
 app.get('/api/recipes/:id/print.pdf', async (c) => {
   try {
     const id = c.req.param('id');
-    const size = c.req.query('size') || 'letter';
     
     const recipe = await c.env.DB.prepare(
       'SELECT * FROM recipes WHERE id = ?'
@@ -616,7 +615,7 @@ app.post('/api/chat', async (c) => {
   try {
     const userId = await resolveUser(c);
     const body = await c.req.json();
-    const { messages, context } = body;
+    const { messages } = body;
     
     if (!messages || !Array.isArray(messages)) {
       return c.json({ error: 'messages array required' }, 400);
@@ -648,7 +647,7 @@ export default {
     return app.fetch(request, env, ctx);
   },
   
-  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+  async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
     console.log('Running scheduled crawl job');
     
     try {

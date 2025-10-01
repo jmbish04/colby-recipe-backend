@@ -16,7 +16,7 @@ Style: concise, operational, metric + US.`;
 
 export async function embed(env: Env, text: string): Promise<number[]> {
   try {
-    const response = await env.AI.run(env.EMBED_MODEL, {
+    const response = await env.AI.run(env.EMBED_MODEL as any, {
       text: [text],
     }) as { data?: number[][]; shape?: number[] };
     
@@ -34,7 +34,7 @@ export async function enrichRecipe(env: Env, candidateData: any): Promise<any> {
   try {
     const userPrompt = `Extract and normalize this recipe data:\n\n${JSON.stringify(candidateData, null, 2)}\n\nReturn ONLY valid JSON with the normalized recipe structure including alternatives for Tokit, air fryer, rice cooker, and bread machine.`;
     
-    const response = await env.AI.run(env.CHAT_MODEL, {
+    const response = await env.AI.run(env.CHAT_MODEL as any, {
       messages: [
         { role: 'system', content: ENRICHMENT_SYSTEM_PROMPT },
         { role: 'user', content: userPrompt }
@@ -90,7 +90,7 @@ export async function chat(env: Env, messages: any[], userPrefs?: any): Promise<
   
   const allMessages = [...systemMessages, ...messages];
   
-  const response = await env.AI.run(env.CHAT_MODEL, {
+  const response = await env.AI.run(env.CHAT_MODEL as any, {
     messages: allMessages,
     stream: true,
   }) as ReadableStream;
