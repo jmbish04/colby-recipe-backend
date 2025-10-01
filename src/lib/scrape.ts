@@ -100,7 +100,7 @@ export async function scrapeAndExtract(env: Env, url: string): Promise<any> {
         const imgResponse = await fetch(enriched.hero_image_url);
         if (imgResponse.ok) {
           const imgBuffer = await imgResponse.arrayBuffer();
-          const imgKey = `images/${recipeId}.jpg`;
+          const imgKey = `${recipeId}.jpg`;
           await env.R2_IMAGES.put(imgKey, imgBuffer, {
             httpMetadata: { contentType: 'image/jpeg' }
           });
