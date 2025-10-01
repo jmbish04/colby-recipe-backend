@@ -81,7 +81,7 @@ npm run dev
 1. **Clone and install dependencies**:
 ```bash
 git clone <your-repo>
-cd colby-recipe-backend
+cd menuforge
 npm install
 ```
 
