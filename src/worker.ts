@@ -101,7 +101,6 @@ app.post('/api/recipes/batch-scan', async (c) => {
       return c.json({ error: 'urls array required' }, 400);
     }
     
-    const results = [];
     const promises = urls.map(async (url) => {
       try {
         const result = await scrapeAndExtract(c.env, url);
@@ -128,7 +127,7 @@ app.get('/api/recipes', async (c) => {
     const cuisine = c.req.query('cuisine');
     const limit = parseInt(c.req.query('limit') || '24');
     
-    let query = 'SELECT id, title, hero_image_url, cuisine, tags FROM recipes WHERE 1=1';
+    let query = 'SELECT id, title, hero_image_url, cuisine, tags, created_at FROM recipes WHERE 1=1';
     const bindings: any[] = [];
     
     if (q) {
@@ -158,11 +157,15 @@ app.get('/api/recipes', async (c) => {
       if (profile) {
         const rankedResults = (results as any[]).map(recipe => {
           let score = 0;
-          
+
           // Freshness (newer recipes get higher score)
-          const createdAt = new Date(recipe.created_at || 0).getTime();
-          const ageInDays = (Date.now() - createdAt) / (1000 * 60 * 60 * 24);
-          const freshnessScore = Math.max(0, 1 - ageInDays / 365);
+          const createdAt = recipe.created_at ? new Date(recipe.created_at).getTime() : null;
+          const ageInDays = createdAt
+            ? (Date.now() - createdAt) / (1000 * 60 * 60 * 24)
+            : Number.POSITIVE_INFINITY;
+          const freshnessScore = Number.isFinite(ageInDays)
+            ? Math.max(0, 1 - ageInDays / 365)
+            : 0;
           score += freshnessScore;
           
           // Tag preferences
@@ -569,7 +572,11 @@ app.post('/api/search/scrape', async (c) => {
 app.get('/api/recipes/:id/print', async (c) => {
   try {
     const id = c.req.param('id');
-    const format = c.req.query('format') || 'html'; // 'html' or 'pdf'
+    const format = (c.req.query('format') || 'html').toLowerCase(); // 'html' or 'pdf'
+
+    if (format !== 'html') {
+      return c.json({ error: 'Only HTML format is supported at this time' }, 400);
+    }
     
     const recipe = await c.env.DB.prepare(
       'SELECT * FROM recipes WHERE id = ?'
@@ -674,6 +681,38 @@ app.post('/api/chat', async (c) => {
 // Scheduled handler (Cron)
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const url = new URL(request.url);
+
+    if (url.pathname.startsWith('/api/')) {
+      const authHeader = request.headers.get('authorization');
+      const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+      const apiKeyHeader = request.headers.get('x-api-key');
+
+      const hasValidBearer = bearerToken === env.WORKER_API_KEY;
+      const hasValidHeader = apiKeyHeader === env.WORKER_API_KEY;
+
+      if (!hasValidBearer && !hasValidHeader) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: {
+            'content-type': 'application/json',
+            'www-authenticate': 'Bearer realm="worker"'
+          }
+        });
+      }
+
+      return app.fetch(request, env, ctx);
+    }
+
+    if (url.pathname.startsWith('/cdn/images/')) {
+      return app.fetch(request, env, ctx);
+    }
+
+    const assetResponse = await env.ASSETS.fetch(request);
+    if (assetResponse.status !== 404) {
+      return assetResponse;
+    }
+
     return app.fetch(request, env, ctx);
   },
   
