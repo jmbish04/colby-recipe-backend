@@ -651,7 +651,7 @@
         "summary": "Download a printable recipe",
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
-          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["html", "pdf"], "default": "html" } }
+          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["html"], "default": "html" } }
         ],
         "responses": {
           "200": {
