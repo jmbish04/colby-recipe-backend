@@ -239,24 +239,17 @@ export async function deleteFavorite(env: Env, userId: string, recipeId: string)
 }
 
 export async function upsertRating(env: Env, rating: Rating): Promise<Rating> {
-  await env.DB.prepare(
+  const row = await env.DB.prepare(
     `INSERT INTO ratings (user_id, recipe_id, stars, notes, cooked_at)
      VALUES (?, ?, ?, ?, ?)
      ON CONFLICT(user_id, recipe_id) DO UPDATE SET
        stars = excluded.stars,
        notes = excluded.notes,
        cooked_at = excluded.cooked_at,
-       updated_at = CURRENT_TIMESTAMP`
+       updated_at = CURRENT_TIMESTAMP
+     RETURNING user_id, recipe_id, stars, notes, cooked_at, created_at, updated_at`
   )
     .bind(rating.userId, rating.recipeId, rating.stars, rating.notes ?? null, rating.cookedAt ?? null)
-    .run();
-
-  const row = await env.DB.prepare(
-    `SELECT user_id, recipe_id, stars, notes, cooked_at, created_at, updated_at
-     FROM ratings
-     WHERE user_id = ? AND recipe_id = ?`
-  )
-    .bind(rating.userId, rating.recipeId)
     .first<RatingRow>();
 
   if (!row) {
