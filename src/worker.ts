@@ -1178,7 +1178,7 @@ app.post('/api/recipes/:id/tailor', async (c) => {
     return jsonResponse({ error: 'appliance manual has not been processed yet' }, { status: 409 });
   }
 
-  const originalSteps = recipe.steps.map((step) => step.instruction || String(step));
+  const originalSteps = recipe.steps.map((step) => step.instruction);
 
   try {
     const tailoredSteps = await tailorRecipeInstructions(c.env, {
