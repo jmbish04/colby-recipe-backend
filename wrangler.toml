@@ -29,12 +29,12 @@ index_name = "recipes-index"
 [[d1_databases]]
 binding = "DB"
 database_name = "colby-recipe"
-database_id = "${DATABASE_ID}"
+database_id = "a1e61fc6-cf5a-4900-9482-1089ce36f1d1"
 
 # KV BINDING
 [[kv_namespaces]]
 binding = "KV"
-id = "${KV_ID}"
+id = "472e8adbec2f4aecac8d168a3910ca08"
 
 # R2 BUCKET BINDING
 [[r2_buckets]]
