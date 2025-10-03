@@ -1,22 +1,23 @@
 {
-  "name": "menuforge",
-  "version": "1.0.0",
-  "description": "MenuForge - A serverless recipe management and meal planning backend",
+  "name": "colby-recipe-backend",
+  "version": "1.1.0",
+  "description": "MenuForge AI recipe backend (Cloudflare Workers)",
   "main": "src/worker.ts",
   "scripts": {
+    "pretypecheck": "wrangler types --experimental-include-runtime",
+    "typecheck": "npm run pretypecheck && tsc --noEmit",
+    "test": "vitest run",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "types": "wrangler types"
+    "migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "deploy": "npm run migrate:remote && wrangler deploy"
   },
-  "keywords": ["cloudflare", "workers", "recipe", "meal-planning"],
+  "keywords": ["cloudflare", "workers", "recipes", "ai"],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241127.0",
     "typescript": "^5.7.2",
+    "vitest": "^2.1.3",
     "wrangler": "^3.96.0"
   },
-  "dependencies": {
-    "hono": "^4.6.14"
-  }
+  "dependencies": {}
 }

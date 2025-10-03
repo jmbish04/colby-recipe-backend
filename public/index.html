@@ -274,6 +274,117 @@
         <pre id="response-body"></pre>
       </div>
     </section>
+    <section id="voice">
+      <h2>Voice memo → Ingredients</h2>
+      <p>Record a short pantry rundown. We transcribe it and drop the text into the chat textarea.</p>
+      <div class="row" style="align-items:center;">
+        <button id="recordBtn">🎙️ Start recording</button>
+        <span id="recordingStatus" class="pill" hidden>Recording…</span>
+        <button id="stopBtn" class="secondary" disabled>⏹ Stop</button>
+      </div>
+      <p id="transcribeResult"></p>
+    </section>
+  
+    <section id="chat">
+      <h2>On-hand chat</h2>
+      <label for="ingredients">Ingredients (comma separated)</label>
+      <textarea id="ingredients" placeholder="tomatoes, basil, mozzarella"></textarea>
+      <label for="theme">Theme</label>
+      <input id="theme" type="text" placeholder="e.g. summer picnic" />
+      <div class="row">
+        <div>
+          <label for="userId">User ID (optional personalization)</label>
+          <input id="userId" type="text" placeholder="household-123" />
+        </div>
+        <div>
+          <label>Tools</label>
+          <div class="tools">
+            <label><input type="checkbox" value="air_fryer" class="toolChk" />Air fryer</label>
+            <label><input type="checkbox" value="bread_machine" class="toolChk" />Bread machine</label>
+            <label><input type="checkbox" value="slow_cooker" class="toolChk" />Slow cooker</label>
+            <label><input type="checkbox" value="instant_pot" class="toolChk" />Instant Pot</label>
+          </div>
+        </div>
+      </div>
+      <button id="chatBtn">✨ Suggest recipes</button>
+      <div id="chatOutput" style="margin-top:1rem;"></div>
+    </section>
+  
+    <section id="ingestUrl">
+      <h2>Ingest via URL</h2>
+      <label for="urlInput">Recipe URL</label>
+      <input id="urlInput" type="url" placeholder="https://example.com/my-favorite-recipe" />
+      <button id="urlBtn">🌐 Crawl &amp; normalize</button>
+      <div id="urlResult" style="margin-top:1rem;"></div>
+    </section>
+  
+    <section id="ingestImage">
+      <h2>Ingest via image</h2>
+      <p>Upload one or more recipe photos or scans. We run OCR and normalize the result.</p>
+      <input id="imageInput" type="file" accept="image/*" multiple />
+      <button id="imageBtn">🖼️ Normalize images</button>
+      <div id="imageResult" style="margin-top:1rem;"></div>
+    </section>
+  
+    <section id="prefs">
+      <h2>User preferences</h2>
+      <div class="row">
+        <div>
+          <label for="prefsUser">User ID</label>
+          <input id="prefsUser" type="text" placeholder="household-123" />
+        </div>
+        <div>
+          <label for="prefsCuisines">Favored cuisines</label>
+          <input id="prefsCuisines" type="text" placeholder="thai, mexican" />
+        </div>
+        <div>
+          <label for="prefsDislikes">Disliked ingredients</label>
+          <input id="prefsDislikes" type="text" placeholder="olives, cilantro" />
+        </div>
+        <div>
+          <label for="prefsTools">Favored tools</label>
+          <input id="prefsTools" type="text" placeholder="air_fryer, grill" />
+        </div>
+      </div>
+      <label for="prefsNotes">Notes</label>
+      <textarea id="prefsNotes" placeholder="Anything else to remember"></textarea>
+      <div class="row" style="margin-top:0.75rem;">
+        <button id="loadPrefs">📥 Load</button>
+        <button id="savePrefs" class="secondary">💾 Save</button>
+      </div>
+      <div id="prefsResult" style="margin-top:1rem;"></div>
+    </section>
+  
+    <section id="themes">
+      <h2>Theme suggestions</h2>
+      <label for="themeSeed">Theme seed</label>
+      <input id="themeSeed" type="text" placeholder="peach" />
+      <button id="themeBtn">🍑 Fetch ideas</button>
+      <div id="themeResult" style="margin-top:1rem;"></div>
+    </section>
+  
+    <section id="logs">
+      <h2>Request logs</h2>
+      <div class="row" style="align-items:center;">
+        <div>
+          <label for="logLimit">Limit</label>
+          <input id="logLimit" type="text" value="50" />
+        </div>
+        <div>
+          <label for="logLevel">Level</label>
+          <input id="logLevel" type="text" placeholder="info | error" />
+        </div>
+        <button id="refreshLogs">🔄 Refresh</button>
+      </div>
+      <div style="overflow-x:auto; max-height:320px;">
+        <table>
+          <thead>
+            <tr><th>Timestamp</th><th>Level</th><th>Route</th><th>Method</th><th>Status</th><th>ms</th><th>Message</th><th>Meta</th></tr>
+          </thead>
+          <tbody id="logsBody"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
   <footer>
     Built for MenuForge • Need schema details? <a href="/openapi.json">Download the OpenAPI document</a>.
@@ -429,6 +540,253 @@
         sendBtn.textContent = 'Send request';
       }
     });
+
+    const apiKeyInput = document.getElementById('apiKey');
+    const recordBtn = document.getElementById('recordBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const recordingStatus = document.getElementById('recordingStatus');
+    const transcribeResult = document.getElementById('transcribeResult');
+    const ingredientsInput = document.getElementById('ingredients');
+    const chatBtn = document.getElementById('chatBtn');
+    const chatOutput = document.getElementById('chatOutput');
+    const urlBtn = document.getElementById('urlBtn');
+    const urlInput = document.getElementById('urlInput');
+    const urlResult = document.getElementById('urlResult');
+    const imageBtn = document.getElementById('imageBtn');
+    const imageInput = document.getElementById('imageInput');
+    const imageResult = document.getElementById('imageResult');
+    const prefsUser = document.getElementById('prefsUser');
+    const prefsCuisines = document.getElementById('prefsCuisines');
+    const prefsDislikes = document.getElementById('prefsDislikes');
+    const prefsTools = document.getElementById('prefsTools');
+    const prefsNotes = document.getElementById('prefsNotes');
+    const prefsResult = document.getElementById('prefsResult');
+    const loadPrefs = document.getElementById('loadPrefs');
+    const savePrefs = document.getElementById('savePrefs');
+    const themeSeed = document.getElementById('themeSeed');
+    const themeBtn = document.getElementById('themeBtn');
+    const themeResult = document.getElementById('themeResult');
+    const logsBody = document.getElementById('logsBody');
+    const refreshLogs = document.getElementById('refreshLogs');
+    const logLimit = document.getElementById('logLimit');
+    const logLevel = document.getElementById('logLevel');
+    const userIdInput = document.getElementById('userId');
+    const toolCheckboxes = Array.from(document.querySelectorAll('.toolChk'));
+    const themeInput = document.getElementById('theme');
+
+    const storageKey = 'menuforge-api-key';
+    
+    function authHeaders(extra = {}) {
+      const key = localStorage.getItem(API_KEY_STORAGE) || '';
+      if (!key) throw new Error('API key required');
+      return Object.assign({ 'X-API-Key': key }, extra);
+    }
+
+    async function callJson(url, options = {}) {
+      const res = await fetch(url, options);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || res.statusText);
+      return data;
+    }
+
+    async function handleChat() {
+      try {
+        chatBtn.disabled = true;
+        chatOutput.innerHTML = 'Loading…';
+        const tools = toolCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
+        const payload = {
+          ingredients: ingredientsInput.value.split(',').map(s => s.trim()).filter(Boolean),
+          theme: themeInput.value.trim() || undefined,
+          tools,
+          userId: userIdInput.value.trim() || undefined,
+        };
+        const data = await callJson('/api/chat/ingredients', {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload),
+        });
+        chatOutput.innerHTML = `
+          <h3>Assistant message</h3>
+          <pre>${data.message || ''}</pre>
+          <h3>Suggestions</h3>
+          <ol>${(data.suggestions || []).map(r => `<li><strong>${r.title}</strong> <small>${(r.cuisine || '')}</small><br/><span class="pill">${(r.tags || []).join(', ')}</span></li>`).join('')}</ol>
+        `;
+      } catch (err) {
+        chatOutput.innerHTML = `<pre>${err.message}</pre>`;
+      } finally {
+        chatBtn.disabled = false;
+      }
+    }
+    chatBtn.addEventListener('click', handleChat);
+
+    async function handleUrl() {
+      try {
+        urlBtn.disabled = true;
+        urlResult.textContent = 'Loading…';
+        const data = await callJson('/api/ingest/url', {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ url: urlInput.value.trim() }),
+        });
+        urlResult.innerHTML = `<pre>${JSON.stringify(data.recipe, null, 2)}</pre>`;
+      } catch (err) {
+        urlResult.innerHTML = `<pre>${err.message}</pre>`;
+      } finally {
+        urlBtn.disabled = false;
+      }
+    }
+    urlBtn.addEventListener('click', handleUrl);
+
+    async function handleImages() {
+      try {
+        imageBtn.disabled = true;
+        imageResult.textContent = 'Loading…';
+        const form = new FormData();
+        Array.from(imageInput.files || []).forEach(file => form.append('file', file));
+        const res = await fetch('/api/ingest/image', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: form,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || res.statusText);
+        imageResult.innerHTML = `<pre>${JSON.stringify(data.recipe, null, 2)}</pre>`;
+      } catch (err) {
+        imageResult.innerHTML = `<pre>${err.message}</pre>`;
+      } finally {
+        imageBtn.disabled = false;
+      }
+    }
+    imageBtn.addEventListener('click', handleImages);
+
+    async function handlePrefsLoad() {
+      try {
+        prefsResult.textContent = 'Loading…';
+        const params = new URLSearchParams({ userId: prefsUser.value.trim() });
+        const data = await callJson(`/api/prefs?${params.toString()}`, { headers: authHeaders() });
+        const prefs = data.preferences || {};
+        prefsCuisines.value = (prefs.cuisines || []).join(', ');
+        prefsDislikes.value = (prefs.dislikedIngredients || []).join(', ');
+        prefsTools.value = (prefs.favoredTools || []).join(', ');
+        prefsNotes.value = prefs.notes || '';
+        prefsResult.innerHTML = `<pre>${JSON.stringify(prefs, null, 2)}</pre>`;
+      } catch (err) {
+        prefsResult.innerHTML = `<pre>${err.message}</pre>`;
+      }
+    }
+    loadPrefs.addEventListener('click', handlePrefsLoad);
+
+    async function handlePrefsSave() {
+      try {
+        prefsResult.textContent = 'Saving…';
+        const payload = {
+          userId: prefsUser.value.trim(),
+          cuisines: prefsCuisines.value,
+          dislikedIngredients: prefsDislikes.value,
+          favoredTools: prefsTools.value,
+          notes: prefsNotes.value,
+        };
+        const data = await callJson('/api/prefs', {
+          method: 'PUT',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload),
+        });
+        prefsResult.innerHTML = `<pre>${JSON.stringify(data.preferences, null, 2)}</pre>`;
+      } catch (err) {
+        prefsResult.innerHTML = `<pre>${err.message}</pre>`;
+      }
+    }
+    savePrefs.addEventListener('click', handlePrefsSave);
+
+    async function handleTheme() {
+      try {
+        themeResult.textContent = 'Loading…';
+        const params = new URLSearchParams({ seed: themeSeed.value.trim() });
+        const data = await callJson(`/api/themes/suggest?${params.toString()}`, { headers: authHeaders() });
+        themeResult.innerHTML = `<ol>${(data.recipes || []).map(r => `<li>${r.title} <span class="pill">${(r.tags || []).join(', ')}</span></li>`).join('')}</ol>`;
+      } catch (err) {
+        themeResult.innerHTML = `<pre>${err.message}</pre>`;
+      }
+    }
+    themeBtn.addEventListener('click', handleTheme);
+
+    async function handleLogs() {
+      try {
+        logsBody.innerHTML = '<tr><td colspan="8">Loading…</td></tr>';
+        const params = new URLSearchParams();
+        if (logLimit.value.trim()) params.set('limit', logLimit.value.trim());
+        if (logLevel.value.trim()) params.set('level', logLevel.value.trim());
+        const data = await callJson(`/api/logs?${params.toString()}`, { headers: authHeaders() });
+        logsBody.innerHTML = '';
+        (data.items || []).forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${row.ts || ''}</td>
+            <td>${row.level || ''}</td>
+            <td>${row.route || ''}</td>
+            <td>${row.method || ''}</td>
+            <td>${row.status || ''}</td>
+            <td>${row.ms || ''}</td>
+            <td>${row.msg || ''}</td>
+            <td><details><summary>meta</summary><pre>${JSON.stringify(row.meta || {}, null, 2)}</pre></details></td>`;
+          logsBody.appendChild(tr);
+        });
+      } catch (err) {
+        logsBody.innerHTML = `<tr><td colspan="8"><pre>${err.message}</pre></td></tr>`;
+      }
+    }
+    refreshLogs.addEventListener('click', handleLogs);
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+
+    async function startRecording() {
+      try {
+        recordBtn.disabled = true;
+        stopBtn.disabled = false;
+        recordingStatus.hidden = false;
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = event => { if (event.data.size) audioChunks.push(event.data); };
+        mediaRecorder.onstop = async () => {
+          recordingStatus.hidden = true;
+          recordBtn.disabled = false;
+          stopBtn.disabled = true;
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          const form = new FormData();
+          form.append('file', blob, 'voice.webm');
+          try {
+            const res = await fetch('/api/transcribe', { method: 'POST', headers: authHeaders(), body: form });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || res.statusText);
+            transcribeResult.textContent = data.text || '';
+            ingredientsInput.value = data.text || ingredientsInput.value;
+          } catch (err) {
+            transcribeResult.textContent = err.message;
+          }
+        };
+        mediaRecorder.start();
+      } catch (err) {
+        recordingStatus.hidden = true;
+        recordBtn.disabled = false;
+        stopBtn.disabled = true;
+        transcribeResult.textContent = err.message || 'Microphone permission denied.';
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    }
+
+    recordBtn.addEventListener('click', startRecording);
+    stopBtn.addEventListener('click', stopRecording);
+
+    if (localStorage.getItem(API_KEY_STORAGE)) {
+      handleLogs().catch(() => {});
+    }
   </script>
 </body>
 </html>

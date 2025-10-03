@@ -1,102 +1,350 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { Env, resolveUser, generateToken } from './lib/auth';
-import { scrapeAndExtract } from './lib/scrape';
-import { chat } from './lib/ai';
-import { scheduleProfileRecompute, getUserProfile } from './lib/profile';
+import { Env, VectorizeMatch } from './env';
+import { requireApiKey } from './auth';
+import { ensureRecipeId, jsonResponse, parseArray, parseJsonBody, safeDateISOString, truncate } from './utils';
+import { extractTextFromImage, generateChatMessage, normalizeRecipeFromText, transcribeAudio, embedText } from './ai';
+import {
+  getUserPreferences,
+  listRecipesByIds,
+  recentThemeRecipes,
+  storeIngestion,
+  upsertRecipeFromIngestion,
+  upsertUserPreferences,
+  getUserProfile,
+  scrapeAndExtract,
+} from './db';
+import { RecipeSummary, UserPreferences } from './types';
 
-const app = new Hono<{ Bindings: Env }>();
+export const app = new Hono<{ Bindings: Env }>();
 
-app.use('/*', cors());
+app.use('/api/*', cors());
 
-// Health check
-app.get('/', (c) => c.json({ status: 'ok', service: 'MenuForge' }));
+// Middleware for API key authentication
+app.use('/api/*', async (c, next) => {
+  const authError = requireApiKey(c.req.raw, c.env);
+  if (authError) {
+    return authError;
+  }
+  await next();
+});
 
-// CDN - Serve images from R2
-app.get('/cdn/images/*', async (c) => {
-  try {
-    const key = c.req.path.replace('/cdn/images/', '');
-    const object = await c.env.R2_IMAGES.get(key);
+app.use('*', async (c, next) => {
+  const start = Date.now();
+  await next();
+  const end = Date.now();
+  const log = {
+    ts: new Date().toISOString(),
+    level: c.res.ok ? 'info' : 'error',
+    route: new URL(c.req.url).pathname,
+    method: c.req.method,
+    status: c.res.status,
+    ms: end - start,
+    msg: c.res.ok ? 'ok' : 'error',
+    meta: {},
+  };
+  c.executionCtx.waitUntil(c.env.DB.prepare(
+    `INSERT INTO request_logs (ts, level, route, method, status, ms, msg, meta)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+    .bind(log.ts, log.level, log.route, log.method, log.status, log.ms, log.msg, JSON.stringify(log.meta ?? {}))
+    .run());
+});
 
-    if (object === null) {
-      return c.notFound();
+// Helper to resolve user ID from request
+async function resolveUser(c: any): Promise<string> {
+  // In a real app, this would involve session validation, JWT decoding, etc.
+  // For now, we'll allow a user_id query parameter for testing.
+  return c.req.query('user_id') || 'anon';
+}
+
+// API Routes from codex/add-ai-chat-and-ingestion-features
+export async function handleChatIngredients(c: any): Promise<Response> {
+  const body = await parseJsonBody<{
+    ingredients?: unknown;
+    theme?: unknown;
+    tools?: unknown;
+    userId?: unknown;
+  }>(c.req.raw);
+
+  const ingredients = parseArray(body.ingredients);
+  if (!ingredients.length) {
+    return jsonResponse({ error: 'ingredients array required' }, { status: 400 });
+  }
+  const theme = typeof body.theme === 'string' ? body.theme.trim() : '';
+  const tools = parseArray(body.tools);
+  const userId = typeof body.userId === 'string' ? body.userId.trim() : '';
+
+  const prefs = userId ? await getUserPreferences(c.env, userId) : null;
+
+  const contextPieces = [
+    'User provided ingredients:',
+    ...ingredients.map((item) => `- ${item}`),
+  ];
+  if (theme) {
+    contextPieces.push(`Theme: ${theme}`);
+  }
+  if (tools.length) {
+    contextPieces.push(`Available tools: ${tools.join(', ')}`);
+  }
+  if (prefs) {
+    if (prefs.cuisines.length) {
+      contextPieces.push(`Preferred cuisines: ${prefs.cuisines.join(', ')}`);
+    }
+    if (prefs.dislikedIngredients.length) {
+      contextPieces.push(`Disliked ingredients: ${prefs.dislikedIngredients.join(', ')}`);
+    }
+    if (prefs.favoredTools.length) {
+      contextPieces.push(`Favored tools: ${prefs.favoredTools.join(', ')}`);
+    }
+  }
+
+  const embeddingInput = [ingredients.join(', ')];
+  if (theme) embeddingInput.push(theme);
+  if (prefs?.cuisines.length) embeddingInput.push(prefs.cuisines.join(', '));
+  const embeddingText = embeddingInput.join('\n');
+  const vector = await embedText(c.env, embeddingText);
+
+  const matches = vector.length
+    ? await c.env.VEC.query({
+        vector,
+        topK: 50,
+        returnMetadata: true,
+      })
+    : { matches: [] };
+
+  const recipeIds = (matches.matches ?? [])
+    .map((match) => match.metadata?.recipe_id || match.id)
+    .filter((value): value is string => Boolean(value));
+
+  const recipeMap = await listRecipesByIds(c.env, recipeIds);
+
+  const scored = (matches.matches ?? [])
+    .map((match) => {
+      const recipe = recipeMap[match.metadata?.recipe_id ?? match.id];
+      if (!recipe) return null;
+      const score = computeRecipeScore(recipe, match, prefs, tools, theme, ingredients);
+      return { ...recipe, score };
+    })
+    .filter((value): value is RecipeSummary & { score: number } => Boolean(value));
+
+  scored.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+  const suggestions = scored.slice(0, 5).map(({ score, ...rest }) => rest);
+
+  const prompt = `${contextPieces.join('\n')}\n\nTop candidate recipes:\n${scored
+    .slice(0, 10)
+    .map((recipe, index) => `${index + 1}. ${recipe.title}`)
+    .join('\n')}`;
+
+  const message = await generateChatMessage(c.env, prompt);
+
+  return jsonResponse({ suggestions, message });
+}
+
+app.post('/api/chat/ingredients', handleChatIngredients);
+
+function computeRecipeScore(
+  recipe: RecipeSummary,
+  match: VectorizeMatch,
+  prefs: UserPreferences | null,
+  tools: string[],
+  theme: string,
+  ingredients: string[]
+): number {
+  let score = typeof match.score === 'number' ? match.score : 0;
+
+  const tags = new Set(recipe.tags.map((tag) => tag.toLowerCase()));
+  if (theme) {
+    const lowerTheme = theme.toLowerCase();
+    if (tags.has(lowerTheme) || recipe.title.toLowerCase().includes(lowerTheme)) {
+      score += 0.5;
+    }
+  }
+
+  if (prefs) {
+    if (prefs.cuisines.length && recipe.cuisine) {
+      if (prefs.cuisines.some((cuisine) => recipe.cuisine?.toLowerCase().includes(cuisine.toLowerCase()))) {
+        score += 0.75;
+      }
     }
 
-    const headers = new Headers();
-    object.writeHttpMetadata(headers);
-    headers.set('etag', object.httpEtag);
-    headers.set('cache-control', 'public, max-age=31536000, immutable');
+    if (prefs.favoredTools.length && tools.length === 0) {
+      // If user has favored tools and no tools provided, boost recipes whose tags mention them
+      if (prefs.favoredTools.some((tool) => tags.has(tool.toLowerCase()))) {
+        score += 0.3;
+      }
+    }
+  }
 
-    return new Response(object.body, {
-      headers,
+  if (tools.length) {
+    if (tools.some((tool) => tags.has(tool.toLowerCase()))) {
+      score += 0.4;
+    }
+  }
+
+  if (prefs?.dislikedIngredients.length) {
+    if (prefs.dislikedIngredients.some((item) => tags.has(item.toLowerCase()))) {
+      score -= 1.5;
+    }
+  }
+
+  if (ingredients.length) {
+    score += Math.min(ingredients.length, 5) * 0.1;
+  }
+
+  return score;
+}
+
+export async function handleTranscribe(c: any): Promise<Response> {
+  const form = await c.req.formData();
+  const file = form.get('file');
+  if (!(file instanceof File)) {
+    return jsonResponse({ error: 'file required' }, { status: 400 });
+  }
+  const buffer = new Uint8Array(await file.arrayBuffer());
+  const text = await transcribeAudio(c.env, buffer);
+  return jsonResponse({ text });
+}
+
+app.post('/api/transcribe', handleTranscribe);
+
+export async function handleIngestUrl(c: any): Promise<Response> {
+  const body = await parseJsonBody<{ url?: unknown }>(c.req.raw);
+  const url = typeof body.url === 'string' ? body.url.trim() : '';
+  if (!url) {
+    return jsonResponse({ error: 'url required' }, { status: 400 });
+  }
+
+  const session = await c.env.BROWSER.newSession({});
+  const page = await session.newPage();
+  try {
+    await page.goto(url, { waitUntil: 'networkidle', timeout: 20000 });
+    const rawHtml = await page.content();
+    const normalized = await normalizeRecipeFromText(c.env, rawHtml, url);
+    normalized.id = ensureRecipeId(normalized, crypto.randomUUID());
+    normalized.sourceUrl = url;
+
+    await storeIngestion(c.env, {
+      sourceType: 'url',
+      sourceRef: url,
+      raw: truncate(rawHtml),
+      recipe: normalized,
     });
-  } catch (error) {
-    console.error('Image serve error:', error);
-    return c.notFound();
+
+    const stored = await upsertRecipeFromIngestion(c.env, normalized);
+
+    return jsonResponse({ recipe: stored });
+  } finally {
+    await page.close();
+    await session.close();
   }
+}
+
+app.post('/api/ingest/url', handleIngestUrl);
+
+app.post('/api/ingest/image', async (c) => {
+  const form = await c.req.formData();
+  const files = [...form.values()].filter((value): value is File => value instanceof File);
+  if (!files.length) {
+    return jsonResponse({ error: 'image files required' }, { status: 400 });
+  }
+
+  let combinedText = '';
+  for (const file of files) {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const text = await extractTextFromImage(c.env, bytes);
+    combinedText += `\n\nImage ${file.name}:\n${text}`;
+  }
+
+  const normalized = await normalizeRecipeFromText(c.env, combinedText.trim());
+  normalized.id = ensureRecipeId(normalized, crypto.randomUUID());
+
+  await storeIngestion(c.env, {
+    sourceType: 'image',
+    sourceRef: files.map((file) => file.name).join(','),
+    raw: combinedText.trim(),
+    recipe: normalized,
+  });
+
+  const stored = await upsertRecipeFromIngestion(c.env, normalized);
+
+  return jsonResponse({ recipe: stored });
 });
 
-// Auth - Dev login
-app.post('/api/auth/dev-login', async (c) => {
-  try {
-    const body = await c.req.json();
-    const { user_id, name, email } = body;
-    
-    if (!user_id) {
-      return c.json({ error: 'user_id required' }, 400);
-    }
-    
-    // Upsert user
-    await c.env.DB.prepare(
-      `INSERT INTO users (id, name, email, updated_at) 
-       VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-       ON CONFLICT(id) DO UPDATE SET
-         name = excluded.name,
-         email = excluded.email,
-         updated_at = CURRENT_TIMESTAMP`
-    ).bind(user_id, name || null, email || null).run();
-    
-    // Generate token
-    const token = generateToken();
-    const sessionKey = `kv:sess:${token}`;
-    
-    // Store session (expires in 30 days)
-    await c.env.KV.put(sessionKey, JSON.stringify({
-      user_id,
-      expires: Date.now() + 30 * 24 * 60 * 60 * 1000,
-    }), { expirationTtl: 30 * 24 * 60 * 60 });
-    
-    return c.json({ token });
-  } catch (error) {
-    console.error('Dev login error:', error);
-    return c.json({ error: 'Failed to create session' }, 500);
+export async function handleGetPrefs(c: any): Promise<Response> {
+  const userId = c.req.query('userId');
+  if (!userId) {
+    return jsonResponse({ error: 'userId required' }, { status: 400 });
   }
+  const prefs = await getUserPreferences(c.env, userId);
+  return jsonResponse({ preferences: prefs });
+}
+
+app.get('/api/prefs', handleGetPrefs);
+
+export async function handlePutPrefs(c: any): Promise<Response> {
+  const body = await parseJsonBody<{
+    userId?: unknown;
+    cuisines?: unknown;
+    dislikedIngredients?: unknown;
+    favoredTools?: unknown;
+    notes?: unknown;
+  }>(c.req.raw);
+
+  const userId = typeof body.userId === 'string' ? body.userId.trim() : '';
+  if (!userId) {
+    return jsonResponse({ error: 'userId required' }, { status: 400 });
+  }
+
+  const prefs: UserPreferences = {
+    userId,
+    cuisines: parseArray(body.cuisines),
+    dislikedIngredients: parseArray(body.dislikedIngredients),
+    favoredTools: parseArray(body.favoredTools),
+    notes: typeof body.notes === 'string' ? body.notes : null,
+  };
+
+  await upsertUserPreferences(c.env, prefs);
+
+  const stored = await getUserPreferences(c.env, userId);
+  return jsonResponse({ preferences: stored });
+}
+
+app.put('/api/prefs', handlePutPrefs);
+
+app.get('/api/themes/suggest', async (c) => {
+  const seed = (c.req.query('seed') || '').trim();
+  if (!seed) {
+    return jsonResponse({ error: 'seed required' }, { status: 400 });
+  }
+
+  const seedEmbedding = await embedText(c.env, seed);
+  const vectorResults = seedEmbedding.length
+    ? await c.env.VEC.query({ vector: seedEmbedding, topK: 20, returnMetadata: true })
+    : { matches: [] };
+
+  const ids = (vectorResults.matches ?? [])
+    .map((match) => match.metadata?.recipe_id ?? match.id)
+    .filter((value): value is string => Boolean(value));
+  const recipeMap = await listRecipesByIds(c.env, ids);
+  const vectorSuggestions = (vectorResults.matches ?? [])
+    .map((match) => recipeMap[match.metadata?.recipe_id ?? match.id])
+    .filter((value): value is RecipeSummary => Boolean(value));
+
+  const sqlSuggestions = await recentThemeRecipes(c.env, seed, 12);
+  const merged: Record<string, RecipeSummary> = {};
+  for (const recipe of [...vectorSuggestions, ...sqlSuggestions]) {
+    merged[recipe.id] = recipe;
+  }
+
+  const suggestions = Object.values(merged).slice(0, 12);
+  return jsonResponse({ theme: seed, recipes: suggestions });
 });
 
-// Recipes - Scan single URL
-app.post('/api/recipes/scan', async (c) => {
-  try {
-    const body = await c.req.json();
-    const { url } = body;
-    
-    if (!url) {
-      return c.json({ error: 'url required' }, 400);
-    }
-    
-    const result = await scrapeAndExtract(c.env, url);
-    return c.json({ id: result.id });
-  } catch (error) {
-    console.error('Scan error:', error);
-    return c.json({ error: 'Failed to scan recipe' }, 500);
-  }
-});
-
-// Recipes - Batch scan
+// API Routes from main branch
 app.post('/api/recipes/batch-scan', async (c) => {
   try {
-    const body = await c.req.json();
-    const { urls } = body;
-    
+    const { urls } = await c.req.json();
     if (!Array.isArray(urls)) {
       return c.json({ error: 'urls array required' }, 400);
     }
@@ -118,7 +366,6 @@ app.post('/api/recipes/batch-scan', async (c) => {
   }
 });
 
-// Recipes - List with ranking
 app.get('/api/recipes', async (c) => {
   try {
     const userId = await resolveUser(c);
@@ -202,373 +449,6 @@ app.get('/api/recipes', async (c) => {
   }
 });
 
-// Recipes - Get single recipe
-app.get('/api/recipes/:id', async (c) => {
-  try {
-    const id = c.req.param('id');
-    const userId = await resolveUser(c);
-    
-    const recipe = await c.env.DB.prepare(
-      'SELECT * FROM recipes WHERE id = ?'
-    ).bind(id).first();
-    
-    if (!recipe) {
-      return c.json({ error: 'Recipe not found' }, 404);
-    }
-    
-    // Track event
-    if (userId !== 'anon') {
-      await c.env.DB.prepare(
-        'INSERT INTO events (user_id, recipe_id, event_type) VALUES (?, ?, ?)'
-      ).bind(userId, id, 'open_full').run();
-    }
-    
-    return c.json({ recipe });
-  } catch (error) {
-    console.error('Get recipe error:', error);
-    return c.json({ error: 'Failed to get recipe' }, 500);
-  }
-});
-
-// Favorites - Add
-app.post('/api/favorites/:id', async (c) => {
-  try {
-    const userId = await resolveUser(c);
-    if (userId === 'anon') {
-      return c.json({ error: 'Authentication required' }, 401);
-    }
-    
-    const recipeId = c.req.param('id');
-    
-    await c.env.DB.prepare(
-      'INSERT INTO favorites (user_id, recipe_id) VALUES (?, ?) ON CONFLICT DO NOTHING'
-    ).bind(userId, recipeId).run();
-    
-    await c.env.DB.prepare(
-      'INSERT INTO events (user_id, recipe_id, event_type) VALUES (?, ?, ?)'
-    ).bind(userId, recipeId, 'favorite').run();
-    
-    scheduleProfileRecompute(c.env, userId);
-    
-    return c.json({ success: true });
-  } catch (error) {
-    console.error('Add favorite error:', error);
-    return c.json({ error: 'Failed to add favorite' }, 500);
-  }
-});
-
-// Favorites - Remove
-app.delete('/api/favorites/:id', async (c) => {
-  try {
-    const userId = await resolveUser(c);
-    if (userId === 'anon') {
-      return c.json({ error: 'Authentication required' }, 401);
-    }
-    
-    const recipeId = c.req.param('id');
-    
-    await c.env.DB.prepare(
-      'DELETE FROM favorites WHERE user_id = ? AND recipe_id = ?'
-    ).bind(userId, recipeId).run();
-    
-    return c.json({ success: true });
-  } catch (error) {
-    console.error('Remove favorite error:', error);
-    return c.json({ error: 'Failed to remove favorite' }, 500);
-  }
-});
-
-// Ratings - Add/Update
-app.post('/api/recipes/:id/rating', async (c) => {
-  try {
-    const userId = await resolveUser(c);
-    if (userId === 'anon') {
-      return c.json({ error: 'Authentication required' }, 401);
-    }
-    
-    const recipeId = c.req.param('id');
-    const body = await c.req.json();
-    const { stars, notes, cooked_at } = body;
-    
-    if (!stars || stars < 1 || stars > 5) {
-      return c.json({ error: 'stars must be between 1 and 5' }, 400);
-    }
-    
-    await c.env.DB.prepare(
-      `INSERT INTO ratings (user_id, recipe_id, stars, notes, cooked_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-       ON CONFLICT(user_id, recipe_id) DO UPDATE SET
-         stars = excluded.stars,
-         notes = excluded.notes,
-         cooked_at = excluded.cooked_at,
-         updated_at = CURRENT_TIMESTAMP`
-    ).bind(userId, recipeId, stars, notes || null, cooked_at || null).run();
-    
-    await c.env.DB.prepare(
-      'INSERT INTO events (user_id, recipe_id, event_type, event_value) VALUES (?, ?, ?, ?)'
-    ).bind(userId, recipeId, 'rated', String(stars)).run();
-    
-    if (cooked_at) {
-      await c.env.DB.prepare(
-        'INSERT INTO events (user_id, recipe_id, event_type) VALUES (?, ?, ?)'
-      ).bind(userId, recipeId, 'cooked').run();
-    }
-    
-    scheduleProfileRecompute(c.env, userId);
-    
-    return c.json({ success: true });
-  } catch (error) {
-    console.error('Add rating error:', error);
-    return c.json({ error: 'Failed to add rating' }, 500);
-  }
-});
-
-// Ratings - Get
-app.get('/api/recipes/:id/rating', async (c) => {
-  try {
-    const userId = await resolveUser(c);
-    const recipeId = c.req.param('id');
-    
-    if (userId === 'anon') {
-      return c.json({ stars: null });
-    }
-    
-    const rating = await c.env.DB.prepare(
-      'SELECT stars, notes, cooked_at FROM ratings WHERE user_id = ? AND recipe_id = ?'
-    ).bind(userId, recipeId).first();
-    
-    if (!rating) {
-      return c.json({ stars: null });
-    }
-    
-    return c.json({ rating });
-  } catch (error) {
-    console.error('Get rating error:', error);
-    return c.json({ error: 'Failed to get rating' }, 500);
-  }
-});
-
-// Events - Track
-app.post('/api/events', async (c) => {
-  try {
-    const userId = await resolveUser(c);
-    const body = await c.req.json();
-    const { event_type, recipe_id, value } = body;
-    
-    if (!event_type) {
-      return c.json({ error: 'event_type required' }, 400);
-    }
-    
-    await c.env.DB.prepare(
-      'INSERT INTO events (user_id, recipe_id, event_type, event_value) VALUES (?, ?, ?, ?)'
-    ).bind(userId === 'anon' ? null : userId, recipe_id || null, event_type, value || null).run();
-    
-    return c.json({ success: true });
-  } catch (error) {
-    console.error('Track event error:', error);
-    return c.json({ error: 'Failed to track event' }, 500);
-  }
-});
-
-// Menus - Generate
-app.post('/api/menus/generate', async (c) => {
-  try {
-    const userId = await resolveUser(c);
-    if (userId === 'anon') {
-      return c.json({ error: 'Authentication required' }, 401);
-    }
-    
-    const body = await c.req.json();
-    const { week_start } = body;
-    
-    // Get user profile for boosting
-    const profile = await getUserProfile(c.env, userId);
-    
-    // Fetch diverse recipes
-    const { results: recipes } = await c.env.DB.prepare(
-      `SELECT id, title, cuisine, tags FROM recipes 
-       ORDER BY RANDOM() 
-       LIMIT 50`
-    ).all();
-    
-    // Score and select 7 diverse recipes
-    const scored = (recipes as any[]).map(recipe => {
-      let score = Math.random();
-      
-      if (profile) {
-        if (recipe.cuisine && profile.cuisine) {
-          const cuisines = recipe.cuisine.split(',').map((c: string) => c.trim());
-          for (const cuisine of cuisines) {
-            score += (profile.cuisine[cuisine] || 0) * 0.3;
-          }
-        }
-        
-        if (recipe.tags && profile.tags) {
-          const tags = recipe.tags.split(',').map((t: string) => t.trim());
-          for (const tag of tags) {
-            score += (profile.tags[tag] || 0) * 0.2;
-          }
-        }
-      }
-      
-      return { ...recipe, score };
-    });
-    
-    scored.sort((a, b) => b.score - a.score);
-    
-    // Select top 7 with diversity
-    const selected = scored.slice(0, 7);
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const items = selected.map((recipe, i) => ({
-      day: days[i],
-      meal: 'dinner',
-      recipe_id: recipe.id,
-    }));
-    
-    // Create menu
-    const menuId = crypto.randomUUID();
-    await c.env.DB.prepare(
-      `INSERT INTO menus (id, user_id, title, week_start, items_json)
-       VALUES (?, ?, ?, ?, ?)`
-    ).bind(
-      menuId,
-      userId,
-      `Menu for ${week_start || 'this week'}`,
-      week_start || new Date().toISOString().split('T')[0],
-      JSON.stringify(items)
-    ).run();
-    
-    await c.env.DB.prepare(
-      'INSERT INTO menu_members (menu_id, user_id, role) VALUES (?, ?, ?)'
-    ).bind(menuId, userId, 'owner').run();
-    
-    return c.json({ id: menuId, items });
-  } catch (error) {
-    console.error('Generate menu error:', error);
-    return c.json({ error: 'Failed to generate menu' }, 500);
-  }
-});
-
-// Menus - Get
-app.get('/api/menus/:id', async (c) => {
-  try {
-    const id = c.req.param('id');
-    
-    const menu = await c.env.DB.prepare(
-      'SELECT * FROM menus WHERE id = ?'
-    ).bind(id).first();
-    
-    if (!menu) {
-      return c.json({ error: 'Menu not found' }, 404);
-    }
-    
-    return c.json({ menu });
-  } catch (error) {
-    console.error('Get menu error:', error);
-    return c.json({ error: 'Failed to get menu' }, 500);
-  }
-});
-
-// Menus - Update
-app.put('/api/menus/:id', async (c) => {
-  try {
-    const userId = await resolveUser(c);
-    if (userId === 'anon') {
-      return c.json({ error: 'Authentication required' }, 401);
-    }
-    
-    const id = c.req.param('id');
-    const body = await c.req.json();
-    const { items } = body;
-    
-    if (!items) {
-      return c.json({ error: 'items required' }, 400);
-    }
-    
-    await c.env.DB.prepare(
-      `UPDATE menus SET items_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
-    ).bind(JSON.stringify(items), id).run();
-    
-    return c.json({ success: true });
-  } catch (error) {
-    console.error('Update menu error:', error);
-    return c.json({ error: 'Failed to update menu' }, 500);
-  }
-});
-
-// Search - Suggest
-app.get('/api/search/suggest', async (c) => {
-  try {
-    const q = c.req.query('q');
-    
-    if (!q) {
-      return c.json({ suggestions: [] });
-    }
-    
-    // Check cache
-    const cacheKey = `kv:search-cache:${q}`;
-    const cached = await c.env.KV.get(cacheKey, 'json');
-    if (cached) {
-      return c.json({ suggestions: cached });
-    }
-    
-    // Simple search
-    const { results } = await c.env.DB.prepare(
-      `SELECT DISTINCT title FROM recipes WHERE title LIKE ? LIMIT 5`
-    ).bind(`%${q}%`).all();
-    
-    const suggestions = (results as any[]).map(r => r.title);
-    
-    // Cache for 1 hour
-    await c.env.KV.put(cacheKey, JSON.stringify(suggestions), { expirationTtl: 3600 });
-    
-    return c.json({ suggestions });
-  } catch (error) {
-    console.error('Search suggest error:', error);
-    return c.json({ error: 'Failed to get suggestions' }, 500);
-  }
-});
-
-// Search - Scrape
-app.post('/api/search/scrape', async (c) => {
-  try {
-    const body = await c.req.json();
-    const { urls } = body;
-    
-    if (urls) {
-      // Enqueue URLs
-      for (const url of urls) {
-        await c.env.DB.prepare(
-          `INSERT INTO crawl_queue (url, status) VALUES (?, 'queued') ON CONFLICT DO NOTHING`
-        ).bind(url).run();
-      }
-      return c.json({ success: true, queued: urls.length });
-    }
-    
-    // Basic seed discovery (simplified)
-    const seeds = await c.env.KV.get('source-seeds', 'json') as string[] || [
-      'https://www.seriouseats.com/',
-      'https://www.sbs.com.au/food/cuisine/singaporean',
-      'https://www.kingarthurbaking.com/recipes',
-      'https://www.budgetbytes.com/',
-      'https://www.breadmachinepros.com/recipes/'
-    ];
-    
-    for (const seed of seeds) {
-      await c.env.DB.prepare(
-        `INSERT INTO crawl_queue (url, priority, status) VALUES (?, 1, 'queued') ON CONFLICT DO NOTHING`
-      ).bind(seed).run();
-    }
-    
-    return c.json({ success: true, queued: seeds.length });
-  } catch (error) {
-    console.error('Search scrape error:', error);
-    return c.json({ error: 'Failed to scrape' }, 500);
-  }
-});
-
-// Print - PDF
-// Print - Recipe as HTML (or PDF with Browser Rendering)
 app.get('/api/recipes/:id/print', async (c) => {
   try {
     const id = c.req.param('id');
@@ -587,58 +467,15 @@ app.get('/api/recipes/:id/print', async (c) => {
     }
     
     // Generate print-optimized HTML
-    const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>${recipe.title}</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    h1 { color: #333; }
-    .meta { color: #666; margin: 20px 0; }
-    .section { margin: 30px 0; }
-    .ingredients li, .steps li { margin: 10px 0; }
-  </style>
-</head>
-<body>
-  <h1>${recipe.title}</h1>
-  ${recipe.author ? `<p class="meta">By ${recipe.author}</p>` : ''}
-  ${recipe.time_total_min ? `<p class="meta">Total time: ${recipe.time_total_min} minutes</p>` : ''}
-  
-  <div class="section">
-    <h2>Ingredients</h2>
-    <ul class="ingredients">
-      ${JSON.parse(recipe.ingredients_json).map((i: string) => `<li>${i}</li>`).join('')}
-    </ul>
-  </div>
-  
-  <div class="section">
-    <h2>Instructions</h2>
-    <ol class="steps">
-      ${JSON.parse(recipe.steps_json).map((s: string) => `<li>${s}</li>`).join('')}
-    </ol>
-  </div>
-  
-  ${recipe.alternatives_json ? `
-  <div class="section">
-    <h2>Alternative Cooking Methods</h2>
-    <pre>${JSON.stringify(JSON.parse(recipe.alternatives_json), null, 2)}</pre>
-  </div>
-  ` : ''}
-</body>
-</html>
-    `;
+    const html = `\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <title>${recipe.title}</title>\n  <style>\n    body { font-family: Arial, sans-serif; margin: 40px; }\n    h1 { color: #333; }\n    .meta { color: #666; margin: 20px 0; }\n    .section { margin: 30px 0; }\n    .ingredients li, .steps li { margin: 10px 0; }\n  </style>\n</head>\n<body>\n  <h1>${recipe.title}</h1>\n  ${recipe.author ? `<p class=\"meta\">By ${recipe.author}</p>` : ''}\n  ${recipe.time_total_min ? `<p class=\"meta\">Total time: ${recipe.time_total_min} minutes</p>` : ''}\n  \n  <div class=\"section\">\n    <h2>Ingredients</h2>\n    <ul class=\"ingredients\">\n      ${JSON.parse(recipe.ingredients_json).map((i: string) => `<li>${i}</li>`).join('')}\n    </ul>\n  </div>\n  \n  <div class=\"section\">\n    <h2>Instructions</h2>\n    <ol class=\"steps\">\n      ${JSON.parse(recipe.steps_json).map((s: string) => `<li>${s}</li>`).join('')}\n    </ol>\n  </div>\n  \n  ${recipe.alternatives_json ? `\n  <div class=\"section\">\n    <h2>Alternative Cooking Methods</h2>\n    <pre>${JSON.stringify(JSON.parse(recipe.alternatives_json), null, 2)}</pre>\n  </div>\n  ` : ''}\n</body>\n</html>\n    `;
     
-    // Return HTML for now. In production with Browser Rendering API, could generate PDF
-    // To generate PDF: use Browser Rendering API to render HTML and convert to PDF
     const contentType = 'text/html';
     const extension = 'html';
     
     return new Response(html, {
       headers: {
         'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="recipe-${id}.${extension}"`,
+        'Content-Disposition': `attachment; filename=\"recipe-${id}.${extension}\"`, 
       },
     });
   } catch (error) {
@@ -647,72 +484,14 @@ app.get('/api/recipes/:id/print', async (c) => {
   }
 });
 
-// Chat
-app.post('/api/chat', async (c) => {
-  try {
-    const userId = await resolveUser(c);
-    const body = await c.req.json();
-    const { messages } = body;
-    
-    if (!messages || !Array.isArray(messages)) {
-      return c.json({ error: 'messages array required' }, 400);
-    }
-    
-    let userPrefs = null;
-    if (userId !== 'anon') {
-      userPrefs = await getUserProfile(c.env, userId);
-    }
-    
-    const stream = await chat(c.env, messages, userPrefs);
-    
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
-  } catch (error) {
-    console.error('Chat error:', error);
-    return c.json({ error: 'Failed to chat' }, 500);
-  }
+// Serve static assets
+app.get('/*', async (c) => {
+  return c.env.ASSETS.fetch(c.req.raw);
 });
 
-// Scheduled handler (Cron)
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-
-    if (url.pathname.startsWith('/api/')) {
-      const authHeader = request.headers.get('authorization');
-      const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-      const apiKeyHeader = request.headers.get('x-api-key');
-
-      const hasValidBearer = bearerToken === env.WORKER_API_KEY;
-      const hasValidHeader = apiKeyHeader === env.WORKER_API_KEY;
-
-      if (!hasValidBearer && !hasValidHeader) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: {
-            'content-type': 'application/json',
-            'www-authenticate': 'Bearer realm="worker"'
-          }
-        });
-      }
-
-      return app.fetch(request, env, ctx);
-    }
-
-    if (url.pathname.startsWith('/cdn/images/')) {
-      return app.fetch(request, env, ctx);
-    }
-
-    const assetResponse = await env.ASSETS.fetch(request);
-    if (assetResponse.status !== 404) {
-      return assetResponse;
-    }
-
     return app.fetch(request, env, ctx);
   },
   
@@ -741,7 +520,7 @@ export default {
           const html = await response.text();
           
           // Extract links with recipe keywords
-          const linkRegex = /href=["'](https?:\/\/[^"']*(?:recipe|banana-bread|cake|cookie|dessert|bread)[^"']*)["']/gi;
+          const linkRegex = /href=[\"'](https?:\/\/[^\"']*(?:recipe|banana-bread|cake|cookie|dessert|bread)[^\"']*)["']/gi;
           let match;
           const links = new Set<string>();
           
