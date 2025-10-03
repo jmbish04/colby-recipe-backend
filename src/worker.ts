@@ -3,7 +3,16 @@ import { cors } from 'hono/cors';
 import { Env, VectorizeMatch } from './env';
 import { requireApiKey } from './auth';
 import { ensureRecipeId, jsonResponse, parseArray, parseJsonBody, truncate } from './utils';
-import { extractTextFromImage, generateChatMessage, normalizeRecipeFromText, transcribeAudio, embedText } from './ai';
+import {
+  categorizeShoppingList,
+  extractTextFromImage,
+  generateChatMessage,
+  generateMenuPlan,
+  normalizeRecipeFromText,
+  transcribeAudio,
+  embedText,
+  MenuGenerationCandidate,
+} from './ai';
 import {
   getUserPreferences,
   listRecipesByIds,
@@ -13,8 +22,16 @@ import {
   upsertUserPreferences,
   getUserProfile,
   scrapeAndExtract,
+  createMenu,
+  getMenuWithItems,
+  listMenuItems,
+  listPantryItems,
+  createPantryItem,
+  updatePantryItem,
+  deletePantryItem,
+  getRecipesWithIngredients,
 } from './db';
-import { RecipeSummary, UserPreferences } from './types';
+import { MenuItem, RecipeSummary, UserPreferences } from './types';
 
 export const app = new Hono<{ Bindings: Env }>();
 
@@ -53,9 +70,118 @@ app.use('*', async (c, next) => {
 
 // Helper to resolve user ID from request
 async function resolveUser(c: any): Promise<string> {
-  // In a real app, this would involve session validation, JWT decoding, etc.
-  // For now, we'll allow a user_id query parameter for testing.
-  return c.req.query('user_id') || 'anon';
+  const authHeader = c.req.header('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7).trim();
+    if (token) {
+      try {
+        const session = await c.env.KV.get(`kv:sess:${token}`, 'json') as
+          | { user_id: string; expires: number }
+          | null;
+        if (session && session.user_id && session.expires > Date.now()) {
+          return session.user_id;
+        }
+      } catch (error) {
+        console.warn('Failed to load session for token', error);
+      }
+    }
+  }
+
+  const queryUser = c.req.query('user_id');
+  if (queryUser) {
+    return queryUser;
+  }
+
+  return 'anon';
+}
+
+async function requireUserId(c: any): Promise<string | null> {
+  const userId = await resolveUser(c);
+  if (!userId || userId === 'anon') {
+    return null;
+  }
+  return userId;
+}
+
+const DAY_NAMES: readonly string[] = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];
+
+const DAY_INDEX_MAP = new Map(DAY_NAMES.map((name, index) => [name.toLowerCase(), index]));
+
+function resolveDayMetadata(day: string | null | undefined, fallbackIndex: number): {
+  label: string;
+  index: MenuItem['dayOfWeek'];
+} {
+  if (day && typeof day === 'string') {
+    const normalized = day.trim();
+    if (normalized) {
+      const candidateIndex = DAY_INDEX_MAP.get(normalized.toLowerCase());
+      if (candidateIndex != null) {
+        return { label: DAY_NAMES[candidateIndex], index: candidateIndex as MenuItem['dayOfWeek'] };
+      }
+      return { label: normalized, index: (fallbackIndex % 7) as MenuItem['dayOfWeek'] };
+    }
+  }
+  return { label: DAY_NAMES[fallbackIndex % 7], index: (fallbackIndex % 7) as MenuItem['dayOfWeek'] };
+}
+
+function normalizeMealType(meal: string | null | undefined): MenuItem['mealType'] {
+  if (!meal) {
+    return 'dinner';
+  }
+  const value = meal.toLowerCase();
+  if (value.includes('break')) {
+    return 'breakfast';
+  }
+  if (value.includes('lunch') || value.includes('midday')) {
+    return 'lunch';
+  }
+  if (value.includes('snack')) {
+    return 'lunch';
+  }
+  if (value.includes('dinner') || value.includes('supper')) {
+    return 'dinner';
+  }
+  return 'dinner';
+}
+
+function normalizeIngredientEntry(raw: unknown): { name: string; quantity?: string | null } | null {
+  if (!raw) return null;
+  if (typeof raw === 'string') {
+    const name = raw.trim();
+    return name ? { name } : null;
+  }
+  if (typeof raw === 'object') {
+    const record = raw as Record<string, unknown>;
+    const nameValue =
+      typeof record.name === 'string'
+        ? record.name
+        : typeof record.ingredient === 'string'
+          ? record.ingredient
+          : typeof record.text === 'string'
+            ? record.text
+            : '';
+    const name = nameValue.trim();
+    if (!name) return null;
+    const quantityValue =
+      typeof record.quantity === 'string'
+        ? record.quantity
+        : typeof record.amount === 'string'
+          ? record.amount
+          : typeof record.qty === 'string'
+            ? record.qty
+            : undefined;
+    const quantity = quantityValue ? quantityValue.trim() : undefined;
+    return { name, quantity: quantity ?? undefined };
+  }
+  return null;
 }
 
 // API Routes from codex/add-ai-chat-and-ingestion-features
@@ -305,6 +431,8 @@ export async function handlePutPrefs(c: any): Promise<Response> {
     cuisines: parseArray(body.cuisines),
     dislikedIngredients: parseArray(body.dislikedIngredients),
     favoredTools: parseArray(body.favoredTools),
+    dietaryRestrictions: parseArray(body.dietaryRestrictions),
+    allergies: parseArray(body.allergies),
     notes: typeof body.notes === 'string' ? body.notes : null,
   };
 
@@ -343,6 +471,334 @@ app.get('/api/themes/suggest', async (c) => {
 
   const suggestions = Object.values(merged).slice(0, 12);
   return jsonResponse({ theme: seed, recipes: suggestions });
+});
+
+app.post('/api/menus/generate', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  let body: {
+    week_start?: unknown;
+    weekStart?: unknown;
+    theme?: unknown;
+    excluded_recipe_ids?: unknown;
+    excludedRecipeIds?: unknown;
+  } = {};
+
+  try {
+    if (c.req.header('Content-Type')?.includes('application/json')) {
+      body = await parseJsonBody<typeof body>(c.req.raw);
+    }
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid JSON body' }, { status });
+  }
+
+  const weekStartRaw = typeof body.week_start === 'string' ? body.week_start : typeof body.weekStart === 'string' ? body.weekStart : null;
+  const weekStart = weekStartRaw?.trim() || null;
+  const theme = typeof body.theme === 'string' ? body.theme.trim() : '';
+  const excludedList = parseArray(body.excluded_recipe_ids ?? body.excludedRecipeIds).map((value) => value.trim()).filter(Boolean);
+  const excludedSet = new Set(excludedList.map((value) => value.toLowerCase()));
+
+  async function fetchCandidates(applyTheme: boolean): Promise<MenuGenerationCandidate[]> {
+    let query =
+      'SELECT id, title, cuisine, tags, hero_image_url, description FROM recipes';
+    const conditions: string[] = [];
+    const bindings: any[] = [];
+
+    if (applyTheme && theme) {
+      const like = `%${theme.toLowerCase()}%`;
+      conditions.push('(' + ['LOWER(title) LIKE ?', 'LOWER(tags) LIKE ?', 'LOWER(cuisine) LIKE ?'].join(' OR ') + ')');
+      bindings.push(like, like, like);
+    }
+
+    if (conditions.length) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    query += ' ORDER BY RANDOM() LIMIT 60';
+
+    type CandidateRow = {
+      id: string;
+      title: string;
+      cuisine: string | null;
+      tags: string | null;
+      hero_image_url: string | null;
+      description: string | null;
+    };
+
+    const { results } = await c.env.DB.prepare(query)
+      .bind(...bindings)
+      .all<CandidateRow>();
+
+    return (results ?? []).map((row: CandidateRow) => ({
+      id: row.id,
+      title: row.title,
+      cuisine: row.cuisine,
+      tags: row.tags
+        ? row.tags
+            .split(',')
+            .map((tag: string) => tag.trim())
+            .filter(Boolean)
+        : [],
+      heroImageUrl: row.hero_image_url,
+      description: row.description,
+    }));
+  }
+
+  let candidates = await fetchCandidates(true);
+  if (!candidates.length) {
+    candidates = await fetchCandidates(false);
+  }
+
+  const availableCandidates = candidates.filter((candidate) => !excludedSet.has(candidate.id.toLowerCase()));
+
+  if (!availableCandidates.length) {
+    return jsonResponse({ error: 'unable to generate menu with provided exclusions' }, { status: 422 });
+  }
+
+  const prefs = await getUserPreferences(c.env, userId);
+
+  const plan = await generateMenuPlan(c.env, {
+    candidates: availableCandidates,
+    theme,
+    excludedRecipeIds: excludedList,
+    weekStart,
+    preferences: prefs,
+  });
+
+  const candidateMap = new Map(availableCandidates.map((candidate) => [candidate.id, candidate]));
+  const used = new Set<string>();
+  const desiredCount = Math.min(7, availableCandidates.length);
+  const enriched: Array<{
+    recipeId: string;
+    dayLabel: string;
+    dayIndex: MenuItem['dayOfWeek'];
+    mealType: MenuItem['mealType'];
+  }> = [];
+
+  for (const item of plan.items) {
+    const recipeId = item.recipeId;
+    if (!recipeId) continue;
+    const candidate = candidateMap.get(recipeId);
+    if (!candidate) continue;
+    const key = recipeId.toLowerCase();
+    if (excludedSet.has(key) || used.has(key)) continue;
+    const { label, index } = resolveDayMetadata(item.day ?? null, enriched.length);
+    const mealType = normalizeMealType(item.meal ?? null);
+    enriched.push({ recipeId, dayLabel: label, dayIndex: index, mealType });
+    used.add(key);
+    if (enriched.length >= desiredCount) break;
+  }
+
+  if (enriched.length < desiredCount) {
+    for (const candidate of availableCandidates) {
+      const key = candidate.id.toLowerCase();
+      if (used.has(key)) continue;
+      const { label, index } = resolveDayMetadata(null, enriched.length);
+      enriched.push({ recipeId: candidate.id, dayLabel: label, dayIndex: index, mealType: 'dinner' });
+      used.add(key);
+      if (enriched.length >= desiredCount) break;
+    }
+  }
+
+  if (!enriched.length) {
+    return jsonResponse({ error: 'unable to generate menu' }, { status: 422 });
+  }
+
+  const menu = await createMenu(c.env, {
+    userId,
+    title: plan.title ?? (theme ? `${theme} Menu` : 'Weekly Menu'),
+    weekStartDate: weekStart,
+    items: enriched.map((item) => ({
+      recipeId: item.recipeId,
+      dayOfWeek: item.dayIndex,
+      mealType: item.mealType,
+    })),
+  });
+
+  const responseItems = enriched.map((item) => ({
+    day: item.dayLabel,
+    meal: item.mealType ?? 'dinner',
+    recipe_id: item.recipeId,
+  }));
+
+  return jsonResponse({
+    id: menu.id,
+    title: menu.title,
+    week_start: weekStart,
+    items: responseItems,
+  });
+});
+
+app.get('/api/pantry', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const items = await listPantryItems(c.env, userId);
+  return jsonResponse({ items });
+});
+
+app.post('/api/pantry', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  let body: { ingredientName?: unknown; quantity?: unknown; unit?: unknown };
+  try {
+    body = await parseJsonBody<typeof body>(c.req.raw);
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid JSON body' }, { status });
+  }
+
+  const ingredientName = typeof body.ingredientName === 'string' ? body.ingredientName.trim() : '';
+  if (!ingredientName) {
+    return jsonResponse({ error: 'ingredientName required' }, { status: 400 });
+  }
+
+  const quantity = typeof body.quantity === 'string' ? body.quantity.trim() : null;
+  const unit = typeof body.unit === 'string' ? body.unit.trim() : null;
+
+  const item = await createPantryItem(c.env, userId, {
+    ingredientName,
+    quantity: quantity || null,
+    unit: unit || null,
+  });
+
+  return jsonResponse({ item }, { status: 201 });
+});
+
+app.put('/api/pantry/:id', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const id = Number(c.req.param('id'));
+  if (!Number.isInteger(id) || id <= 0) {
+    return jsonResponse({ error: 'invalid pantry item id' }, { status: 400 });
+  }
+
+  let body: { ingredientName?: unknown; quantity?: unknown; unit?: unknown };
+  try {
+    body = await parseJsonBody<typeof body>(c.req.raw);
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid JSON body' }, { status });
+  }
+
+  const updates: {
+    ingredientName?: string;
+    quantity?: string | null;
+    unit?: string | null;
+  } = {};
+
+  if (Object.prototype.hasOwnProperty.call(body, 'ingredientName') && typeof body.ingredientName === 'string') {
+    const value = body.ingredientName.trim();
+    updates.ingredientName = value || undefined;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'quantity')) {
+    updates.quantity = typeof body.quantity === 'string' ? body.quantity.trim() || null : null;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'unit')) {
+    updates.unit = typeof body.unit === 'string' ? body.unit.trim() || null : null;
+  }
+
+  const item = await updatePantryItem(c.env, userId, id, updates);
+  if (!item) {
+    return jsonResponse({ error: 'pantry item not found' }, { status: 404 });
+  }
+
+  return jsonResponse({ item });
+});
+
+app.delete('/api/pantry/:id', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const id = Number(c.req.param('id'));
+  if (!Number.isInteger(id) || id <= 0) {
+    return jsonResponse({ error: 'invalid pantry item id' }, { status: 400 });
+  }
+
+  const success = await deletePantryItem(c.env, userId, id);
+  if (!success) {
+    return jsonResponse({ error: 'pantry item not found' }, { status: 404 });
+  }
+
+  return jsonResponse({ success: true });
+});
+
+app.post('/api/menus/:id/shopping-list', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const menuId = c.req.param('id');
+  if (!menuId) {
+    return jsonResponse({ error: 'menu id required' }, { status: 400 });
+  }
+
+  const menu = await getMenuWithItems(c.env, menuId);
+  if (!menu || menu.userId !== userId) {
+    return jsonResponse({ error: 'menu not found' }, { status: 404 });
+  }
+
+  const items = menu.items ?? (await listMenuItems(c.env, menuId));
+  const recipeIds = Array.from(new Set(items.map((item) => item.recipeId).filter(Boolean)));
+
+  if (!recipeIds.length) {
+    return jsonResponse({ shoppingList: [] });
+  }
+
+  const recipes = await getRecipesWithIngredients(c.env, recipeIds);
+  const aggregated = new Map<string, { name: string; quantities: string[] }>();
+
+  for (const recipe of recipes) {
+    const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
+    for (const ingredient of ingredients) {
+      const normalized = normalizeIngredientEntry(ingredient);
+      if (!normalized) continue;
+      const key = normalized.name.toLowerCase();
+      const entry = aggregated.get(key) ?? { name: normalized.name, quantities: [] };
+      if (normalized.quantity) {
+        entry.quantities.push(normalized.quantity);
+      }
+      aggregated.set(key, entry);
+    }
+  }
+
+  const pantryItems = await listPantryItems(c.env, userId);
+  const pantrySet = new Set(
+    pantryItems
+      .map((item) => item.ingredientName?.trim().toLowerCase())
+      .filter((value): value is string => Boolean(value))
+  );
+
+  for (const key of pantrySet) {
+    aggregated.delete(key);
+  }
+
+  const aggregatedList = Array.from(aggregated.values()).map((entry) => ({
+    name: entry.name,
+    quantity: entry.quantities.filter(Boolean).join(' + ') || undefined,
+  }));
+
+  if (!aggregatedList.length) {
+    return jsonResponse({ shoppingList: [] });
+  }
+
+  const shoppingList = await categorizeShoppingList(c.env, aggregatedList);
+  return jsonResponse({ shoppingList });
 });
 
 // API Routes from main branch

@@ -173,6 +173,45 @@
         },
         "required": ["userId"]
       },
+      "PantryItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "ingredientName": { "type": "string" },
+          "quantity": { "type": ["string", "null"] },
+          "unit": { "type": ["string", "null"] },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "ingredientName", "updatedAt"]
+      },
+      "PantryItemInput": {
+        "type": "object",
+        "properties": {
+          "ingredientName": { "type": "string" },
+          "quantity": { "type": "string" },
+          "unit": { "type": "string" }
+        },
+        "required": ["ingredientName"]
+      },
+      "ShoppingListItem": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "quantity": { "type": ["string", "null"] }
+        },
+        "required": ["name"]
+      },
+      "ShoppingListCategory": {
+        "type": "object",
+        "properties": {
+          "category": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ShoppingListItem" }
+          }
+        },
+        "required": ["category", "items"]
+      },
       "LogsResponse": {
         "type": "object",
         "properties": {
@@ -780,7 +819,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "week_start": { "type": "string", "format": "date" }
+                  "week_start": { "type": "string", "format": "date" },
+                  "theme": { "type": "string" },
+                  "excluded_recipe_ids": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
                 }
               }
             }
@@ -795,6 +839,8 @@
                   "type": "object",
                   "properties": {
                     "id": { "type": "string" },
+                    "title": { "type": ["string", "null"] },
+                    "week_start": { "type": ["string", "null"], "format": "date" },
                     "items": {
                       "type": "array",
                       "items": {
@@ -803,10 +849,12 @@
                           "day": { "type": "string" },
                           "meal": { "type": "string" },
                           "recipe_id": { "type": "string" }
-                        }
+                        },
+                        "required": ["day", "meal", "recipe_id"]
                       }
                     }
-                  }
+                  },
+                  "required": ["id", "items"]
                 }
               }
             }
@@ -891,6 +939,156 @@
               }
             }
           }
+        }
+      }
+    },
+    "/api/pantry": {
+      "get": {
+        "summary": "List pantry items for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "Pantry items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/PantryItem" }
+                    }
+                  },
+                  "required": ["items"]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a pantry item",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PantryItemInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pantry item created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": { "$ref": "#/components/schemas/PantryItem" }
+                  },
+                  "required": ["item"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pantry/{id}": {
+      "put": {
+        "summary": "Update a pantry item",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PantryItemInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pantry item updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": { "$ref": "#/components/schemas/PantryItem" }
+                  },
+                  "required": ["item"]
+                }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a pantry item",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deletion result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" }
+                  },
+                  "required": ["success"]
+                }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/menus/{id}/shopping-list": {
+      "post": {
+        "summary": "Generate a pantry-aware shopping list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shopping list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "shoppingList": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/ShoppingListCategory" }
+                    }
+                  },
+                  "required": ["shoppingList"]
+                }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
         }
       }
     },

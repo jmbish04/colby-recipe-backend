@@ -223,7 +223,8 @@
         <li>Scan a recipe with <code>POST /api/recipes/scan</code> or <code>/batch-scan</code>.</li>
         <li>Query ranked recipes via <code>GET /api/recipes</code>.</li>
         <li>Track engagement with favorites, ratings, and custom events.</li>
-        <li>Generate a weekly menu using <code>POST /api/menus/generate</code>.</li>
+        <li>Generate a weekly menu using <code>POST /api/menus/generate</code> with optional themes and exclusions.</li>
+        <li>Keep pantry inventory in sync via <code>GET/POST/PUT/DELETE /api/pantry</code> and request a pantry-aware list with <code>POST /api/menus/{id}/shopping-list</code>.</li>
       </ul>
       <p>Responses are JSON unless otherwise noted (e.g., printable recipes return HTML). See <a href="/openapi.json">/openapi.json</a> for structured details.</p>
     </section>

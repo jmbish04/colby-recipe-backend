@@ -14,7 +14,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["./.wrangler/types/runtime.d.ts"]
+    "types": ["./worker-configuration.d.ts"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", ".wrangler"]
