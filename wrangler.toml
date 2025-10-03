@@ -2,28 +2,45 @@ name = "colby-recipe-backend"
 main = "src/worker.ts"
 compatibility_date = "2025-01-01"
 
+# HOST LOCAL FILES BINDING
 [assets]
 directory = "./public"
 binding = "ASSETS"
 
+# LOGS BINDING
 [observability]
 enabled = true
 head_sampling_rate = 1
 
+# WORKER AI BINDING
 [ai]
 binding = "AI"
 
+# BROWSER RENDERING BINDING
 [browser]
 binding = "BROWSER"
 
+# VECTORIZE BINDING
 [[vectorize]]
 binding = "VEC"
 index_name = "recipes-index"
 
+# D1 BINDING
 [[d1_databases]]
 binding = "DB"
-database_name = "DB"
+database_name = "colby-recipe"
 database_id = "${DATABASE_ID}"
 
+# KV BINDING
+[[kv_namespaces]]
+binding = "KV"
+id = "${KV_ID}"
+
+# R2 BUCKET BINDING
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "colby-recipes" 
+
+# CRON TRIGGERS
 [triggers]
 crons = ["0 3 * * *"]
