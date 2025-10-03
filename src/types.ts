@@ -77,7 +77,7 @@ export interface Rating {
 export interface Event {
   id: number;
   userId: string;
-  eventType: string;
+  eventType: 'view' | 'cook' | 'skip' | 'add_to_menu';
   recipeId?: string | null;
   sessionId?: string | null;
   createdAt: string;
