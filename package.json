@@ -9,7 +9,7 @@
     "test": "vitest run",
     "dev": "wrangler dev",
     "migrate:remote": "wrangler d1 migrations apply DB --remote",
-    "deploy": "npm run migrate:remote && wrangler deploy"
+    "deploy": "npm run migrate:remote && wrangler versions deploy"
   },
   "keywords": [
     "cloudflare",
