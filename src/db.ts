@@ -1,5 +1,5 @@
 import { Env } from './env';
-import { NormalizedRecipe, RecipeSummary, User, UserPreferences } from './types';
+import { Favorite, NormalizedRecipe, Rating, RecipeSummary, User, UserPreferences } from './types';
 import { buildEmbeddingText, ensureRecipeId, safeDateISOString, truncate } from './utils';
 import { embedText, normalizeRecipeFromText } from './ai';
 
@@ -181,6 +181,120 @@ export async function upsertRecipeFromIngestion(env: Env, recipe: NormalizedReci
   }
 
   return recipe;
+}
+
+export async function createFavorite(env: Env, favorite: Favorite): Promise<Favorite> {
+  await env.DB.prepare(
+    `INSERT INTO favorites (user_id, recipe_id)
+     VALUES (?, ?)
+     ON CONFLICT(user_id, recipe_id) DO NOTHING`
+  )
+    .bind(favorite.userId, favorite.recipeId)
+    .run();
+
+  const row = await env.DB.prepare(
+    `SELECT user_id, recipe_id, created_at
+     FROM favorites
+     WHERE user_id = ? AND recipe_id = ?`
+  )
+    .bind(favorite.userId, favorite.recipeId)
+    .first<FavoriteRow>();
+
+  if (!row) {
+    throw new Error('Failed to create favorite');
+  }
+
+  return mapFavoriteRow(row);
+}
+
+export async function getFavorite(env: Env, userId: string, recipeId: string): Promise<Favorite | null> {
+  const row = await env.DB.prepare(
+    `SELECT user_id, recipe_id, created_at
+     FROM favorites
+     WHERE user_id = ? AND recipe_id = ?`
+  )
+    .bind(userId, recipeId)
+    .first<FavoriteRow>();
+
+  return row ? mapFavoriteRow(row) : null;
+}
+
+export async function listFavorites(env: Env, userId: string): Promise<Favorite[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT user_id, recipe_id, created_at
+     FROM favorites
+     WHERE user_id = ?
+     ORDER BY datetime(created_at) DESC`
+  )
+    .bind(userId)
+    .all<FavoriteRow>();
+
+  return (results ?? []).map(mapFavoriteRow);
+}
+
+export async function deleteFavorite(env: Env, userId: string, recipeId: string): Promise<void> {
+  await env.DB.prepare(`DELETE FROM favorites WHERE user_id = ? AND recipe_id = ?`)
+    .bind(userId, recipeId)
+    .run();
+}
+
+export async function upsertRating(env: Env, rating: Rating): Promise<Rating> {
+  await env.DB.prepare(
+    `INSERT INTO ratings (user_id, recipe_id, stars, notes, cooked_at)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(user_id, recipe_id) DO UPDATE SET
+       stars = excluded.stars,
+       notes = excluded.notes,
+       cooked_at = excluded.cooked_at,
+       updated_at = CURRENT_TIMESTAMP`
+  )
+    .bind(rating.userId, rating.recipeId, rating.stars, rating.notes ?? null, rating.cookedAt ?? null)
+    .run();
+
+  const row = await env.DB.prepare(
+    `SELECT user_id, recipe_id, stars, notes, cooked_at, created_at, updated_at
+     FROM ratings
+     WHERE user_id = ? AND recipe_id = ?`
+  )
+    .bind(rating.userId, rating.recipeId)
+    .first<RatingRow>();
+
+  if (!row) {
+    throw new Error('Failed to upsert rating');
+  }
+
+  return mapRatingRow(row);
+}
+
+export async function getRating(env: Env, userId: string, recipeId: string): Promise<Rating | null> {
+  const row = await env.DB.prepare(
+    `SELECT user_id, recipe_id, stars, notes, cooked_at, created_at, updated_at
+     FROM ratings
+     WHERE user_id = ? AND recipe_id = ?`
+  )
+    .bind(userId, recipeId)
+    .first<RatingRow>();
+
+  return row ? mapRatingRow(row) : null;
+}
+
+export async function listRatings(env: Env, userId: string): Promise<Rating[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT user_id, recipe_id, stars, notes, cooked_at, created_at, updated_at
+     FROM ratings
+     WHERE user_id = ?
+     ORDER BY datetime(updated_at) DESC`
+  )
+    .bind(userId)
+    .all<RatingRow>();
+
+  return (results ?? []).map(mapRatingRow);
+}
+
+export async function deleteRating(env: Env, userId: string, recipeId: string): Promise<void> {
+  await env.DB.prepare(`DELETE FROM ratings WHERE user_id = ? AND recipe_id = ?`)
+    .bind(userId, recipeId)
+    .run();
 }
 
 export async function listRecipesByIds(env: Env, ids: string[]): Promise<Record<string, RecipeSummary>> {
@@ -594,4 +708,40 @@ function parseJsonArray(value: string | null): string[] {
     console.warn('Failed to parse JSON array', error);
   }
   return [];
+}
+
+type FavoriteRow = {
+  user_id: string;
+  recipe_id: string;
+  created_at: string;
+};
+
+type RatingRow = {
+  user_id: string;
+  recipe_id: string;
+  stars: number;
+  notes: string | null;
+  cooked_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+function mapFavoriteRow(row: FavoriteRow): Favorite {
+  return {
+    userId: row.user_id,
+    recipeId: row.recipe_id,
+    createdAt: row.created_at,
+  };
+}
+
+function mapRatingRow(row: RatingRow): Rating {
+  return {
+    userId: row.user_id,
+    recipeId: row.recipe_id,
+    stars: Number(row.stars),
+    notes: row.notes,
+    cookedAt: row.cooked_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
