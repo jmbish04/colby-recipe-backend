@@ -43,7 +43,7 @@ export interface UserPreferences {
   favoredTools: string[];
   dietaryRestrictions: string[];
   allergies: string[];
-  skillLevel?: number | null;
+  skillLevel?: (1 | 2 | 3 | 4 | 5) | null;
   defaultServings?: number | null;
   notes?: string | null;
   updatedAt?: string;
