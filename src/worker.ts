@@ -6,15 +6,21 @@ import { ensureRecipeId, jsonResponse, parseArray, parseJsonBody, truncate } fro
 import {
   categorizeShoppingList,
   extractTextFromImage,
+  extractTextFromPdf,
   generateChatMessage,
+  generatePrepPhases,
+  generateRecipeFlowchart,
   generateMenuPlan,
+  tailorRecipeInstructions,
   normalizeRecipeFromText,
   transcribeAudio,
   embedText,
   MenuGenerationCandidate,
 } from './ai';
 import {
+  createKitchenAppliance,
   getUserPreferences,
+  getRecipeById,
   listRecipesByIds,
   recentThemeRecipes,
   storeIngestion,
@@ -30,8 +36,13 @@ import {
   updatePantryItem,
   deletePantryItem,
   getRecipesWithIngredients,
+  listKitchenAppliances,
+  updateRecipePrepPhases,
+  getKitchenAppliance,
+  updateKitchenApplianceManualData,
+  deleteKitchenAppliance,
 } from './db';
-import { MenuItem, RecipeSummary, UserPreferences } from './types';
+import { MenuItem, RecipeDetail, RecipeSummary, UserPreferences } from './types';
 
 export const app = new Hono<{ Bindings: Env }>();
 
@@ -182,6 +193,41 @@ function normalizeIngredientEntry(raw: unknown): { name: string; quantity?: stri
     return { name, quantity: quantity ?? undefined };
   }
   return null;
+}
+
+async function processApplianceManual(
+  env: Env,
+  input: { applianceId: string; manualKey?: string | null; pdfBytes: Uint8Array; brand: string; model: string }
+): Promise<void> {
+  try {
+    const extracted = await extractTextFromPdf(env, input.pdfBytes);
+    const cleaned = extracted.trim();
+    const truncated = cleaned ? truncate(cleaned, 50000) : '';
+    const embedding = truncated ? await embedText(env, truncated) : [];
+
+    await updateKitchenApplianceManualData(env, input.applianceId, {
+      extractedText: truncated || null,
+      manualEmbedding: embedding.length ? embedding : null,
+    });
+
+    if (embedding.length) {
+      await env.VEC.upsert([
+        {
+          id: `appliance:${input.applianceId}`,
+          values: embedding,
+          metadata: {
+            type: 'appliance_manual',
+            appliance_id: input.applianceId,
+            manual_r2_key: input.manualKey ?? undefined,
+            brand: input.brand,
+            model: input.model,
+          },
+        },
+      ]);
+    }
+  } catch (error) {
+    console.error('Failed to process appliance manual', input.applianceId, error);
+  }
 }
 
 // API Routes from codex/add-ai-chat-and-ingestion-features
@@ -418,6 +464,8 @@ export async function handlePutPrefs(c: any): Promise<Response> {
     cuisines?: unknown;
     dislikedIngredients?: unknown;
     favoredTools?: unknown;
+    dietaryRestrictions?: unknown;
+    allergies?: unknown;
     notes?: unknown;
   }>(c.req.raw);
 
@@ -631,6 +679,132 @@ app.post('/api/menus/generate', async (c) => {
     week_start: weekStart,
     items: responseItems,
   });
+});
+
+app.post('/api/kitchen/appliances', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  let form: FormData;
+  try {
+    form = await c.req.raw.formData();
+  } catch (error) {
+    return jsonResponse({ error: 'invalid form data' }, { status: 400 });
+  }
+
+  const brandValue = form.get('brand');
+  const modelValue = form.get('model');
+  const manualValue = form.get('manual');
+
+  if (typeof brandValue !== 'string' || !brandValue.trim()) {
+    return jsonResponse({ error: 'brand is required' }, { status: 400 });
+  }
+  if (typeof modelValue !== 'string' || !modelValue.trim()) {
+    return jsonResponse({ error: 'model is required' }, { status: 400 });
+  }
+
+  let manualFile: File | null = null;
+  if (manualValue != null) {
+    if (manualValue instanceof File) {
+      manualFile = manualValue;
+    } else {
+      return jsonResponse({ error: 'manual must be a file upload' }, { status: 400 });
+    }
+  }
+
+  const brand = brandValue.trim();
+  const model = modelValue.trim();
+  const applianceId = crypto.randomUUID();
+  let manualKey: string | null = null;
+  let manualBytes: Uint8Array | null = null;
+
+  if (manualFile) {
+    try {
+      const arrayBuffer = await manualFile.arrayBuffer();
+      manualBytes = new Uint8Array(arrayBuffer);
+      const extensionMatch = manualFile.name?.match(/\.([a-z0-9]+)$/i);
+      const extension = extensionMatch ? `.${extensionMatch[1].toLowerCase()}` : '.pdf';
+      manualKey = `kitchen-manuals/${userId}/${applianceId}${extension}`;
+      await c.env.BUCKET.put(manualKey, manualBytes, {
+        httpMetadata: { contentType: manualFile.type || 'application/pdf' },
+      });
+    } catch (error) {
+      console.error('Failed to store manual in R2', error);
+      return jsonResponse({ error: 'failed to store manual' }, { status: 500 });
+    }
+  }
+
+  const appliance = await createKitchenAppliance(c.env, {
+    id: applianceId,
+    userId,
+    brand,
+    model,
+    manualR2Key: manualKey,
+  });
+
+  if (manualBytes) {
+    const bytesCopy = new Uint8Array(manualBytes);
+    c.executionCtx.waitUntil(
+      processApplianceManual(c.env, {
+        applianceId,
+        manualKey,
+        pdfBytes: bytesCopy,
+        brand,
+        model,
+      })
+    );
+  }
+
+  return jsonResponse({ appliance }, { status: 201 });
+});
+
+app.get('/api/kitchen/appliances', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const appliances = await listKitchenAppliances(c.env, userId);
+  return jsonResponse({ appliances });
+});
+
+app.delete('/api/kitchen/appliances/:id', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const id = c.req.param('id');
+  if (!id) {
+    return jsonResponse({ error: 'appliance id required' }, { status: 400 });
+  }
+
+  const appliance = await getKitchenAppliance(c.env, id);
+  if (!appliance || appliance.userId !== userId) {
+    return jsonResponse({ error: 'appliance not found' }, { status: 404 });
+  }
+
+  if (appliance.manualR2Key) {
+    try {
+      await c.env.BUCKET.delete(appliance.manualR2Key);
+    } catch (error) {
+      console.warn('Failed to delete manual from R2', error);
+    }
+  }
+
+  await deleteKitchenAppliance(c.env, userId, id);
+
+  if (typeof c.env.VEC.delete === 'function') {
+    try {
+      await c.env.VEC.delete([`appliance:${id}`]);
+    } catch (error) {
+      console.warn('Failed to delete appliance vector entry', error);
+    }
+  }
+
+  return jsonResponse({ success: true });
 });
 
 app.get('/api/pantry', async (c) => {
@@ -906,6 +1080,120 @@ app.get('/api/recipes', async (c) => {
   } catch (error) {
     console.error('List recipes error:', error);
     return c.json({ error: 'Failed to list recipes' }, 500);
+  }
+});
+
+app.get('/api/recipes/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    if (!id) {
+      return jsonResponse({ error: 'recipe id required' }, { status: 400 });
+    }
+
+    let recipe = await getRecipeById(c.env, id);
+    if (!recipe) {
+      return jsonResponse({ error: 'recipe not found' }, { status: 404 });
+    }
+
+    if ((!recipe.prepPhases || recipe.prepPhases.length === 0) && recipe.ingredients.length && recipe.steps.length) {
+      try {
+        const phases = await generatePrepPhases(c.env, recipe);
+        if (phases.length) {
+          await updateRecipePrepPhases(c.env, recipe.id, phases);
+        }
+        recipe = { ...recipe, prepPhases: phases } as RecipeDetail;
+      } catch (error) {
+        console.warn('Failed to generate prep phases on-demand', error);
+      }
+    }
+
+    return jsonResponse({ recipe });
+  } catch (error) {
+    console.error('Recipe detail error', error);
+    return jsonResponse({ error: 'failed to load recipe' }, { status: 500 });
+  }
+});
+
+app.get('/api/recipes/:id/flowchart', async (c) => {
+  const id = c.req.param('id');
+  if (!id) {
+    return jsonResponse({ error: 'recipe id required' }, { status: 400 });
+  }
+
+  const recipe = await getRecipeById(c.env, id);
+  if (!recipe) {
+    return jsonResponse({ error: 'recipe not found' }, { status: 404 });
+  }
+
+  try {
+    const flowchart = await generateRecipeFlowchart(c.env, {
+      title: recipe.title,
+      steps: recipe.steps,
+      prepTimeMinutes: recipe.prepTimeMinutes,
+      cookTimeMinutes: recipe.cookTimeMinutes,
+      totalTimeMinutes: recipe.totalTimeMinutes,
+    });
+    return jsonResponse({ flowchart });
+  } catch (error) {
+    console.error('Failed to generate flowchart', error);
+    return jsonResponse({ error: 'failed to generate flowchart' }, { status: 500 });
+  }
+});
+
+app.post('/api/recipes/:id/tailor', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const id = c.req.param('id');
+  if (!id) {
+    return jsonResponse({ error: 'recipe id required' }, { status: 400 });
+  }
+
+  let body: { appliance_id?: unknown };
+  try {
+    body = await parseJsonBody<typeof body>(c.req.raw);
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid JSON body' }, { status });
+  }
+
+  const applianceId = typeof body.appliance_id === 'string' ? body.appliance_id.trim() : '';
+  if (!applianceId) {
+    return jsonResponse({ error: 'appliance_id is required' }, { status: 400 });
+  }
+
+  const recipe = await getRecipeById(c.env, id);
+  if (!recipe) {
+    return jsonResponse({ error: 'recipe not found' }, { status: 404 });
+  }
+
+  const appliance = await getKitchenAppliance(c.env, applianceId);
+  if (!appliance || appliance.userId !== userId) {
+    return jsonResponse({ error: 'appliance not found' }, { status: 404 });
+  }
+
+  if (!appliance.extractedText) {
+    return jsonResponse({ error: 'appliance manual has not been processed yet' }, { status: 409 });
+  }
+
+  const originalSteps = recipe.steps.map((step) => step.instruction);
+
+  try {
+    const tailoredSteps = await tailorRecipeInstructions(c.env, {
+      title: recipe.title,
+      originalSteps,
+      manualText: appliance.extractedText,
+      appliance: { brand: appliance.brand, model: appliance.model },
+      prepPhases: recipe.prepPhases,
+      manualEmbedding: appliance.manualEmbedding ?? null,
+    });
+
+    return jsonResponse({ tailored_steps: tailoredSteps });
+  } catch (error) {
+    console.error('Failed to tailor recipe', error);
+    return jsonResponse({ error: 'failed to tailor recipe' }, { status: 500 });
   }
 });
 

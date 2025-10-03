@@ -1,17 +1,20 @@
 import { Env } from './env';
 import {
   Favorite,
+  PrepPhase,
+  KitchenAppliance,
   Menu,
   MenuItem,
   NormalizedRecipe,
   PantryItem,
   Rating,
+  RecipeDetail,
   RecipeSummary,
   User,
   UserPreferences,
 } from './types';
 import { buildEmbeddingText, ensureRecipeId, safeDateISOString, truncate } from './utils';
-import { embedText, normalizeRecipeFromText } from './ai';
+import { embedText, generatePrepPhases, normalizeRecipeFromText } from './ai';
 
 export async function upsertUser(env: Env, user: User): Promise<User> {
   await env.DB.prepare(
@@ -135,9 +138,24 @@ export async function upsertRecipeFromIngestion(env: Env, recipe: NormalizedReci
   const id = recipe.id;
   const domain = recipe.sourceUrl ? new URL(recipe.sourceUrl).hostname : 'local';
   const tags = recipe.tags?.join(',');
+  let prepPhases = Array.isArray(recipe.prepPhases) ? recipe.prepPhases : [];
+  const shouldGeneratePhases =
+    (!prepPhases || prepPhases.length === 0) &&
+    ((Array.isArray(recipe.ingredients) && recipe.ingredients.length > 0) ||
+      (Array.isArray(recipe.steps) && recipe.steps.length > 0));
+
+  if (shouldGeneratePhases) {
+    try {
+      prepPhases = await generatePrepPhases(env, recipe);
+    } catch (error) {
+      console.warn('Failed to generate prep phases for recipe', id, error);
+      prepPhases = [];
+    }
+  }
+
   await env.DB.prepare(
-    `INSERT INTO recipes (id, source_url, source_domain, title, cuisine, tags, hero_image_url, yield, time_prep_min, time_cook_min, time_total_min, ingredients_json, steps_json, equipment_json, notes, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `INSERT INTO recipes (id, source_url, source_domain, title, cuisine, tags, hero_image_url, yield, time_prep_min, time_cook_min, time_total_min, ingredients_json, steps_json, equipment_json, prep_phases_json, notes, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
      ON CONFLICT(source_url) DO UPDATE SET
        id = excluded.id,
        title = excluded.title,
@@ -151,6 +169,7 @@ export async function upsertRecipeFromIngestion(env: Env, recipe: NormalizedReci
        ingredients_json = excluded.ingredients_json,
        steps_json = excluded.steps_json,
        equipment_json = excluded.equipment_json,
+       prep_phases_json = excluded.prep_phases_json,
        notes = excluded.notes,
        updated_at = CURRENT_TIMESTAMP`
   )
@@ -169,6 +188,7 @@ export async function upsertRecipeFromIngestion(env: Env, recipe: NormalizedReci
       JSON.stringify(recipe.ingredients ?? []),
       JSON.stringify(recipe.steps ?? []),
       JSON.stringify(recipe.tools ?? []),
+      JSON.stringify(prepPhases ?? []),
       recipe.notes ?? null
     )
     .run();
@@ -190,6 +210,7 @@ export async function upsertRecipeFromIngestion(env: Env, recipe: NormalizedReci
     ]);
   }
 
+  recipe.prepPhases = prepPhases;
   return recipe;
 }
 
@@ -573,6 +594,203 @@ export async function getRecipesWithIngredients(
   }));
 }
 
+export async function getRecipeById(env: Env, id: string): Promise<RecipeDetail | null> {
+  const row = await env.DB.prepare(
+    `SELECT id, source_url, title, description, author, cuisine, tags, hero_image_url, yield, time_prep_min, time_cook_min, time_total_min, ingredients_json, steps_json, equipment_json, prep_phases_json, notes, created_at, updated_at
+     FROM recipes
+     WHERE id = ?`
+  )
+    .bind(id)
+    .first<RecipeRow>();
+
+  if (!row) {
+    return null;
+  }
+
+  let ingredients: unknown = [];
+  let steps: unknown = [];
+  let equipment: unknown = [];
+
+  try {
+    ingredients = row.ingredients_json ? JSON.parse(row.ingredients_json) : [];
+  } catch (error) {
+    console.warn('Failed to parse ingredients JSON', error);
+    ingredients = [];
+  }
+
+  try {
+    steps = row.steps_json ? JSON.parse(row.steps_json) : [];
+  } catch (error) {
+    console.warn('Failed to parse steps JSON', error);
+    steps = [];
+  }
+
+  try {
+    equipment = row.equipment_json ? JSON.parse(row.equipment_json) : [];
+  } catch (error) {
+    console.warn('Failed to parse equipment JSON', error);
+    equipment = [];
+  }
+
+  const tags = row.tags
+    ? row.tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    : [];
+
+  const recipe: RecipeDetail = {
+    id: row.id,
+    title: row.title,
+    description: row.description ?? undefined,
+    author: row.author,
+    cuisine: row.cuisine ?? undefined,
+    tags,
+    heroImageUrl: row.hero_image_url ?? undefined,
+    yield: row.yield ?? undefined,
+    prepTimeMinutes: row.time_prep_min == null ? null : Number(row.time_prep_min),
+    cookTimeMinutes: row.time_cook_min == null ? null : Number(row.time_cook_min),
+    totalTimeMinutes: row.time_total_min == null ? null : Number(row.time_total_min),
+    ingredients: Array.isArray(ingredients) ? (ingredients as any[]) : [],
+    steps: Array.isArray(steps) ? (steps as any[]) : [],
+    tools: Array.isArray(equipment) ? (equipment as any[]) : [],
+    notes: row.notes ?? undefined,
+    sourceUrl: row.source_url ?? undefined,
+    prepPhases: parsePrepPhases(row.prep_phases_json),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+
+  return recipe;
+}
+
+export async function updateRecipePrepPhases(env: Env, id: string, phases: PrepPhase[]): Promise<void> {
+  await env.DB.prepare(
+    `UPDATE recipes
+     SET prep_phases_json = ?, updated_at = CURRENT_TIMESTAMP
+     WHERE id = ?`
+  )
+    .bind(JSON.stringify(phases ?? []), id)
+    .run();
+}
+
+export async function createKitchenAppliance(
+  env: Env,
+  input: {
+    id?: string;
+    userId: string;
+    brand: string;
+    model: string;
+    manualR2Key?: string | null;
+    extractedText?: string | null;
+    manualEmbedding?: number[] | null;
+  }
+): Promise<KitchenAppliance> {
+  const id = input.id ?? crypto.randomUUID();
+  await env.DB.prepare(
+    `INSERT INTO kitchen_appliances (id, user_id, brand, model, manual_r2_key, extracted_text, manual_embedding_json)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  )
+    .bind(
+      id,
+      input.userId,
+      input.brand,
+      input.model,
+      input.manualR2Key ?? null,
+      input.extractedText ?? null,
+      input.manualEmbedding ? JSON.stringify(input.manualEmbedding) : null
+    )
+    .run();
+
+  const appliance = await getKitchenAppliance(env, id);
+  if (!appliance) {
+    throw new Error('Failed to create kitchen appliance');
+  }
+  return appliance;
+}
+
+export async function listKitchenAppliances(env: Env, userId: string): Promise<KitchenAppliance[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT id, user_id, brand, model, manual_r2_key, extracted_text, manual_embedding_json, created_at, updated_at
+     FROM kitchen_appliances
+     WHERE user_id = ?
+     ORDER BY datetime(created_at) DESC`
+  )
+    .bind(userId)
+    .all<KitchenApplianceRow>();
+
+  return (results ?? []).map(mapKitchenApplianceRow);
+}
+
+export async function getKitchenAppliance(env: Env, id: string): Promise<KitchenAppliance | null> {
+  const row = await env.DB.prepare(
+    `SELECT id, user_id, brand, model, manual_r2_key, extracted_text, manual_embedding_json, created_at, updated_at
+     FROM kitchen_appliances
+     WHERE id = ?`
+  )
+    .bind(id)
+    .first<KitchenApplianceRow>();
+
+  return row ? mapKitchenApplianceRow(row) : null;
+}
+
+export async function updateKitchenApplianceManualData(
+  env: Env,
+  id: string,
+  updates: {
+    manualR2Key?: string | null;
+    extractedText?: string | null;
+    manualEmbedding?: number[] | null;
+  }
+): Promise<KitchenAppliance | null> {
+  const sets: string[] = [];
+  const values: any[] = [];
+
+  if (Object.prototype.hasOwnProperty.call(updates, 'manualR2Key')) {
+    sets.push('manual_r2_key = ?');
+    values.push(updates.manualR2Key ?? null);
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, 'extractedText')) {
+    sets.push('extracted_text = ?');
+    values.push(updates.extractedText ?? null);
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, 'manualEmbedding')) {
+    sets.push('manual_embedding_json = ?');
+    values.push(updates.manualEmbedding ? JSON.stringify(updates.manualEmbedding) : null);
+  }
+
+  if (sets.length) {
+    sets.push('updated_at = CURRENT_TIMESTAMP');
+    await env.DB.prepare(
+      `UPDATE kitchen_appliances
+       SET ${sets.join(', ')}
+       WHERE id = ?`
+    )
+      .bind(...values, id)
+      .run();
+  }
+
+  return getKitchenAppliance(env, id);
+}
+
+export async function deleteKitchenAppliance(env: Env, userId: string, id: string): Promise<boolean> {
+  const row = await env.DB.prepare(
+    `SELECT id FROM kitchen_appliances WHERE id = ? AND user_id = ?`
+  )
+    .bind(id, userId)
+    .first<{ id: string }>();
+
+  if (!row) {
+    return false;
+  }
+
+  await env.DB.prepare(`DELETE FROM kitchen_appliances WHERE id = ? AND user_id = ?`)
+    .bind(id, userId)
+    .run();
+
+  return true;
+}
+
 export interface UserProfile {
   userId: string;
   tags: Record<string, number>;
@@ -928,6 +1146,70 @@ function parseJsonArray(value: string | null): string[] {
   return [];
 }
 
+function parsePrepPhases(value: string | null): PrepPhase[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed
+      .map((item: any): PrepPhase | null => {
+        if (!item) return null;
+        const title =
+          typeof item.phaseTitle === 'string'
+            ? item.phaseTitle
+            : typeof item.phase_title === 'string'
+              ? item.phase_title
+              : null;
+        if (!title) return null;
+        const ingredients = Array.isArray(item.ingredients)
+          ? item.ingredients
+              .map((ingredient: any) => {
+                if (!ingredient) return null;
+                const name =
+                  typeof ingredient.name === 'string'
+                    ? ingredient.name
+                    : typeof ingredient.ingredient === 'string'
+                      ? ingredient.ingredient
+                      : typeof ingredient.text === 'string'
+                        ? ingredient.text
+                        : '';
+                const normalized = name.trim();
+                if (!normalized) return null;
+                const quantity =
+                  typeof ingredient.quantity === 'string'
+                    ? ingredient.quantity.trim() || undefined
+                    : typeof ingredient.amount === 'string'
+                      ? ingredient.amount.trim() || undefined
+                      : undefined;
+                const notes = typeof ingredient.notes === 'string' ? ingredient.notes.trim() || undefined : undefined;
+                return {
+                  name: normalized,
+                  quantity,
+                  notes,
+                };
+              })
+              .filter(
+                (value: { name: string; quantity?: string; notes?: string } | null): value is {
+                  name: string;
+                  quantity?: string;
+                  notes?: string;
+                } => Boolean(value)
+              )
+          : [];
+        return {
+          phaseTitle: title,
+          ingredients,
+        };
+      })
+      .filter((value): value is PrepPhase => Boolean(value));
+  } catch (error) {
+    console.warn('Failed to parse prep phases JSON', error);
+    return [];
+  }
+}
+
 type FavoriteRow = {
   user_id: string;
   recipe_id: string;
@@ -976,6 +1258,40 @@ type RecipeIngredientRow = {
   id: string;
   title: string;
   ingredients_json: string | null;
+};
+
+type RecipeRow = {
+  id: string;
+  source_url: string | null;
+  title: string;
+  description: string | null;
+  author: string | null;
+  cuisine: string | null;
+  tags: string | null;
+  hero_image_url: string | null;
+  yield: string | null;
+  time_prep_min: number | null;
+  time_cook_min: number | null;
+  time_total_min: number | null;
+  ingredients_json: string | null;
+  steps_json: string | null;
+  equipment_json: string | null;
+  prep_phases_json: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type KitchenApplianceRow = {
+  id: string;
+  user_id: string;
+  brand: string;
+  model: string;
+  manual_r2_key: string | null;
+  extracted_text: string | null;
+  manual_embedding_json: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 function mapFavoriteRow(row: FavoriteRow): Favorite {
@@ -1028,6 +1344,34 @@ function mapPantryItemRow(row: PantryItemRow): PantryItem {
     unit: row.unit,
     purchaseDate: row.purchase_date,
     expiryDate: row.expiry_date,
+    updatedAt: row.updated_at,
+  };
+}
+
+function mapKitchenApplianceRow(row: KitchenApplianceRow): KitchenAppliance {
+  let manualEmbedding: number[] | null = null;
+  if (row.manual_embedding_json) {
+    try {
+      const parsed = JSON.parse(row.manual_embedding_json);
+      if (Array.isArray(parsed)) {
+        manualEmbedding = parsed
+          .map((value) => (typeof value === 'number' ? value : Number(value)))
+          .filter((value) => Number.isFinite(value));
+      }
+    } catch (error) {
+      console.warn('Failed to parse appliance embedding JSON', error);
+    }
+  }
+
+  return {
+    id: row.id,
+    userId: row.user_id,
+    brand: row.brand,
+    model: row.model,
+    manualR2Key: row.manual_r2_key,
+    extractedText: row.extracted_text,
+    manualEmbedding,
+    createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }

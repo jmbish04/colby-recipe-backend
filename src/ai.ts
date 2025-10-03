@@ -1,5 +1,6 @@
 import { Env } from './env';
-import { NormalizedRecipe, RecipeSummary, UserPreferences } from './types';
+import { NormalizedRecipe, PrepPhase, RecipeSummary, RecipeStep, UserPreferences } from './types';
+import { truncate } from './utils';
 
 const CHAT_MODEL = '@cf/meta/llama-3.1-70b-instruct';
 const EMBEDDING_MODEL = '@cf/embedding/embeddinggemma-300m';
@@ -92,6 +93,255 @@ export async function extractTextFromImage(env: Env, image: Uint8Array): Promise
     return String(result.choices[0].message.content);
   }
   return '';
+}
+
+export async function extractTextFromPdf(env: Env, pdf: Uint8Array): Promise<string> {
+  const result = await env.AI.run(OCR_MODEL, {
+    messages: [
+      {
+        role: 'system',
+        content: 'You are an OCR assistant. Read the attached PDF manual and return all text in reading order.',
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'input_text',
+            text: 'Please extract the manual text from this PDF.',
+          },
+          {
+            type: 'input_file',
+            data: pdf,
+            mime_type: 'application/pdf',
+          },
+        ],
+      },
+    ],
+  });
+
+  if (typeof result?.text === 'string') {
+    return result.text;
+  }
+  if (Array.isArray(result?.choices) && result.choices[0]?.message?.content) {
+    return String(result.choices[0].message.content);
+  }
+  if (typeof result?.result === 'string') {
+    return result.result;
+  }
+  return '';
+}
+
+export async function generatePrepPhases(env: Env, recipe: NormalizedRecipe): Promise<PrepPhase[]> {
+  const payload = {
+    title: recipe.title,
+    ingredients: recipe.ingredients,
+    steps: recipe.steps,
+  };
+
+  const response = await env.AI.run(CHAT_MODEL, {
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a culinary prep planner. Group recipe ingredients into logical prep phases based on the steps. Respond ONLY with JSON matching [{"phaseTitle":string,"ingredients":[{name,quantity?,notes?}]}].',
+      },
+      {
+        role: 'user',
+        content: JSON.stringify(payload),
+      },
+    ],
+  });
+
+  const raw = typeof response?.choices?.[0]?.message?.content === 'string'
+    ? response.choices[0].message.content
+    : typeof response?.result === 'string'
+      ? response.result
+      : typeof response?.response === 'string'
+        ? response.response
+        : typeof response?.output_text === 'string'
+          ? response.output_text
+          : '[]';
+
+  const sanitized = raw.trim().startsWith('```')
+    ? raw.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
+    : raw;
+
+  try {
+    const parsed = JSON.parse(sanitized);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed
+      .map((item: any): PrepPhase | null => {
+        const phaseTitle =
+          typeof item?.phaseTitle === 'string'
+            ? item.phaseTitle
+            : typeof item?.phase_title === 'string'
+              ? item.phase_title
+              : null;
+        if (!phaseTitle) {
+          return null;
+        }
+        const ingredients = Array.isArray(item?.ingredients)
+          ? item.ingredients
+              .map((ingredient: any): { name: string; quantity?: string; notes?: string } | null => {
+                if (!ingredient) return null;
+                const name =
+                  typeof ingredient.name === 'string'
+                    ? ingredient.name
+                    : typeof ingredient?.ingredient === 'string'
+                      ? ingredient.ingredient
+                      : typeof ingredient?.text === 'string'
+                        ? ingredient.text
+                        : '';
+                const trimmed = name.trim();
+                if (!trimmed) return null;
+                const quantity =
+                  typeof ingredient.quantity === 'string'
+                    ? ingredient.quantity
+                    : typeof ingredient.amount === 'string'
+                      ? ingredient.amount
+                      : undefined;
+                const notes = typeof ingredient.notes === 'string' ? ingredient.notes : undefined;
+                return {
+                  name: trimmed,
+                  quantity: quantity?.trim() || undefined,
+                  notes: notes?.trim() || undefined,
+                };
+              })
+              .filter(
+                (value: { name: string; quantity?: string; notes?: string } | null): value is {
+                  name: string;
+                  quantity?: string;
+                  notes?: string;
+                } => Boolean(value)
+              )
+          : [];
+        return {
+          phaseTitle: phaseTitle.trim(),
+          ingredients,
+        };
+      })
+      .filter((value): value is PrepPhase => Boolean(value));
+  } catch (error) {
+    console.warn('Failed to parse prep phases', error);
+    return [];
+  }
+}
+
+export async function generateRecipeFlowchart(
+  env: Env,
+  input: {
+    title: string;
+    steps: RecipeStep[];
+    prepTimeMinutes?: number | null;
+    cookTimeMinutes?: number | null;
+    totalTimeMinutes?: number | null;
+  }
+): Promise<string> {
+  const response = await env.AI.run(CHAT_MODEL, {
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a culinary visualization expert. Create Mermaid.js flowcharts that capture cooking workflows, parallel steps, and timing. Respond ONLY with the Mermaid definition.',
+      },
+      {
+        role: 'user',
+        content: JSON.stringify({
+          title: input.title,
+          steps: input.steps,
+          timing: {
+            prep: input.prepTimeMinutes,
+            cook: input.cookTimeMinutes,
+            total: input.totalTimeMinutes,
+          },
+        }),
+      },
+    ],
+  });
+
+  const raw = typeof response?.choices?.[0]?.message?.content === 'string'
+    ? response.choices[0].message.content
+    : typeof response?.result === 'string'
+      ? response.result
+      : typeof response?.response === 'string'
+        ? response.response
+        : typeof response?.output_text === 'string'
+          ? response.output_text
+          : '';
+
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return 'graph TD\n  A[Start] --> B[Cook]';
+  }
+  return trimmed;
+}
+
+export async function tailorRecipeInstructions(
+  env: Env,
+  input: {
+    title: string;
+    originalSteps: string[];
+    manualText: string;
+    appliance: { brand: string; model: string };
+    prepPhases?: PrepPhase[];
+    manualEmbedding?: number[] | null;
+  }
+): Promise<string[]> {
+  const prepPhaseSection = input.prepPhases && input.prepPhases.length
+    ? `Prep Phases: ${JSON.stringify(input.prepPhases)}`
+    : '';
+  const embeddingSummary = Array.isArray(input.manualEmbedding) && input.manualEmbedding.length
+    ? `Embedding vector retrieved (length ${input.manualEmbedding.length}).`
+    : 'No stored embedding vector found.';
+  const manualText = truncate(input.manualText ?? '', 18000);
+  const prompt = `Recipe Title: ${input.title}\nAppliance: ${input.appliance.brand} ${input.appliance.model}\n${embeddingSummary}\n\nOriginal Recipe Steps:\n${input.originalSteps
+    .map((step, index) => `${index + 1}. ${step}`)
+    .join('\n')}\n\n${prepPhaseSection}\n\nAppliance Manual Text:\n${manualText}\n\nInstruction: Rewrite the following recipe instructions to be optimized for the provided user manual. Pay close attention to the device's specific functions, constraints (like a lack of temperature control), and recommended settings. Maintain the original recipe's intent but adapt the technique. Respond ONLY with JSON array of strings representing the tailored steps.`;
+
+  const response = await env.AI.run(CHAT_MODEL, {
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a culinary assistant that adapts recipes to specific kitchen appliances. Always respond with valid JSON arrays of instructions.',
+      },
+      { role: 'user', content: prompt },
+    ],
+  });
+
+  let raw = typeof response?.choices?.[0]?.message?.content === 'string'
+    ? response.choices[0].message.content
+    : typeof response?.result === 'string'
+      ? response.result
+      : typeof response?.response === 'string'
+        ? response.response
+        : typeof response?.output_text === 'string'
+          ? response.output_text
+          : '[]';
+
+  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenceMatch) {
+    raw = fenceMatch[1];
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed.map((value) => String(value));
+    }
+    if (Array.isArray(parsed?.steps)) {
+      return parsed.steps.map((value: unknown) => String(value));
+    }
+  } catch (error) {
+    console.warn('Failed to parse tailored steps JSON', error);
+  }
+
+  return raw
+    .split(/\n+/)
+    .map((line: string) => line.trim())
+    .filter(Boolean);
 }
 
 export async function normalizeRecipeFromText(env: Env, text: string, sourceUrl?: string): Promise<NormalizedRecipe> {

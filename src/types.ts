@@ -9,10 +9,16 @@ export interface RecipeStep {
   instruction: string;
 }
 
+export interface PrepPhase {
+  phaseTitle: string;
+  ingredients: Ingredient[];
+}
+
 export interface NormalizedRecipe {
   id: string;
   title: string;
   description?: string;
+  author?: string | null;
   cuisine?: string;
   tags?: string[];
   heroImageUrl?: string;
@@ -25,6 +31,12 @@ export interface NormalizedRecipe {
   tools?: string[];
   notes?: string;
   sourceUrl?: string;
+  prepPhases?: PrepPhase[];
+}
+
+export interface RecipeDetail extends NormalizedRecipe {
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RecipeSummary {
@@ -127,4 +139,16 @@ export interface ShoppingListItem {
   quantity?: string | null;
   unit?: string | null;
   isChecked: boolean;
+}
+
+export interface KitchenAppliance {
+  id: string;
+  userId: string;
+  brand: string;
+  model: string;
+  manualR2Key?: string | null;
+  extractedText?: string | null;
+  manualEmbedding?: number[] | null;
+  createdAt: string;
+  updatedAt: string;
 }

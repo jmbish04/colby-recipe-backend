@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Colby Recipe Backend API",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Programmatic interface for MenuForge recipe ingestion, personalization, and menu planning."
   },
   "servers": [
@@ -44,6 +44,52 @@
           "heroImageUrl": { "type": ["string", "null"] }
         },
         "required": ["id", "title", "tags"]
+      },
+      "Ingredient": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "quantity": { "type": ["string", "null"] },
+          "notes": { "type": ["string", "null"] }
+        },
+        "required": ["name"]
+      },
+      "RecipeStep": {
+        "type": "object",
+        "properties": {
+          "title": { "type": ["string", "null"] },
+          "instruction": { "type": "string" }
+        },
+        "required": ["instruction"]
+      },
+      "PrepPhase": {
+        "type": "object",
+        "properties": {
+          "phaseTitle": { "type": "string" },
+          "ingredients": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Ingredient" }
+          }
+        },
+        "required": ["phaseTitle", "ingredients"]
+      },
+      "KitchenAppliance": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "brand": { "type": "string" },
+          "model": { "type": "string" },
+          "manualR2Key": { "type": ["string", "null"] },
+          "extractedText": { "type": ["string", "null"] },
+          "manualEmbedding": {
+            "type": ["array", "null"],
+            "items": { "type": "number" }
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "userId", "brand", "model", "createdAt", "updatedAt"]
       },
       "ChatIngredientsRequest": {
         "type": "object",
@@ -91,46 +137,35 @@
         "properties": {
           "id": { "type": "string" },
           "title": { "type": "string" },
-          "description": { "type": "string" },
-          "cuisine": { "type": "string" },
+          "description": { "type": ["string", "null"] },
+          "cuisine": { "type": ["string", "null"] },
           "tags": {
             "type": "array",
             "items": { "type": "string" }
           },
-          "heroImageUrl": { "type": "string" },
-          "yield": { "type": "string" },
+          "heroImageUrl": { "type": ["string", "null"] },
+          "yield": { "type": ["string", "null"] },
           "prepTimeMinutes": { "type": ["integer", "null"] },
           "cookTimeMinutes": { "type": ["integer", "null"] },
           "totalTimeMinutes": { "type": ["integer", "null"] },
           "ingredients": {
             "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": { "type": "string" },
-                "quantity": { "type": "string" },
-                "notes": { "type": "string" }
-              },
-              "required": ["name"]
-            }
+            "items": { "$ref": "#/components/schemas/Ingredient" }
           },
           "steps": {
             "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "title": { "type": "string" },
-                "instruction": { "type": "string" }
-              },
-              "required": ["instruction"]
-            }
+            "items": { "$ref": "#/components/schemas/RecipeStep" }
           },
           "tools": {
             "type": "array",
             "items": { "type": "string" }
           },
-          "notes": { "type": "string" },
-          "sourceUrl": { "type": "string" }
+          "notes": { "type": ["string", "null"] },
+          "sourceUrl": { "type": ["string", "null"], "format": "uri" },
+          "prepPhases": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PrepPhase" }
+          }
         },
         "required": ["id", "title", "ingredients", "steps"]
       },
@@ -237,23 +272,15 @@
       },
       "Recipe": {
         "allOf": [
-          { "$ref": "#/components/schemas/RecipeSummary" },
+          { "$ref": "#/components/schemas/NormalizedRecipe" },
           {
             "type": "object",
             "properties": {
               "author": { "type": ["string", "null"] },
-              "description": { "type": ["string", "null"] },
-              "ingredients_json": {
-                "type": "array",
-                "items": { "type": "string" },
-                "description": "Ingredients serialized as JSON array"
-              },
-              "steps_json": {
-                "type": "array",
-                "items": { "type": "string" },
-                "description": "Preparation steps serialized as JSON array"
-              }
-            }
+              "createdAt": { "type": "string", "format": "date-time" },
+              "updatedAt": { "type": "string", "format": "date-time" }
+            },
+            "required": ["createdAt", "updatedAt"]
           }
         ]
       },
@@ -649,6 +676,84 @@
         }
       }
     },
+    "/api/recipes/{id}/flowchart": {
+      "get": {
+        "summary": "Generate a Mermaid flowchart for a recipe",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mermaid definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "flowchart": { "type": "string" }
+                  },
+                  "required": ["flowchart"]
+                }
+              }
+            }
+          },
+          "404": { "description": "Recipe not found" }
+        }
+      }
+    },
+    "/api/recipes/{id}/tailor": {
+      "post": {
+        "summary": "Tailor recipe instructions for a specific appliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "appliance_id": { "type": "string" }
+                },
+                "required": ["appliance_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tailored recipe instructions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tailored_steps": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  },
+                  "required": ["tailored_steps"]
+                }
+              }
+            }
+          },
+          "404": { "description": "Recipe or appliance not found" },
+          "409": { "description": "Appliance manual not processed" }
+        }
+      }
+    },
     "/api/recipes/{id}/rating": {
       "get": {
         "summary": "Get the current user's rating",
@@ -939,6 +1044,95 @@
               }
             }
           }
+        }
+      }
+    },
+    "/api/kitchen/appliances": {
+      "post": {
+        "summary": "Register a kitchen appliance and optional manual",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "brand": { "type": "string" },
+                  "model": { "type": "string" },
+                  "manual": { "type": "string", "format": "binary" }
+                },
+                "required": ["brand", "model"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Appliance created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appliance": { "$ref": "#/components/schemas/KitchenAppliance" }
+                  },
+                  "required": ["appliance"]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List kitchen appliances for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "Appliance listing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appliances": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/KitchenAppliance" }
+                    }
+                  },
+                  "required": ["appliances"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/kitchen/appliances/{id}": {
+      "delete": {
+        "summary": "Remove a kitchen appliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deletion confirmation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" }
+                  },
+                  "required": ["success"]
+                }
+              }
+            }
+          },
+          "404": { "description": "Appliance not found" }
         }
       }
     },

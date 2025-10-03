@@ -80,6 +80,42 @@
       padding-left: 1.25rem;
     }
 
+    .appliance-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .appliance-list li {
+      background: rgba(148, 163, 184, 0.18);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .appliance-meta {
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .appliance-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
     .tester form {
       display: flex;
       flex-direction: column;
@@ -326,7 +362,74 @@
       <button id="imageBtn">🖼️ Normalize images</button>
       <div id="imageResult" style="margin-top:1rem;"></div>
     </section>
-  
+
+    <section id="appliances">
+      <h2>Kitchen appliances</h2>
+      <p>Upload manuals to personalize recipes for your gear. Manuals are stored securely in R2 and processed asynchronously.</p>
+      <form id="applianceForm" class="stack">
+        <div class="row">
+          <div>
+            <label for="applianceBrand">Brand</label>
+            <input id="applianceBrand" type="text" placeholder="e.g. Breville" required />
+          </div>
+          <div>
+            <label for="applianceModel">Model</label>
+            <input id="applianceModel" type="text" placeholder="e.g. Smart Oven Air" required />
+          </div>
+        </div>
+        <div>
+          <label for="applianceManual">Manual (PDF optional)</label>
+          <input id="applianceManual" type="file" accept="application/pdf" />
+        </div>
+        <div class="row" style="align-items:center; gap:0.75rem;">
+          <button type="submit">➕ Add appliance</button>
+          <button type="button" id="refreshAppliances" class="secondary">🔄 Refresh list</button>
+        </div>
+      </form>
+      <div id="applianceResult" class="response" hidden>
+        <h3>Latest appliance</h3>
+        <pre id="applianceResultBody"></pre>
+      </div>
+      <div>
+        <h3>Your appliances</h3>
+        <ul id="appliancesList" class="appliance-list">
+          <li class="muted">No appliances yet. Add one to get started.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="recipeAgents">
+      <h2>Agentic recipe tailoring</h2>
+      <p>Load structured recipes, generate Mermaid flowcharts, and rewrite instructions for a specific appliance.</p>
+      <div class="row">
+        <div>
+          <label for="tailorRecipeId">Recipe ID</label>
+          <input id="tailorRecipeId" type="text" placeholder="recipe-123" />
+        </div>
+        <div>
+          <label for="tailorApplianceId">Appliance ID</label>
+          <input id="tailorApplianceId" type="text" placeholder="appliance-456" />
+        </div>
+      </div>
+      <div class="row" style="align-items:center; gap:0.75rem;">
+        <button id="loadRecipeDetail" class="secondary">📄 Load recipe detail</button>
+        <button id="flowchartBtn" class="secondary">📈 Generate flowchart</button>
+        <button id="tailorBtn">🤖 Tailor instructions</button>
+      </div>
+      <div id="recipeDetailResult" class="response" hidden>
+        <h3>Recipe detail</h3>
+        <pre></pre>
+      </div>
+      <div id="flowchartResult" class="response" hidden>
+        <h3>Mermaid flowchart</h3>
+        <pre></pre>
+      </div>
+      <div id="tailorResult" class="response" hidden>
+        <h3>Tailored steps</h3>
+        <pre></pre>
+      </div>
+    </section>
+
     <section id="prefs">
       <h2>User preferences</h2>
       <div class="row">
@@ -574,6 +677,25 @@
     const userIdInput = document.getElementById('userId');
     const toolCheckboxes = Array.from(document.querySelectorAll('.toolChk'));
     const themeInput = document.getElementById('theme');
+    const applianceForm = document.getElementById('applianceForm');
+    const applianceBrand = document.getElementById('applianceBrand');
+    const applianceModel = document.getElementById('applianceModel');
+    const applianceManual = document.getElementById('applianceManual');
+    const applianceResult = document.getElementById('applianceResult');
+    const applianceResultBody = document.getElementById('applianceResultBody');
+    const appliancesList = document.getElementById('appliancesList');
+    const refreshAppliances = document.getElementById('refreshAppliances');
+    const recipeDetailResult = document.getElementById('recipeDetailResult');
+    const recipeDetailPre = recipeDetailResult?.querySelector('pre');
+    const flowchartResult = document.getElementById('flowchartResult');
+    const flowchartPre = flowchartResult?.querySelector('pre');
+    const tailorResult = document.getElementById('tailorResult');
+    const tailorPre = tailorResult?.querySelector('pre');
+    const loadRecipeDetailBtn = document.getElementById('loadRecipeDetail');
+    const flowchartBtn = document.getElementById('flowchartBtn');
+    const tailorBtnAgent = document.getElementById('tailorBtn');
+    const tailorRecipeId = document.getElementById('tailorRecipeId');
+    const tailorApplianceId = document.getElementById('tailorApplianceId');
 
     const storageKey = 'menuforge-api-key';
     
@@ -659,6 +781,168 @@
       }
     }
     imageBtn.addEventListener('click', handleImages);
+
+    async function loadAppliancesList() {
+      if (!appliancesList) return;
+      try {
+        refreshAppliances && (refreshAppliances.disabled = true);
+        const data = await callJson('/api/kitchen/appliances', { headers: authHeaders() });
+        const items = data.appliances || [];
+        if (!items.length) {
+          appliancesList.innerHTML = '<li class="muted">No appliances yet. Add one to get started.</li>';
+          return;
+        }
+        appliancesList.innerHTML = items
+          .map((appliance) => {
+            const manualStatus = appliance.extractedText ? 'Manual processed' : 'Awaiting OCR';
+            const manualKey = appliance.manualR2Key ? `Manual key: ${appliance.manualR2Key}` : 'Manual not uploaded';
+            return `
+              <li>
+                <div class="appliance-meta">
+                  <strong>${appliance.brand} ${appliance.model}</strong>
+                  <span class="pill">${manualStatus}</span>
+                  <small>ID: ${appliance.id}</small>
+                  <small>${manualKey}</small>
+                </div>
+                <div class="appliance-actions">
+                  <button data-action="delete" data-id="${appliance.id}" class="secondary">🗑 Remove</button>
+                </div>
+              </li>`;
+          })
+          .join('');
+      } catch (err) {
+        appliancesList.innerHTML = `<li><pre>${err.message}</pre></li>`;
+      } finally {
+        refreshAppliances && (refreshAppliances.disabled = false);
+      }
+    }
+
+    async function handleApplianceSubmit(event) {
+      event.preventDefault();
+      if (!applianceForm) return;
+      try {
+        applianceForm.querySelector('button[type="submit"]').disabled = true;
+        const form = new FormData();
+        form.append('brand', applianceBrand.value.trim());
+        form.append('model', applianceModel.value.trim());
+        if (applianceManual.files && applianceManual.files[0]) {
+          form.append('manual', applianceManual.files[0]);
+        }
+        const res = await fetch('/api/kitchen/appliances', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: form,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || res.statusText);
+        if (applianceResult && applianceResultBody) {
+          applianceResult.hidden = false;
+          applianceResultBody.textContent = JSON.stringify(data.appliance, null, 2);
+        }
+        applianceForm.reset();
+        await loadAppliancesList();
+      } catch (err) {
+        if (applianceResult && applianceResultBody) {
+          applianceResult.hidden = false;
+          applianceResultBody.textContent = err.message;
+        }
+      } finally {
+        const submitBtn = applianceForm.querySelector('button[type="submit"]');
+        submitBtn && (submitBtn.disabled = false);
+      }
+    }
+
+    async function handleDeleteAppliance(id) {
+      try {
+        await callJson(`/api/kitchen/appliances/${id}`, {
+          method: 'DELETE',
+          headers: authHeaders(),
+        });
+        await loadAppliancesList();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    appliancesList?.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const id = target.dataset.id;
+      if (target.dataset.action === 'delete' && id) {
+        handleDeleteAppliance(id);
+      }
+    });
+
+    applianceForm?.addEventListener('submit', handleApplianceSubmit);
+    refreshAppliances?.addEventListener('click', loadAppliancesList);
+
+    async function handleRecipeDetailLoad() {
+      if (!recipeDetailResult || !recipeDetailPre) return;
+      try {
+        loadRecipeDetailBtn.disabled = true;
+        recipeDetailResult.hidden = false;
+        recipeDetailPre.textContent = 'Loading…';
+        const id = tailorRecipeId.value.trim();
+        if (!id) throw new Error('Recipe ID required');
+        const data = await callJson(`/api/recipes/${encodeURIComponent(id)}`, {
+          headers: authHeaders(),
+        });
+        recipeDetailPre.textContent = JSON.stringify(data.recipe, null, 2);
+      } catch (err) {
+        recipeDetailPre.textContent = err.message;
+      } finally {
+        loadRecipeDetailBtn.disabled = false;
+      }
+    }
+
+    loadRecipeDetailBtn?.addEventListener('click', handleRecipeDetailLoad);
+
+    async function handleFlowchart() {
+      if (!flowchartResult || !flowchartPre) return;
+      try {
+        flowchartBtn.disabled = true;
+        flowchartResult.hidden = false;
+        flowchartPre.textContent = 'Loading…';
+        const id = tailorRecipeId.value.trim();
+        if (!id) throw new Error('Recipe ID required');
+        const data = await callJson(`/api/recipes/${encodeURIComponent(id)}/flowchart`, {
+          headers: authHeaders(),
+        });
+        flowchartPre.textContent = data.flowchart || '';
+      } catch (err) {
+        flowchartPre.textContent = err.message;
+      } finally {
+        flowchartBtn.disabled = false;
+      }
+    }
+
+    flowchartBtn?.addEventListener('click', handleFlowchart);
+
+    async function handleTailorRecipe() {
+      if (!tailorResult || !tailorPre) return;
+      try {
+        tailorBtnAgent.disabled = true;
+        tailorResult.hidden = false;
+        tailorPre.textContent = 'Loading…';
+        const recipeId = tailorRecipeId.value.trim();
+        const applianceId = tailorApplianceId.value.trim();
+        if (!recipeId) throw new Error('Recipe ID required');
+        if (!applianceId) throw new Error('Appliance ID required');
+        const data = await callJson(`/api/recipes/${encodeURIComponent(recipeId)}/tailor`, {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ appliance_id: applianceId }),
+        });
+        const steps = data.tailored_steps || [];
+        tailorPre.textContent = steps.length ? steps.map((step, index) => `${index + 1}. ${step}`).join('\n') : 'No steps returned.';
+      } catch (err) {
+        tailorPre.textContent = err.message;
+      } finally {
+        tailorBtnAgent.disabled = false;
+      }
+    }
+
+    tailorBtnAgent?.addEventListener('click', handleTailorRecipe);
 
     async function handlePrefsLoad() {
       try {
