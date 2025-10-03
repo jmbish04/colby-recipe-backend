@@ -184,24 +184,18 @@ export async function upsertRecipeFromIngestion(env: Env, recipe: NormalizedReci
 }
 
 export async function createFavorite(env: Env, favorite: Favorite): Promise<Favorite> {
-  await env.DB.prepare(
+  const row = await env.DB.prepare(
     `INSERT INTO favorites (user_id, recipe_id)
      VALUES (?, ?)
-     ON CONFLICT(user_id, recipe_id) DO NOTHING`
-  )
-    .bind(favorite.userId, favorite.recipeId)
-    .run();
-
-  const row = await env.DB.prepare(
-    `SELECT user_id, recipe_id, created_at
-     FROM favorites
-     WHERE user_id = ? AND recipe_id = ?`
+     ON CONFLICT(user_id, recipe_id) DO UPDATE SET recipe_id = excluded.recipe_id
+     RETURNING user_id, recipe_id, created_at`
   )
     .bind(favorite.userId, favorite.recipeId)
     .first<FavoriteRow>();
 
   if (!row) {
-    throw new Error('Failed to create favorite');
+    // This should be very unlikely with the query above
+    throw new Error('Failed to create or retrieve favorite');
   }
 
   return mapFavoriteRow(row);
