@@ -35,6 +35,48 @@ export interface VectorizeIndex {
     returnValues?: boolean;
     returnMetadata?: boolean;
   }): Promise<VectorizeQueryResult>;
+  delete?(ids: string[]): Promise<unknown>;
+}
+
+export type R2Body =
+  | ArrayBuffer
+  | ArrayBufferView
+  | ReadableStream
+  | Blob
+  | string
+  | null;
+
+export interface R2ObjectBody {
+  body?: ReadableStream;
+  text(): Promise<string>;
+  json<T = unknown>(): Promise<T>;
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
+
+export interface R2Object {
+  key: string;
+  size: number;
+  uploaded: string;
+  httpEtag?: string;
+  httpMetadata?: Record<string, unknown>;
+  customMetadata?: Record<string, string>;
+  body?: ReadableStream;
+  writeHttpMetadata(response: ResponseInit): void;
+  readHttpMetadata(): Record<string, unknown>;
+  text(): Promise<string>;
+  json<T = unknown>(): Promise<T>;
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
+
+export interface R2PutOptions {
+  httpMetadata?: { contentType?: string };
+  customMetadata?: Record<string, string>;
+}
+
+export interface R2Bucket {
+  put(key: string, value: R2Body, options?: R2PutOptions): Promise<void | R2Object>;
+  get(key: string): Promise<R2Object | null>;
+  delete(key: string): Promise<void>;
 }
 
 export interface BrowserPage {
@@ -61,4 +103,5 @@ export interface Env {
   BROWSER: BrowserService;
   VEC: VectorizeIndex;
   KV: KVNamespace;
+  BUCKET: R2Bucket;
 }

@@ -1,5 +1,16 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { handleChatIngredients, handleIngestUrl, handleTranscribe, handlePutPrefs, handleGetPrefs } from '../src/worker';
+import {
+  handleChatIngredients,
+  handleIngestUrl,
+  handleTranscribe,
+  handlePutPrefs,
+  handleGetPrefs,
+} from '../src/worker';
+import {
+  generatePrepPhases,
+  generateRecipeFlowchart,
+  tailorRecipeInstructions,
+} from '../src/ai';
 import { Env, BrowserService, BrowserSession, BrowserPage, VectorizeQueryResult } from '../src/env';
 
 vi.mock('hono', () => {
@@ -75,7 +86,11 @@ class MockD1 implements D1Database {
       return;
     }
     if (query.startsWith('INSERT INTO recipes')) {
-      const [id, source_url, , title, cuisine, tags, hero] = bindings as [string, string, string, string, string | null, string | null, string | null];
+      const id = bindings[0] as string;
+      const title = bindings[3] as string;
+      const cuisine = (bindings[4] ?? null) as string | null;
+      const tags = (bindings[5] ?? null) as string | null;
+      const hero = (bindings[6] ?? null) as string | null;
       this.recipes.set(id, {
         id,
         title,
@@ -183,6 +198,45 @@ function createEnv(overrides: Partial<Env & { vectorResult?: VectorizeQueryResul
         return { text: 'garlic, basil, tomato' };
       }
       if (options?.messages) {
+        const first = Array.isArray(options.messages) ? options.messages[0] : null;
+        if (typeof first?.content === 'string' && first.content.includes('culinary prep planner')) {
+          return {
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify([
+                    {
+                      phaseTitle: 'For the Filling',
+                      ingredients: [],
+                    },
+                  ]),
+                },
+              },
+            ],
+          };
+        }
+        if (typeof first?.content === 'string' && first.content.includes('culinary visualization expert')) {
+          return {
+            choices: [
+              {
+                message: {
+                  content: 'graph TD\n  A[Prep] --> B[Cook]',
+                },
+              },
+            ],
+          };
+        }
+        if (typeof first?.content === 'string' && first.content.includes('culinary assistant that adapts recipes')) {
+          return {
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify(['Use the smart oven to bake for 20 minutes.']),
+                },
+              },
+            ],
+          };
+        }
         const last = Array.isArray(options.messages) ? options.messages.at(-1) : null;
         if (typeof last?.content === 'string' && last.content.includes('{')) {
           return {
@@ -250,6 +304,12 @@ function createEnv(overrides: Partial<Env & { vectorResult?: VectorizeQueryResul
     VEC: overrides.VEC ?? {
       query: async () => vectorResult,
       upsert: async () => undefined,
+      delete: async () => undefined,
+    },
+    BUCKET: overrides.BUCKET ?? {
+      put: async () => undefined,
+      delete: async () => undefined,
+      get: async () => null,
     },
     db,
     aiCalls,
@@ -337,5 +397,56 @@ describe('worker', () => {
     const body = await getRes.json();
     expect(body.preferences.userId).toBe('household-1');
     expect(body.preferences.cuisines).toContain('thai');
+  });
+});
+
+describe('ai helpers', () => {
+  it('groups ingredients into prep phases', async () => {
+    const env = createEnv();
+    const phases = await generatePrepPhases(env, {
+      id: 'recipe-1',
+      title: 'Stuffed Mushrooms',
+      ingredients: [
+        { name: 'mushrooms' },
+        { name: 'cream cheese' },
+      ],
+      steps: [
+        { instruction: 'Clean the mushrooms.' },
+        { instruction: 'Mix the filling.' },
+      ],
+    } as any);
+
+    expect(phases.length).toBeGreaterThan(0);
+    expect(phases[0]?.phaseTitle).toBe('For the Filling');
+  });
+
+  it('creates a mermaid flowchart for a recipe', async () => {
+    const env = createEnv();
+    const chart = await generateRecipeFlowchart(env, {
+      title: 'Roast Chicken',
+      steps: [
+        { instruction: 'Season the chicken.' },
+        { instruction: 'Roast until cooked.' },
+      ],
+      prepTimeMinutes: 15,
+      cookTimeMinutes: 60,
+      totalTimeMinutes: 75,
+    });
+
+    expect(chart).toContain('graph TD');
+    expect(chart).toContain('A[Prep]');
+  });
+
+  it('tailors recipe instructions using an appliance manual', async () => {
+    const env = createEnv();
+    const steps = await tailorRecipeInstructions(env, {
+      title: 'Smart Oven Cookies',
+      originalSteps: ['Preheat the oven and bake for 12 minutes.'],
+      manualText: 'Use the smart oven bake setting.',
+      appliance: { brand: 'SmartCo', model: 'Baker 2000' },
+    });
+
+    expect(Array.isArray(steps)).toBe(true);
+    expect(steps[0]).toContain('smart oven');
   });
 });
