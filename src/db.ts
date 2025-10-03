@@ -1,7 +1,7 @@
 import { Env } from './env';
 import { NormalizedRecipe, RecipeSummary, UserPreferences } from './types';
-import { buildEmbeddingText } from './utils';
-import { embedText } from './ai';
+import { buildEmbeddingText, ensureRecipeId, safeDateISOString, truncate } from './utils';
+import { embedText, normalizeRecipeFromText } from './ai';
 
 export async function getUserPreferences(env: Env, userId: string): Promise<UserPreferences | null> {
   const stmt = env.DB.prepare(
@@ -181,6 +181,348 @@ export async function recentThemeRecipes(env: Env, seed: string, limit = 12): Pr
     });
   }
   return mapped;
+}
+
+export interface UserProfile {
+  userId: string;
+  tags: Record<string, number>;
+  cuisine: Record<string, number>;
+  updatedAt: string;
+}
+
+export async function getUserProfile(env: Env, userId: string): Promise<UserProfile | null> {
+  const prefs = await getUserPreferences(env, userId);
+  if (!prefs) {
+    return null;
+  }
+
+  const tags: Record<string, number> = {};
+  const cuisine: Record<string, number> = {};
+
+  for (const name of prefs.favoredTools) {
+    const key = name.trim();
+    if (key) {
+      tags[key] = Math.max(tags[key] ?? 0, 1);
+    }
+  }
+
+  for (const disliked of prefs.dislikedIngredients) {
+    const key = disliked.trim();
+    if (key) {
+      const current = tags[key] ?? 0;
+      tags[key] = current < 0 ? current : -1;
+    }
+  }
+
+  for (const cuisineName of prefs.cuisines) {
+    const key = cuisineName.trim();
+    if (key) {
+      cuisine[key] = Math.max(cuisine[key] ?? 0, 1.2);
+    }
+  }
+
+  return {
+    userId: prefs.userId,
+    tags,
+    cuisine,
+    updatedAt: prefs.updatedAt ?? safeDateISOString(),
+  };
+}
+
+export async function scrapeAndExtract(env: Env, url: string): Promise<NormalizedRecipe> {
+  if (!url) {
+    throw new Error('URL is required');
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch recipe (${response.status})`);
+  }
+
+  const html = await response.text();
+  const fromJsonLd = extractRecipeFromJsonLd(html, url);
+
+  const normalized = fromJsonLd ?? (await normalizeRecipeFromText(env, html, url));
+  normalized.id = ensureRecipeId(normalized, crypto.randomUUID());
+  normalized.sourceUrl = normalized.sourceUrl ?? url;
+
+  await storeIngestion(env, {
+    sourceType: 'url',
+    sourceRef: url,
+    raw: truncate(html),
+    recipe: normalized,
+  });
+
+  return upsertRecipeFromIngestion(env, normalized);
+}
+
+function extractRecipeFromJsonLd(html: string, sourceUrl: string): NormalizedRecipe | null {
+  const scriptRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = scriptRegex.exec(html)) !== null) {
+    const payload = match[1]?.trim();
+    if (!payload) continue;
+
+    try {
+      const parsed = JSON.parse(decodeHtmlEntities(payload));
+      const recipeNode = findRecipeNode(parsed);
+      if (recipeNode) {
+        return normalizeJsonLdRecipe(recipeNode, sourceUrl);
+      }
+    } catch (error) {
+      console.warn('Failed to parse JSON-LD recipe', error);
+    }
+  }
+
+  return null;
+}
+
+function decodeHtmlEntities(input: string): string {
+  return input.replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+}
+
+function findRecipeNode(data: unknown): Record<string, unknown> | null {
+  if (!data) return null;
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      const found = findRecipeNode(item);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  if (typeof data !== 'object') {
+    return null;
+  }
+
+  const node = data as Record<string, unknown>;
+  const type = node['@type'];
+  if (isRecipeType(type)) {
+    return node;
+  }
+
+  if (node['@graph']) {
+    const foundInGraph = findRecipeNode(node['@graph']);
+    if (foundInGraph) return foundInGraph;
+  }
+
+  if (node.mainEntity) {
+    const foundInMain = findRecipeNode(node.mainEntity);
+    if (foundInMain) return foundInMain;
+  }
+
+  if (node.itemListElement) {
+    const foundInList = findRecipeNode(node.itemListElement);
+    if (foundInList) return foundInList;
+  }
+
+  return null;
+}
+
+function isRecipeType(type: unknown): boolean {
+  if (!type) return false;
+  if (typeof type === 'string') {
+    return type.toLowerCase() === 'recipe';
+  }
+  if (Array.isArray(type)) {
+    return type.some((value) => typeof value === 'string' && value.toLowerCase() === 'recipe');
+  }
+  return false;
+}
+
+function normalizeJsonLdRecipe(node: Record<string, unknown>, sourceUrl: string): NormalizedRecipe {
+  const tags = new Set<string>();
+
+  const keywords = node['keywords'];
+  if (typeof keywords === 'string') {
+    keywords
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .forEach((item) => tags.add(item));
+  } else if (Array.isArray(keywords)) {
+    for (const item of keywords) {
+      if (typeof item === 'string' && item.trim()) {
+        tags.add(item.trim());
+      }
+    }
+  }
+
+  const recipeCategory = node['recipeCategory'];
+  if (typeof recipeCategory === 'string' && recipeCategory.trim()) {
+    tags.add(recipeCategory.trim());
+  } else if (Array.isArray(recipeCategory)) {
+    for (const item of recipeCategory) {
+      if (typeof item === 'string' && item.trim()) {
+        tags.add(item.trim());
+      }
+    }
+  }
+
+  const cuisineValues = normalizeStringArray(node['recipeCuisine']);
+  cuisineValues.forEach((value) => tags.add(value));
+
+  const ingredients = normalizeIngredients(node['recipeIngredient']);
+  const steps = normalizeInstructions(node['recipeInstructions']);
+  const tools = normalizeStringArray(node['tool']);
+
+  const heroImageUrl = resolveImageUrl(node['image']);
+
+  const title = getString(node, 'name');
+  const description = getString(node, 'description');
+  const identifier = getString(node, 'identifier');
+  const recipeYield = getString(node, 'recipeYield');
+  const note = getString(node, 'note') ?? getString(node, 'notes');
+
+  return {
+    id: identifier ?? crypto.randomUUID(),
+    title: title && title.trim() ? title.trim() : 'Untitled Recipe',
+    description: description ?? undefined,
+    cuisine: cuisineValues[0] ?? undefined,
+    tags: Array.from(tags),
+    heroImageUrl: heroImageUrl ?? undefined,
+    yield: recipeYield ?? undefined,
+    prepTimeMinutes: toMinutes(node['prepTime']),
+    cookTimeMinutes: toMinutes(node['cookTime']),
+    totalTimeMinutes: toMinutes(node['totalTime']),
+    ingredients,
+    steps,
+    tools,
+    notes: note ?? undefined,
+    sourceUrl,
+  };
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (!value) return [];
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === 'string' ? item.trim() : ''))
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function normalizeIngredients(value: unknown): NormalizedRecipe['ingredients'] {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (typeof item === 'string') {
+          const trimmed = item.trim();
+          return trimmed ? { name: trimmed } : null;
+        }
+        if (item && typeof item === 'object') {
+          const ingredient = item as Record<string, unknown>;
+          const rawName = typeof ingredient.text === 'string'
+            ? ingredient.text
+            : typeof ingredient.name === 'string'
+              ? ingredient.name
+              : '';
+          const quantity = typeof ingredient.quantity === 'string' ? ingredient.quantity : undefined;
+          const notes = typeof ingredient.note === 'string' ? ingredient.note : undefined;
+          const name = rawName.trim();
+          if (!name) return null;
+          return { name, quantity, notes };
+        }
+        return null;
+      })
+      .filter((ingredient): ingredient is { name: string; quantity?: string; notes?: string } => Boolean(ingredient));
+  }
+  if (typeof value === 'string') {
+    return value
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => ({ name: line }));
+  }
+  return [];
+}
+
+function normalizeInstructions(value: unknown): NormalizedRecipe['steps'] {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (typeof item === 'string') {
+          return { instruction: item.trim() };
+        }
+        if (item && typeof item === 'object') {
+          const step = item as Record<string, unknown>;
+          const text = typeof step.text === 'string'
+            ? step.text
+            : typeof step.instruction === 'string'
+              ? step.instruction
+              : typeof step.description === 'string'
+                ? step.description
+                : '';
+          const titleValue = typeof step.name === 'string' ? step.name : undefined;
+          if (!text.trim()) return null;
+          return { title: titleValue, instruction: text.trim() };
+        }
+        return null;
+      })
+      .filter((step): step is { title?: string; instruction: string } => Boolean(step));
+  }
+  if (typeof value === 'string') {
+    return value
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => ({ instruction: line }));
+  }
+  return [];
+}
+
+function getString(node: Record<string, unknown>, key: string): string | null {
+  const value = node[key];
+  return typeof value === 'string' ? value : null;
+}
+
+function resolveImageUrl(value: unknown): string | null {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    return value.trim() || null;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const resolved = resolveImageUrl(item);
+      if (resolved) return resolved;
+    }
+    return null;
+  }
+  if (typeof value === 'object' && value !== null) {
+    const record = value as Record<string, unknown>;
+    if (typeof record.url === 'string' && record.url.trim()) {
+      return record.url.trim();
+    }
+  }
+  return null;
+}
+
+function toMinutes(value: unknown): number | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const match = value.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/i);
+  if (!match) {
+    return null;
+  }
+
+  const hours = match[1] ? parseInt(match[1], 10) : 0;
+  const minutes = match[2] ? parseInt(match[2], 10) : 0;
+  const seconds = match[3] ? parseInt(match[3], 10) : 0;
+
+  const totalMinutes = hours * 60 + minutes + Math.round(seconds / 60);
+  return Number.isNaN(totalMinutes) ? null : totalMinutes;
 }
 
 function parseJsonArray(value: string | null): string[] {
