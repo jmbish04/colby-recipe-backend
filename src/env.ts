@@ -60,4 +60,5 @@ export interface Env {
   AI: AiService;
   BROWSER: BrowserService;
   VEC: VectorizeIndex;
+  KV: KVNamespace;
 }

@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { Env, VectorizeMatch } from './env';
 import { requireApiKey } from './auth';
-import { ensureRecipeId, jsonResponse, parseArray, parseJsonBody, safeDateISOString, truncate } from './utils';
+import { ensureRecipeId, jsonResponse, parseArray, parseJsonBody, truncate } from './utils';
 import { extractTextFromImage, generateChatMessage, normalizeRecipeFromText, transcribeAudio, embedText } from './ai';
 import {
   getUserPreferences,
@@ -26,7 +26,7 @@ app.use('/api/*', async (c, next) => {
   if (authError) {
     return authError;
   }
-  await next();
+  return next();
 });
 
 app.use('*', async (c, next) => {
@@ -105,7 +105,7 @@ export async function handleChatIngredients(c: any): Promise<Response> {
   const embeddingText = embeddingInput.join('\n');
   const vector = await embedText(c.env, embeddingText);
 
-  const matches = vector.length
+  const matchesResult = vector.length
     ? await c.env.VEC.query({
         vector,
         topK: 50,
@@ -113,23 +113,27 @@ export async function handleChatIngredients(c: any): Promise<Response> {
       })
     : { matches: [] };
 
-  const recipeIds = (matches.matches ?? [])
-    .map((match) => match.metadata?.recipe_id || match.id)
+  const matchesList: VectorizeMatch[] = matchesResult.matches ?? [];
+
+  const recipeIds = matchesList
+    .map((match) => match.metadata?.recipe_id ?? match.id)
     .filter((value): value is string => Boolean(value));
 
   const recipeMap = await listRecipesByIds(c.env, recipeIds);
 
-  const scored = (matches.matches ?? [])
-    .map((match) => {
+  type ScoredRecipe = RecipeSummary & { score: number };
+
+  const scored = matchesList
+    .map((match): ScoredRecipe | null => {
       const recipe = recipeMap[match.metadata?.recipe_id ?? match.id];
       if (!recipe) return null;
       const score = computeRecipeScore(recipe, match, prefs, tools, theme, ingredients);
       return { ...recipe, score };
     })
-    .filter((value): value is RecipeSummary & { score: number } => Boolean(value));
+    .filter((value): value is ScoredRecipe => Boolean(value));
 
   scored.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-  const suggestions = scored.slice(0, 5).map(({ score, ...rest }) => rest);
+  const suggestions = scored.slice(0, 5).map(({ score: _score, ...rest }): RecipeSummary => rest);
 
   const prompt = `${contextPieces.join('\n')}\n\nTop candidate recipes:\n${scored
     .slice(0, 10)
