@@ -1,11 +1,53 @@
 import { Env } from './env';
-import { NormalizedRecipe, RecipeSummary, UserPreferences } from './types';
+import { NormalizedRecipe, RecipeSummary, User, UserPreferences } from './types';
 import { buildEmbeddingText, ensureRecipeId, safeDateISOString, truncate } from './utils';
 import { embedText, normalizeRecipeFromText } from './ai';
 
+export async function upsertUser(env: Env, user: User): Promise<User> {
+  await env.DB.prepare(
+    `INSERT INTO users (id, email, name, picture_url)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       email = excluded.email,
+       name = excluded.name,
+       picture_url = excluded.picture_url,
+       updated_at = CURRENT_TIMESTAMP`
+  )
+    .bind(user.id, user.email ?? null, user.name ?? null, user.pictureUrl ?? null)
+    .run();
+
+  const row = await env.DB.prepare(
+    `SELECT id, email, name, picture_url, created_at, updated_at
+     FROM users
+     WHERE id = ?`
+  )
+    .bind(user.id)
+    .first<{
+      id: string;
+      email: string | null;
+      name: string | null;
+      picture_url: string | null;
+      created_at: string;
+      updated_at: string;
+    }>();
+
+  if (!row) {
+    throw new Error('Failed to upsert user');
+  }
+
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    pictureUrl: row.picture_url,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export async function getUserPreferences(env: Env, userId: string): Promise<UserPreferences | null> {
   const stmt = env.DB.prepare(
-    `SELECT user_id, cuisines, disliked_ingredients, favored_tools, notes, updated_at
+    `SELECT user_id, cuisines, disliked_ingredients, favored_tools, dietary_restrictions, allergies, skill_level, default_servings, notes, updated_at
      FROM user_prefs WHERE user_id = ?`
   ).bind(userId);
   const row = await stmt.first<{
@@ -13,6 +55,10 @@ export async function getUserPreferences(env: Env, userId: string): Promise<User
     cuisines: string | null;
     disliked_ingredients: string | null;
     favored_tools: string | null;
+    dietary_restrictions: string | null;
+    allergies: string | null;
+    skill_level: number | null;
+    default_servings: number | null;
     notes: string | null;
     updated_at: string;
   }>();
@@ -23,6 +69,10 @@ export async function getUserPreferences(env: Env, userId: string): Promise<User
     cuisines: parseJsonArray(row.cuisines),
     dislikedIngredients: parseJsonArray(row.disliked_ingredients),
     favoredTools: parseJsonArray(row.favored_tools),
+    dietaryRestrictions: parseJsonArray(row.dietary_restrictions),
+    allergies: parseJsonArray(row.allergies),
+    skillLevel: row.skill_level == null ? null : (Number(row.skill_level) as UserPreferences['skillLevel']),
+    defaultServings: row.default_servings == null ? null : Number(row.default_servings),
     notes: row.notes,
     updatedAt: row.updated_at,
   };
@@ -30,12 +80,16 @@ export async function getUserPreferences(env: Env, userId: string): Promise<User
 
 export async function upsertUserPreferences(env: Env, prefs: UserPreferences): Promise<void> {
   await env.DB.prepare(
-    `INSERT INTO user_prefs (user_id, cuisines, disliked_ingredients, favored_tools, notes, updated_at)
-     VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `INSERT INTO user_prefs (user_id, cuisines, disliked_ingredients, favored_tools, dietary_restrictions, allergies, skill_level, default_servings, notes, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
      ON CONFLICT(user_id) DO UPDATE SET
        cuisines = excluded.cuisines,
        disliked_ingredients = excluded.disliked_ingredients,
        favored_tools = excluded.favored_tools,
+       dietary_restrictions = excluded.dietary_restrictions,
+       allergies = excluded.allergies,
+       skill_level = excluded.skill_level,
+       default_servings = excluded.default_servings,
        notes = excluded.notes,
        updated_at = CURRENT_TIMESTAMP`
   )
@@ -44,6 +98,10 @@ export async function upsertUserPreferences(env: Env, prefs: UserPreferences): P
       JSON.stringify(prefs.cuisines ?? []),
       JSON.stringify(prefs.dislikedIngredients ?? []),
       JSON.stringify(prefs.favoredTools ?? []),
+      JSON.stringify(prefs.dietaryRestrictions ?? []),
+      JSON.stringify(prefs.allergies ?? []),
+      prefs.skillLevel ?? null,
+      prefs.defaultServings ?? null,
       prefs.notes ?? null
     )
     .run();
