@@ -725,7 +725,7 @@ function mapRatingRow(row: RatingRow): Rating {
   return {
     userId: row.user_id,
     recipeId: row.recipe_id,
-    stars: Number(row.stars),
+    stars: row.stars,
     notes: row.notes,
     cookedAt: row.cooked_at,
     createdAt: row.created_at,
