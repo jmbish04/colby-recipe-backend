@@ -431,8 +431,8 @@ export async function handlePutPrefs(c: any): Promise<Response> {
     cuisines: parseArray(body.cuisines),
     dislikedIngredients: parseArray(body.dislikedIngredients),
     favoredTools: parseArray(body.favoredTools),
-    dietaryRestrictions: [],
-    allergies: [],
+    dietaryRestrictions: parseArray(body.dietaryRestrictions),
+    allergies: parseArray(body.allergies),
     notes: typeof body.notes === 'string' ? body.notes : null,
   };
 
