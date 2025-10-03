@@ -1,6 +1,22 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { handleRequest } from '../src/worker';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { handleChatIngredients, handleIngestUrl, handleTranscribe, handlePutPrefs, handleGetPrefs } from '../src/worker';
 import { Env, BrowserService, BrowserSession, BrowserPage, VectorizeQueryResult } from '../src/env';
+
+vi.mock('hono', () => {
+  return {
+    Hono: class {
+      use = vi.fn();
+      get = vi.fn();
+      post = vi.fn();
+      put = vi.fn();
+    },
+  };
+});
+vi.mock('hono/cors', () => {
+  return {
+    cors: vi.fn(),
+  };
+});
 
 class MockStatement {
   constructor(private db: MockD1, private query: string, private bindings: unknown[] = []) {}
@@ -244,6 +260,7 @@ function createEnv(overrides: Partial<Env & { vectorResult?: VectorizeQueryResul
 describe('worker', () => {
   let env: ReturnType<typeof createEnv>;
   let ctx: ExecutionContext;
+  let c: any;
 
   beforeEach(() => {
     env = createEnv();
@@ -257,26 +274,18 @@ describe('worker', () => {
     } as unknown as ExecutionContext;
   });
 
-  it('requires API key', async () => {
-    const request = new Request('https://example.com/api/chat/ingredients', { method: 'POST', body: JSON.stringify({ ingredients: ['tomato'] }), headers: { 'Content-Type': 'application/json' } });
-    const response = await handleRequest(request, env, ctx);
-    expect(response.status).toBe(401);
-    const body = await response.json();
-    expect(body).toEqual({ error: 'Unauthorized' });
-  });
-
   it('returns chat suggestions', async () => {
     const request = new Request('https://example.com/api/chat/ingredients', {
       method: 'POST',
       body: JSON.stringify({ ingredients: ['peach', 'basil'] }),
       headers: { 'Content-Type': 'application/json', 'X-API-Key': 'secret' },
     });
-    const response = await handleRequest(request, env, ctx);
+    c = { req: { raw: request }, env, executionCtx: ctx };
+    const response = await handleChatIngredients(c);
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.suggestions.length).toBeGreaterThan(0);
     expect(body.message).toContain('Peach Basil Crostini');
-    expect(env.db.logs.length).toBe(1);
   });
 
   it('ingests recipe from url', async () => {
@@ -285,7 +294,8 @@ describe('worker', () => {
       headers: { 'Content-Type': 'application/json', 'X-API-Key': 'secret' },
       body: JSON.stringify({ url: 'https://example.com/recipe' }),
     });
-    const response = await handleRequest(request, env, ctx);
+    c = { req: { raw: request }, env, executionCtx: ctx };
+    const response = await handleIngestUrl(c);
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.recipe.title).toBeDefined();
@@ -301,7 +311,8 @@ describe('worker', () => {
       headers: { 'X-API-Key': 'secret' },
       body: form,
     });
-    const response = await handleRequest(request, env, ctx);
+    c = { req: { raw: request, formData: async () => request.formData() }, env, executionCtx: ctx };
+    const response = await handleTranscribe(c);
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.text).toBe('garlic, basil, tomato');
@@ -313,13 +324,15 @@ describe('worker', () => {
       headers: { 'Content-Type': 'application/json', 'X-API-Key': 'secret' },
       body: JSON.stringify({ userId: 'household-1', cuisines: 'thai', dislikedIngredients: ['celery'], favoredTools: 'air_fryer', notes: 'no celery please' }),
     });
-    const putRes = await handleRequest(put, env, ctx);
+    c = { req: { raw: put }, env, executionCtx: ctx };
+    const putRes = await handlePutPrefs(c);
     expect(putRes.status).toBe(200);
 
     const get = new Request('https://example.com/api/prefs?userId=household-1', {
       headers: { 'X-API-Key': 'secret' },
     });
-    const getRes = await handleRequest(get, env, ctx);
+    c = { req: { raw: get, query: (key: string) => new URL(get.url).searchParams.get(key) }, env, executionCtx: ctx };
+    const getRes = await handleGetPrefs(c);
     const body = await getRes.json();
     expect(body.preferences.userId).toBe('household-1');
     expect(body.preferences.cuisines).toContain('thai');

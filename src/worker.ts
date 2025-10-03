@@ -16,7 +16,7 @@ import {
 } from './db';
 import { RecipeSummary, UserPreferences } from './types';
 
-const app = new Hono<{ Bindings: Env }>();
+export const app = new Hono<{ Bindings: Env }>();
 
 app.use('/api/*', cors());
 
@@ -29,6 +29,28 @@ app.use('/api/*', async (c, next) => {
   await next();
 });
 
+app.use('*', async (c, next) => {
+  const start = Date.now();
+  await next();
+  const end = Date.now();
+  const log = {
+    ts: new Date().toISOString(),
+    level: c.res.ok ? 'info' : 'error',
+    route: new URL(c.req.url).pathname,
+    method: c.req.method,
+    status: c.res.status,
+    ms: end - start,
+    msg: c.res.ok ? 'ok' : 'error',
+    meta: {},
+  };
+  c.executionCtx.waitUntil(c.env.DB.prepare(
+    `INSERT INTO request_logs (ts, level, route, method, status, ms, msg, meta)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+    .bind(log.ts, log.level, log.route, log.method, log.status, log.ms, log.msg, JSON.stringify(log.meta ?? {}))
+    .run());
+});
+
 // Helper to resolve user ID from request
 async function resolveUser(c: any): Promise<string> {
   // In a real app, this would involve session validation, JWT decoding, etc.
@@ -37,7 +59,7 @@ async function resolveUser(c: any): Promise<string> {
 }
 
 // API Routes from codex/add-ai-chat-and-ingestion-features
-app.post('/api/chat/ingredients', async (c) => {
+export async function handleChatIngredients(c: any): Promise<Response> {
   const body = await parseJsonBody<{
     ingredients?: unknown;
     theme?: unknown;
@@ -117,7 +139,9 @@ app.post('/api/chat/ingredients', async (c) => {
   const message = await generateChatMessage(c.env, prompt);
 
   return jsonResponse({ suggestions, message });
-});
+}
+
+app.post('/api/chat/ingredients', handleChatIngredients);
 
 function computeRecipeScore(
   recipe: RecipeSummary,
@@ -171,7 +195,7 @@ function computeRecipeScore(
   return score;
 }
 
-app.post('/api/transcribe', async (c) => {
+export async function handleTranscribe(c: any): Promise<Response> {
   const form = await c.req.formData();
   const file = form.get('file');
   if (!(file instanceof File)) {
@@ -180,9 +204,11 @@ app.post('/api/transcribe', async (c) => {
   const buffer = new Uint8Array(await file.arrayBuffer());
   const text = await transcribeAudio(c.env, buffer);
   return jsonResponse({ text });
-});
+}
 
-app.post('/api/ingest/url', async (c) => {
+app.post('/api/transcribe', handleTranscribe);
+
+export async function handleIngestUrl(c: any): Promise<Response> {
   const body = await parseJsonBody<{ url?: unknown }>(c.req.raw);
   const url = typeof body.url === 'string' ? body.url.trim() : '';
   if (!url) {
@@ -208,11 +234,13 @@ app.post('/api/ingest/url', async (c) => {
     const stored = await upsertRecipeFromIngestion(c.env, normalized);
 
     return jsonResponse({ recipe: stored });
-  finally {
+  } finally {
     await page.close();
     await session.close();
   }
-});
+}
+
+app.post('/api/ingest/url', handleIngestUrl);
 
 app.post('/api/ingest/image', async (c) => {
   const form = await c.req.formData();
@@ -243,16 +271,18 @@ app.post('/api/ingest/image', async (c) => {
   return jsonResponse({ recipe: stored });
 });
 
-app.get('/api/prefs', async (c) => {
+export async function handleGetPrefs(c: any): Promise<Response> {
   const userId = c.req.query('userId');
   if (!userId) {
     return jsonResponse({ error: 'userId required' }, { status: 400 });
   }
   const prefs = await getUserPreferences(c.env, userId);
   return jsonResponse({ preferences: prefs });
-});
+}
 
-app.put('/api/prefs', async (c) => {
+app.get('/api/prefs', handleGetPrefs);
+
+export async function handlePutPrefs(c: any): Promise<Response> {
   const body = await parseJsonBody<{
     userId?: unknown;
     cuisines?: unknown;
@@ -278,7 +308,9 @@ app.put('/api/prefs', async (c) => {
 
   const stored = await getUserPreferences(c.env, userId);
   return jsonResponse({ preferences: stored });
-});
+}
+
+app.put('/api/prefs', handlePutPrefs);
 
 app.get('/api/themes/suggest', async (c) => {
   const seed = (c.req.query('seed') || '').trim();
@@ -488,7 +520,7 @@ export default {
           const html = await response.text();
           
           // Extract links with recipe keywords
-          const linkRegex = /href=[\"'](https?:\/\/[^\"']*(?:recipe|banana-bread|cake|cookie|dessert|bread)[^\"']*)[\"']/gi;
+          const linkRegex = /href=[\"'](https?:\/\/[^\"']*(?:recipe|banana-bread|cake|cookie|dessert|bread)[^\"']*)["']/gi;
           let match;
           const links = new Set<string>();
           
