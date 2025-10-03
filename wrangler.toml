@@ -23,7 +23,7 @@ index_name = "recipes-index"
 [[d1_databases]]
 binding = "DB"
 database_name = "DB"
-database_id = "a1e61fc6-cf5a-4900-9482-1089ce36f1d1"
+database_id = "${D1_DATABASE_ID}"
 
 [triggers]
 crons = ["0 3 * * *"]
