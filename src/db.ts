@@ -1,5 +1,15 @@
 import { Env } from './env';
-import { Favorite, NormalizedRecipe, Rating, RecipeSummary, User, UserPreferences } from './types';
+import {
+  Favorite,
+  Menu,
+  MenuItem,
+  NormalizedRecipe,
+  PantryItem,
+  Rating,
+  RecipeSummary,
+  User,
+  UserPreferences,
+} from './types';
 import { buildEmbeddingText, ensureRecipeId, safeDateISOString, truncate } from './utils';
 import { embedText, normalizeRecipeFromText } from './ai';
 
@@ -340,6 +350,227 @@ export async function recentThemeRecipes(env: Env, seed: string, limit = 12): Pr
     });
   }
   return mapped;
+}
+
+export interface MenuCreationItem {
+  recipeId: string;
+  dayOfWeek?: number | null;
+  mealType?: MenuItem['mealType'];
+}
+
+export async function createMenu(
+  env: Env,
+  input: {
+    userId: string;
+    title?: string | null;
+    weekStartDate?: string | null;
+    items: MenuCreationItem[];
+  }
+): Promise<Menu & { items: MenuItem[] }> {
+  const menuId = crypto.randomUUID();
+
+  await env.DB.prepare(
+    `INSERT INTO menus (id, user_id, title, week_start_date)
+     VALUES (?, ?, ?, ?)`
+  )
+    .bind(menuId, input.userId, input.title ?? null, input.weekStartDate ?? null)
+    .run();
+
+  if (input.items.length) {
+    for (const item of input.items) {
+      await env.DB.prepare(
+        `INSERT INTO menu_items (menu_id, recipe_id, day_of_week, meal_type)
+         VALUES (?, ?, ?, ?)`
+      )
+        .bind(menuId, item.recipeId, item.dayOfWeek ?? null, item.mealType ?? null)
+        .run();
+    }
+  }
+
+  const menu = await getMenu(env, menuId);
+  if (!menu) {
+    throw new Error('Failed to create menu');
+  }
+  const items = await listMenuItems(env, menuId);
+  return { ...menu, items };
+}
+
+export async function getMenu(env: Env, id: string): Promise<Menu | null> {
+  const row = await env.DB.prepare(
+    `SELECT id, user_id, title, week_start_date, created_at, updated_at
+     FROM menus
+     WHERE id = ?`
+  )
+    .bind(id)
+    .first<MenuRow>();
+
+  return row ? mapMenuRow(row) : null;
+}
+
+export async function getMenuWithItems(env: Env, id: string): Promise<(Menu & { items: MenuItem[] }) | null> {
+  const menu = await getMenu(env, id);
+  if (!menu) {
+    return null;
+  }
+  const items = await listMenuItems(env, id);
+  return { ...menu, items };
+}
+
+export async function listMenuItems(env: Env, menuId: string): Promise<MenuItem[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT id, menu_id, recipe_id, day_of_week, meal_type
+     FROM menu_items
+     WHERE menu_id = ?
+     ORDER BY day_of_week IS NULL, day_of_week, id`
+  )
+    .bind(menuId)
+    .all<MenuItemRow>();
+
+  return (results ?? []).map(mapMenuItemRow);
+}
+
+export async function replaceMenuItems(env: Env, menuId: string, items: MenuCreationItem[]): Promise<MenuItem[]> {
+  await env.DB.prepare(`DELETE FROM menu_items WHERE menu_id = ?`).bind(menuId).run();
+
+  for (const item of items) {
+    await env.DB.prepare(
+      `INSERT INTO menu_items (menu_id, recipe_id, day_of_week, meal_type)
+       VALUES (?, ?, ?, ?)`
+    )
+      .bind(menuId, item.recipeId, item.dayOfWeek ?? null, item.mealType ?? null)
+      .run();
+  }
+
+  return listMenuItems(env, menuId);
+}
+
+export async function listPantryItems(env: Env, userId: string): Promise<PantryItem[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT id, user_id, ingredient_name, quantity, unit, purchase_date, expiry_date, updated_at
+     FROM pantry_items
+     WHERE user_id = ?
+     ORDER BY datetime(updated_at) DESC, id DESC`
+  )
+    .bind(userId)
+    .all<PantryItemRow>();
+
+  return (results ?? []).map(mapPantryItemRow);
+}
+
+export async function createPantryItem(
+  env: Env,
+  userId: string,
+  input: { ingredientName: string; quantity?: string | null; unit?: string | null }
+): Promise<PantryItem> {
+  await env.DB.prepare(
+    `INSERT INTO pantry_items (user_id, ingredient_name, quantity, unit, updated_at)
+     VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`
+  )
+    .bind(userId, input.ingredientName, input.quantity ?? null, input.unit ?? null)
+    .run();
+
+  const row = await env.DB.prepare(
+    `SELECT id, user_id, ingredient_name, quantity, unit, purchase_date, expiry_date, updated_at
+     FROM pantry_items
+     WHERE rowid = last_insert_rowid()`
+  ).first<PantryItemRow>();
+
+  if (!row) {
+    throw new Error('Failed to create pantry item');
+  }
+
+  return mapPantryItemRow(row);
+}
+
+export async function updatePantryItem(
+  env: Env,
+  userId: string,
+  id: number,
+  input: { ingredientName?: string; quantity?: string | null; unit?: string | null }
+): Promise<PantryItem | null> {
+  const existing = await env.DB.prepare(
+    `SELECT id FROM pantry_items WHERE id = ? AND user_id = ?`
+  )
+    .bind(id, userId)
+    .first<{ id: number }>();
+
+  if (!existing) {
+    return null;
+  }
+
+  const hasQuantity = Object.prototype.hasOwnProperty.call(input, 'quantity');
+  const hasUnit = Object.prototype.hasOwnProperty.call(input, 'unit');
+
+  await env.DB.prepare(
+    `UPDATE pantry_items
+     SET ingredient_name = COALESCE(?, ingredient_name),
+         quantity = CASE WHEN ? THEN ? ELSE quantity END,
+         unit = CASE WHEN ? THEN ? ELSE unit END,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = ? AND user_id = ?`
+  )
+    .bind(
+      input.ingredientName ?? null,
+      hasQuantity ? 1 : 0,
+      hasQuantity ? input.quantity ?? null : null,
+      hasUnit ? 1 : 0,
+      hasUnit ? input.unit ?? null : null,
+      id,
+      userId
+    )
+    .run();
+
+  const row = await env.DB.prepare(
+    `SELECT id, user_id, ingredient_name, quantity, unit, purchase_date, expiry_date, updated_at
+     FROM pantry_items
+     WHERE id = ? AND user_id = ?`
+  )
+    .bind(id, userId)
+    .first<PantryItemRow>();
+
+  return row ? mapPantryItemRow(row) : null;
+}
+
+export async function deletePantryItem(env: Env, userId: string, id: number): Promise<boolean> {
+  const row = await env.DB.prepare(
+    `SELECT id FROM pantry_items WHERE id = ? AND user_id = ?`
+  )
+    .bind(id, userId)
+    .first<{ id: number }>();
+
+  if (!row) {
+    return false;
+  }
+
+  await env.DB.prepare(`DELETE FROM pantry_items WHERE id = ? AND user_id = ?`)
+    .bind(id, userId)
+    .run();
+
+  return true;
+}
+
+export async function getRecipesWithIngredients(
+  env: Env,
+  ids: string[]
+): Promise<Array<{ id: string; title: string; ingredients: unknown }>> {
+  if (!ids.length) {
+    return [];
+  }
+
+  const placeholders = ids.map(() => '?').join(',');
+  const { results } = await env.DB.prepare(
+    `SELECT id, title, ingredients_json
+     FROM recipes
+     WHERE id IN (${placeholders})`
+  )
+    .bind(...ids)
+    .all<RecipeIngredientRow>();
+
+  return (results ?? []).map((row: RecipeIngredientRow) => ({
+    id: row.id,
+    title: row.title,
+    ingredients: row.ingredients_json ? JSON.parse(row.ingredients_json) : [],
+  }));
 }
 
 export interface UserProfile {
@@ -713,6 +944,40 @@ type RatingRow = {
   updated_at: string;
 };
 
+type MenuRow = {
+  id: string;
+  user_id: string;
+  title: string | null;
+  week_start_date: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type MenuItemRow = {
+  id: number;
+  menu_id: string;
+  recipe_id: string;
+  day_of_week: number | null;
+  meal_type: string | null;
+};
+
+type PantryItemRow = {
+  id: number;
+  user_id: string;
+  ingredient_name: string;
+  quantity: string | null;
+  unit: string | null;
+  purchase_date: string | null;
+  expiry_date: string | null;
+  updated_at: string;
+};
+
+type RecipeIngredientRow = {
+  id: string;
+  title: string;
+  ingredients_json: string | null;
+};
+
 function mapFavoriteRow(row: FavoriteRow): Favorite {
   return {
     userId: row.user_id,
@@ -729,6 +994,40 @@ function mapRatingRow(row: RatingRow): Rating {
     notes: row.notes,
     cookedAt: row.cooked_at,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function mapMenuRow(row: MenuRow): Menu {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    title: row.title,
+    weekStartDate: row.week_start_date,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function mapMenuItemRow(row: MenuItemRow): MenuItem {
+  return {
+    id: row.id,
+    menuId: row.menu_id,
+    recipeId: row.recipe_id,
+    dayOfWeek: row.day_of_week == null ? null : (row.day_of_week as MenuItem['dayOfWeek']),
+    mealType: row.meal_type ? (row.meal_type as MenuItem['mealType']) : null,
+  };
+}
+
+function mapPantryItemRow(row: PantryItemRow): PantryItem {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    ingredientName: row.ingredient_name,
+    quantity: row.quantity,
+    unit: row.unit,
+    purchaseDate: row.purchase_date,
+    expiryDate: row.expiry_date,
     updatedAt: row.updated_at,
   };
 }

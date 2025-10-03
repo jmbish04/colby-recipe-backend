@@ -4,7 +4,7 @@
   "description": "MenuForge AI recipe backend (Cloudflare Workers)",
   "main": "src/worker.ts",
   "scripts": {
-    "pretypecheck": "wrangler types --experimental-include-runtime",
+    "pretypecheck": "wrangler types",
     "typecheck": "npm run pretypecheck && tsc --noEmit",
     "test": "vitest run",
     "dev": "wrangler dev",

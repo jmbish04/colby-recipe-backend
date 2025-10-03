@@ -311,9 +311,12 @@ curl -X POST https://menuforge.workers.dev/api/menus/generate \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "week_start": "2025-10-06"
+    "week_start": "2025-10-06",
+    "theme": "vegetarian week",
+    "excluded_recipe_ids": ["RECIPE_ID_1"]
   }'
 ```
+`theme` steers the AI prompt (e.g., "vegetarian week", "Mediterranean reset"), while `excluded_recipe_ids` prevents recycled recipes when regenerating a day.
 
 #### Get Menu
 ```bash
@@ -350,6 +353,44 @@ curl -X POST https://menuforge.workers.dev/api/search/scrape \
       "https://www.example.com/recipe2"
     ]
   }'
+```
+
+### Pantry
+
+#### List Pantry Items
+```bash
+curl https://menuforge.workers.dev/api/pantry \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+#### Add Pantry Item
+```bash
+curl -X POST https://menuforge.workers.dev/api/pantry \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"ingredientName": "olive oil", "quantity": "500", "unit": "ml"}'
+```
+
+#### Update Pantry Item
+```bash
+curl -X PUT https://menuforge.workers.dev/api/pantry/ITEM_ID \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"quantity": "1", "unit": "bottle"}'
+```
+
+#### Remove Pantry Item
+```bash
+curl -X DELETE https://menuforge.workers.dev/api/pantry/ITEM_ID \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Shopping Lists
+
+#### Generate Pantry-Aware Shopping List
+```bash
+curl -X POST https://menuforge.workers.dev/api/menus/MENU_ID/shopping-list \
+  -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### Print
