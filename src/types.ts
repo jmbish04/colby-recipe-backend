@@ -97,8 +97,8 @@ export interface MenuItem {
   id: number;
   menuId: string;
   recipeId: string;
-  dayOfWeek?: number | null;
-  mealType?: string | null;
+  dayOfWeek?: (0 | 1 | 2 | 3 | 4 | 5 | 6) | null;
+  mealType?: 'breakfast' | 'lunch' | 'dinner' | null;
 }
 
 export interface PantryItem {
