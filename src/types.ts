@@ -41,6 +41,90 @@ export interface UserPreferences {
   cuisines: string[];
   dislikedIngredients: string[];
   favoredTools: string[];
+  dietaryRestrictions: string[];
+  allergies: string[];
+  skillLevel?: number | null;
+  defaultServings?: number | null;
   notes?: string | null;
   updatedAt?: string;
+}
+
+export interface User {
+  id: string;
+  email?: string | null;
+  name?: string | null;
+  pictureUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Favorite {
+  userId: string;
+  recipeId: string;
+  createdAt: string;
+}
+
+export interface Rating {
+  userId: string;
+  recipeId: string;
+  stars: number;
+  notes?: string | null;
+  cookedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Event {
+  id: number;
+  userId: string;
+  eventType: string;
+  recipeId?: string | null;
+  sessionId?: string | null;
+  createdAt: string;
+}
+
+export interface Menu {
+  id: string;
+  userId: string;
+  title?: string | null;
+  weekStartDate?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items?: MenuItem[];
+}
+
+export interface MenuItem {
+  id: number;
+  menuId: string;
+  recipeId: string;
+  dayOfWeek?: number | null;
+  mealType?: string | null;
+}
+
+export interface PantryItem {
+  id: number;
+  userId: string;
+  ingredientName: string;
+  quantity?: string | null;
+  unit?: string | null;
+  purchaseDate?: string | null;
+  expiryDate?: string | null;
+  updatedAt: string;
+}
+
+export interface ShoppingList {
+  id: string;
+  userId: string;
+  menuId?: string | null;
+  title?: string | null;
+  createdAt: string;
+}
+
+export interface ShoppingListItem {
+  id: number;
+  listId: string;
+  ingredientName: string;
+  quantity?: string | null;
+  unit?: string | null;
+  isChecked: boolean;
 }
