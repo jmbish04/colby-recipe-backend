@@ -242,7 +242,11 @@ async function runApplianceIngestion(env: Env, job: ApplianceIngestionJob): Prom
   try {
     let manualBytes = job.pdfBytes ?? null;
     if (!manualBytes && job.manualUrl) {
-      const response = await fetch(job.manualUrl);
+      const url = new URL(job.manualUrl);
+      if (!['http:', 'https:'].includes(url.protocol)) {
+        throw new Error('Invalid manual URL protocol. Only http and https are allowed.');
+      }
+      const response = await fetch(url.href);
       if (!response.ok) {
         throw new Error(`Failed to download manual: ${response.status}`);
       }
