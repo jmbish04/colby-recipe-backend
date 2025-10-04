@@ -832,7 +832,7 @@
               : '';
             const statusButton = status === 'COMPLETED'
               ? ''
-              : `<button data-action="status" data-id="${appliance.id}" class="secondary">📡 Check status</button>`;
+              : `<button data-action="status" data-id="${escapeHtml(appliance.id)}" class="secondary">📡 Check status</button>`;
             return `
               <li>
                 <div class="appliance-meta">
