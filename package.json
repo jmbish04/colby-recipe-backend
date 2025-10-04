@@ -9,7 +9,8 @@
     "test": "vitest run",
     "dev": "wrangler dev",
     "migrate:remote": "wrangler d1 migrations apply DB --remote",
-    "deploy": "npm run migrate:remote && wrangler versions deploy"
+    "deploy": "npm run migrate:remote && wrangler versions deploy",
+    "commit:gh": "git add . && git commit -m \"Update: $(date '+%Y-%m-%d %H:%M:%S')\" && git push origin master"
   },
   "keywords": [
     "cloudflare",
@@ -25,6 +26,7 @@
     "wrangler": "^4.42.0"
   },
   "dependencies": {
+    "form-data": "^4.0.4",
     "hono": "^4.9.9",
     "pdfjs-dist": "^5.4.149"
   }

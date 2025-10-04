@@ -228,6 +228,93 @@
       overflow: auto;
     }
 
+    .streaming-log {
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+    }
+
+    .streaming-entry {
+      padding: 0.5rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .streaming-entry:last-child {
+      border-bottom: none;
+    }
+
+    .streaming-entry.processing {
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .streaming-entry.completed {
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .streaming-entry.failed {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .streaming-entry.queued {
+      background: rgba(156, 163, 175, 0.1);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+
+    .status-indicator.queued {
+      background: #9ca3af;
+    }
+
+    .status-indicator.processing {
+      background: #3b82f6;
+      animation: pulse 2s infinite;
+    }
+
+    .status-indicator.completed {
+      background: #22c55e;
+    }
+
+    .status-indicator.failed {
+      background: #ef4444;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(148, 163, 184, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200px 0; }
+      100% { background-position: calc(200px + 100%) 0; }
+    }
+
     footer {
       padding: 1rem;
       text-align: center;
@@ -473,7 +560,7 @@
 
     <section id="appliances">
       <h2>Kitchen appliances</h2>
-      <p>Upload manuals to personalize recipes for your gear. Manuals are stored securely in R2 and processed asynchronously.</p>
+      <p>Upload manuals to personalize recipes for your gear. Manuals are stored securely in R2 and processed asynchronously. You can upload PDFs with pre-extracted text to skip OCR processing.</p>
       <form id="applianceForm" class="stack">
         <div>
           <label for="applianceNickname">Nickname (optional)</label>
@@ -484,18 +571,31 @@
           <input id="applianceManual" type="file" accept="application/pdf" />
         </div>
         <div>
+          <label for="applianceTextFile">Pre-extracted text file (optional)</label>
+          <input id="applianceTextFile" type="file" accept=".txt,.text" />
+        </div>
+        <div>
+          <label for="applianceTextInput">Or paste text directly</label>
+          <textarea id="applianceTextInput" placeholder="Paste extracted text here to skip OCR processing..." rows="4"></textarea>
+        </div>
+        <div>
           <label for="applianceManualUrl">Manual URL (public PDF)</label>
           <input id="applianceManualUrl" type="url" placeholder="https://example.com/manual.pdf" />
         </div>
-        <p class="muted">Provide either a manual file or a public manual URL.</p>
+        <p class="muted">Provide either a manual file or a public manual URL. Include text to skip OCR processing.</p>
         <div class="row" style="align-items:center; gap:0.75rem;">
           <button type="submit">➕ Add appliance</button>
           <button type="button" id="refreshAppliances" class="secondary">🔄 Refresh list</button>
+          <button type="button" id="toggleStreaming" class="secondary">📡 Toggle streaming</button>
         </div>
       </form>
       <div id="applianceResult" class="response" hidden>
         <h3>Latest appliance</h3>
         <pre id="applianceResultBody"></pre>
+      </div>
+      <div id="streamingStatus" class="response" hidden>
+        <h3>🔄 Live Processing Status</h3>
+        <div id="streamingLog"></div>
       </div>
       <div>
         <h3>Your appliances</h3>
@@ -539,6 +639,91 @@
       <div id="adaptResult" class="response" hidden>
         <h3>Adapted recipe</h3>
         <pre></pre>
+      </div>
+    </section>
+
+    <section id="pantry">
+      <h2>Pantry Management</h2>
+      <p>Manage your pantry inventory with receipt scanning and voice input.</p>
+      
+      <div class="stack">
+        <h3>📄 Receipt Scanner</h3>
+        <p>Upload a receipt image to automatically add items to your pantry.</p>
+        <form id="receiptForm" class="stack">
+          <div>
+            <label for="receiptUser">User ID</label>
+            <input id="receiptUser" type="text" placeholder="household-123" required />
+          </div>
+          <div>
+            <label for="receiptFile">Receipt Image</label>
+            <input id="receiptFile" type="file" accept="image/*" required />
+          </div>
+          <button type="submit">📷 Process Receipt</button>
+        </form>
+        <div id="receiptResult" class="response" hidden>
+          <h3>Receipt Processing Result</h3>
+          <pre id="receiptResultBody"></pre>
+        </div>
+      </div>
+
+      <div class="stack">
+        <h3>🎙️ Voice Pantry Update</h3>
+        <p>Record your voice to describe what's in your pantry and automatically update your inventory.</p>
+        <form id="voicePantryForm" class="stack">
+          <div>
+            <label for="voicePantryUser">User ID</label>
+            <input id="voicePantryUser" type="text" placeholder="household-123" required />
+          </div>
+          <div class="row" style="align-items:center;">
+            <button type="button" id="startVoiceRecording">🎙️ Start Recording</button>
+            <span id="voiceRecordingStatus" class="pill" hidden>Recording…</span>
+            <button type="button" id="stopVoiceRecording" class="secondary" disabled>⏹ Stop</button>
+          </div>
+          <div id="voiceTranscriptionResult" class="response" hidden>
+            <h3>Transcription & Pantry Update</h3>
+            <pre id="voiceTranscriptionBody"></pre>
+          </div>
+        </form>
+      </div>
+
+      <div class="stack">
+        <h3>📝 Manual Pantry Entry</h3>
+        <p>Add items manually to your pantry.</p>
+        <form id="manualPantryForm" class="stack">
+          <div>
+            <label for="manualPantryUser">User ID</label>
+            <input id="manualPantryUser" type="text" placeholder="household-123" required />
+          </div>
+          <div>
+            <label for="pantryItemName">Item Name</label>
+            <input id="pantryItemName" type="text" placeholder="e.g. organic tomatoes" required />
+          </div>
+          <div class="row">
+            <div>
+              <label for="pantryItemQuantity">Quantity</label>
+              <input id="pantryItemQuantity" type="text" placeholder="2" />
+            </div>
+            <div>
+              <label for="pantryItemUnit">Unit</label>
+              <input id="pantryItemUnit" type="text" placeholder="lbs" />
+            </div>
+          </div>
+          <button type="submit">➕ Add to Pantry</button>
+        </form>
+        <div id="manualPantryResult" class="response" hidden>
+          <h3>Pantry Item Added</h3>
+          <pre id="manualPantryResultBody"></pre>
+        </div>
+      </div>
+
+      <div>
+        <h3>Your Pantry Items</h3>
+        <div class="row" style="align-items:center; gap:0.75rem;">
+          <button type="button" id="loadPantryItems" class="secondary">🔄 Refresh Pantry</button>
+        </div>
+        <ul id="pantryItemsList" class="appliance-list">
+          <li class="muted">No pantry items yet. Add some to get started.</li>
+        </ul>
       </div>
     </section>
 
@@ -792,11 +977,16 @@
     const applianceForm = document.getElementById('applianceForm');
     const applianceNickname = document.getElementById('applianceNickname');
     const applianceManual = document.getElementById('applianceManual');
+    const applianceTextFile = document.getElementById('applianceTextFile');
+    const applianceTextInput = document.getElementById('applianceTextInput');
     const applianceManualUrl = document.getElementById('applianceManualUrl');
     const applianceResult = document.getElementById('applianceResult');
     const applianceResultBody = document.getElementById('applianceResultBody');
     const appliancesList = document.getElementById('appliancesList');
     const refreshAppliances = document.getElementById('refreshAppliances');
+    const toggleStreaming = document.getElementById('toggleStreaming');
+    const streamingStatus = document.getElementById('streamingStatus');
+    const streamingLog = document.getElementById('streamingLog');
     const recipeDetailResult = document.getElementById('recipeDetailResult');
     const recipeDetailPre = recipeDetailResult?.querySelector('pre');
     const flowchartResult = document.getElementById('flowchartResult');
@@ -846,6 +1036,32 @@
     const manualRecipeResponse = document.getElementById('manualRecipeResponse');
     const manualRecipeResponseTitle = manualRecipeResponse?.querySelector('h3');
     const manualRecipeResponseBody = manualRecipeResponse?.querySelector('pre');
+    
+    // Pantry management elements
+    const receiptForm = document.getElementById('receiptForm');
+    const receiptUser = document.getElementById('receiptUser');
+    const receiptFile = document.getElementById('receiptFile');
+    const receiptResult = document.getElementById('receiptResult');
+    const receiptResultBody = document.getElementById('receiptResultBody');
+    
+    const voicePantryForm = document.getElementById('voicePantryForm');
+    const voicePantryUser = document.getElementById('voicePantryUser');
+    const startVoiceRecording = document.getElementById('startVoiceRecording');
+    const stopVoiceRecording = document.getElementById('stopVoiceRecording');
+    const voiceRecordingStatus = document.getElementById('voiceRecordingStatus');
+    const voiceTranscriptionResult = document.getElementById('voiceTranscriptionResult');
+    const voiceTranscriptionBody = document.getElementById('voiceTranscriptionBody');
+    
+    const manualPantryForm = document.getElementById('manualPantryForm');
+    const manualPantryUser = document.getElementById('manualPantryUser');
+    const pantryItemName = document.getElementById('pantryItemName');
+    const pantryItemQuantity = document.getElementById('pantryItemQuantity');
+    const pantryItemUnit = document.getElementById('pantryItemUnit');
+    const manualPantryResult = document.getElementById('manualPantryResult');
+    const manualPantryResultBody = document.getElementById('manualPantryResultBody');
+    
+    const loadPantryItems = document.getElementById('loadPantryItems');
+    const pantryItemsList = document.getElementById('pantryItemsList');
 
     const storageKey = 'menuforge-api-key';
     
@@ -1199,14 +1415,22 @@
             const instructions = appliance.agentInstructions
               ? `<details><summary>Agent instructions</summary><pre>${escapeHtml(appliance.agentInstructions)}</pre></details>`
               : '';
+            
+            // Add streaming indicator for processing appliances
+            const isStreamingThis = streamingAppliances.has(appliance.id);
             const statusButton = status === 'COMPLETED'
               ? ''
               : `<button data-action="status" data-id="${escapeHtml(appliance.id)}" class="secondary">📡 Check status</button>`;
+            
+            const streamingIndicator = isStreamingThis 
+              ? '<span class="status-indicator processing" title="Live streaming"></span>' 
+              : '';
+            
             return `
-              <li>
+              <li class="${status.toLowerCase()}">
                 <div class="appliance-meta">
-                  <strong>${escapeHtml(displayName)}</strong>
-                  <span class="pill">${safeStatus}</span>
+                  <strong>${streamingIndicator}${escapeHtml(displayName)}</strong>
+                  <span class="pill ${status.toLowerCase()}">${safeStatus}</span>
                   <small>ID: ${escapeHtml(appliance.id)}</small>
                   <small>${manualKey}${textKey ? ` · ${textKey}` : ''}</small>
                   ${features}
@@ -1226,6 +1450,78 @@
       }
     }
 
+    // Streaming functionality
+    let streamingInterval = null;
+    let isStreaming = false;
+    const streamingAppliances = new Set();
+
+    function addStreamingEntry(applianceId, status, message, timestamp = new Date()) {
+      if (!streamingLog) return;
+      
+      const entry = document.createElement('div');
+      entry.className = `streaming-entry ${status.toLowerCase()}`;
+      entry.innerHTML = `
+        <div>
+          <span class="status-indicator ${status.toLowerCase()}"></span>
+          <strong>${applianceId.substring(0, 8)}...</strong> ${message}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--muted);">
+          ${timestamp.toLocaleTimeString()}
+        </div>
+      `;
+      
+      streamingLog.insertBefore(entry, streamingLog.firstChild);
+      
+      // Keep only last 20 entries
+      while (streamingLog.children.length > 20) {
+        streamingLog.removeChild(streamingLog.lastChild);
+      }
+    }
+
+    function startStreaming() {
+      if (isStreaming) return;
+      isStreaming = true;
+      streamingStatus.hidden = false;
+      toggleStreaming.textContent = '⏹️ Stop streaming';
+      
+      streamingInterval = setInterval(async () => {
+        if (streamingAppliances.size === 0) return;
+        
+        for (const applianceId of streamingAppliances) {
+          try {
+            const data = await callJson(`/api/kitchen/appliances/${applianceId}/status`, {
+              headers: authHeaders(),
+            });
+            
+            const status = data.status;
+            if (status === 'COMPLETED' || status === 'FAILED') {
+              streamingAppliances.delete(applianceId);
+              addStreamingEntry(applianceId, status, status === 'COMPLETED' ? 'Processing completed!' : 'Processing failed');
+            } else if (status === 'PROCESSING') {
+              addStreamingEntry(applianceId, status, 'Processing in progress...');
+            }
+          } catch (err) {
+            console.error('Streaming error:', err);
+          }
+        }
+        
+        // Refresh the appliances list to show updated statuses
+        await loadAppliancesList();
+      }, 2000); // Poll every 2 seconds
+    }
+
+    function stopStreaming() {
+      if (!isStreaming) return;
+      isStreaming = false;
+      streamingStatus.hidden = true;
+      toggleStreaming.textContent = '📡 Toggle streaming';
+      
+      if (streamingInterval) {
+        clearInterval(streamingInterval);
+        streamingInterval = null;
+      }
+    }
+
     async function handleApplianceSubmit(event) {
       event.preventDefault();
       if (!applianceForm) return;
@@ -1235,9 +1531,11 @@
         const nickname = applianceNickname?.value.trim();
         const manualUrlValue = applianceManualUrl?.value.trim();
         const manualFile = applianceManual?.files && applianceManual.files[0];
+        const textFile = applianceTextFile?.files && applianceTextFile.files[0];
+        const textInput = applianceTextInput?.value.trim();
 
-        if (!manualFile && !manualUrlValue) {
-          throw new Error('Provide a manual file or manual URL');
+        if (!manualFile && !manualUrlValue && !textFile && !textInput) {
+          throw new Error('Provide a manual file, manual URL, text file, or text input');
         }
 
         if (nickname) {
@@ -1246,9 +1544,16 @@
         if (manualFile) {
           form.append('manual_file', manualFile);
         }
+        if (textFile) {
+          form.append('text_file', textFile);
+        }
+        if (textInput) {
+          form.append('text', textInput);
+        }
         if (manualUrlValue) {
           form.append('manual_url', manualUrlValue);
         }
+        
         const res = await fetch('/api/kitchen/appliances', {
           method: 'POST',
           headers: authHeaders(),
@@ -1256,10 +1561,23 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || res.statusText);
+        
         if (applianceResult && applianceResultBody) {
           applianceResult.hidden = false;
           applianceResultBody.textContent = JSON.stringify(data, null, 2);
         }
+        
+        // Add to streaming if processing
+        if (data.appliance_id) {
+          streamingAppliances.add(data.appliance_id);
+          addStreamingEntry(data.appliance_id, 'QUEUED', 'Upload successful, queued for processing');
+          
+          // Auto-start streaming if not already running
+          if (!isStreaming) {
+            startStreaming();
+          }
+        }
+        
         applianceForm.reset();
         await loadAppliancesList();
       } catch (err) {
@@ -1311,6 +1629,13 @@
 
     applianceForm?.addEventListener('submit', handleApplianceSubmit);
     refreshAppliances?.addEventListener('click', loadAppliancesList);
+    toggleStreaming?.addEventListener('click', () => {
+      if (isStreaming) {
+        stopStreaming();
+      } else {
+        startStreaming();
+      }
+    });
 
     async function handleRecipeDetailLoad() {
       if (!recipeDetailResult || !recipeDetailPre) return;
@@ -1487,6 +1812,246 @@
       }
     }
     refreshLogs.addEventListener('click', handleLogs);
+
+    // Pantry management functions
+    async function handleReceiptUpload(event) {
+      event.preventDefault();
+      if (!receiptForm) return;
+      
+      try {
+        const submitBtn = receiptForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        
+        const userId = receiptUser?.value.trim();
+        const file = receiptFile?.files?.[0];
+        
+        if (!userId) {
+          throw new Error('User ID required');
+        }
+        if (!file) {
+          throw new Error('Receipt file required');
+        }
+        
+        const form = new FormData();
+        form.append('receipt', file);
+        
+        const res = await fetch('/api/pantry/receipt', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: form,
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || res.statusText);
+        
+        if (receiptResult && receiptResultBody) {
+          receiptResult.hidden = false;
+          receiptResultBody.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // Refresh pantry list
+        await loadPantryItemsList();
+      } catch (err) {
+        if (receiptResult && receiptResultBody) {
+          receiptResult.hidden = false;
+          receiptResultBody.textContent = err.message;
+        }
+      } finally {
+        const submitBtn = receiptForm.querySelector('button[type="submit"]');
+        submitBtn && (submitBtn.disabled = false);
+      }
+    }
+
+    async function handleManualPantryAdd(event) {
+      event.preventDefault();
+      if (!manualPantryForm) return;
+      
+      try {
+        const submitBtn = manualPantryForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        
+        const userId = manualPantryUser?.value.trim();
+        const name = pantryItemName?.value.trim();
+        const quantity = pantryItemQuantity?.value.trim();
+        const unit = pantryItemUnit?.value.trim();
+        
+        if (!userId) {
+          throw new Error('User ID required');
+        }
+        if (!name) {
+          throw new Error('Item name required');
+        }
+        
+        const payload = {
+          ingredientName: name,
+          quantity: quantity || null,
+          unit: unit || null,
+        };
+        
+        const data = await callJson(`/api/pantry?user_id=${encodeURIComponent(userId)}`, {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload),
+        });
+        
+        if (manualPantryResult && manualPantryResultBody) {
+          manualPantryResult.hidden = false;
+          manualPantryResultBody.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // Clear form
+        manualPantryForm.reset();
+        
+        // Refresh pantry list
+        await loadPantryItemsList();
+      } catch (err) {
+        if (manualPantryResult && manualPantryResultBody) {
+          manualPantryResult.hidden = false;
+          manualPantryResultBody.textContent = err.message;
+        }
+      } finally {
+        const submitBtn = manualPantryForm.querySelector('button[type="submit"]');
+        submitBtn && (submitBtn.disabled = false);
+      }
+    }
+
+    async function loadPantryItemsList() {
+      if (!pantryItemsList) return;
+      
+      try {
+        const userId = voicePantryUser?.value.trim() || receiptUser?.value.trim() || manualPantryUser?.value.trim();
+        if (!userId) {
+          pantryItemsList.innerHTML = '<li class="muted">Enter a User ID to load pantry items.</li>';
+          return;
+        }
+        
+        const data = await callJson(`/api/pantry?user_id=${encodeURIComponent(userId)}`, {
+          headers: authHeaders(),
+        });
+        
+        const items = data.items || [];
+        if (!items.length) {
+          pantryItemsList.innerHTML = '<li class="muted">No pantry items yet. Add some to get started.</li>';
+          return;
+        }
+        
+        pantryItemsList.innerHTML = items
+          .map((item) => {
+            const quantity = item.quantity ? ` ${item.quantity}` : '';
+            const unit = item.unit ? ` ${item.unit}` : '';
+            return `
+              <li>
+                <div class="appliance-meta">
+                  <strong>${escapeHtml(item.ingredientName)}</strong>
+                  <small>${quantity}${unit}</small>
+                  <small>ID: ${item.id}</small>
+                </div>
+                <div class="appliance-actions">
+                  <button data-action="delete-pantry" data-id="${item.id}" class="secondary">🗑 Remove</button>
+                </div>
+              </li>`;
+          })
+          .join('');
+      } catch (err) {
+        pantryItemsList.innerHTML = `<li><pre>${err.message}</pre></li>`;
+      }
+    }
+
+    async function handleDeletePantryItem(id) {
+      try {
+        await callJson(`/api/pantry/${id}`, {
+          method: 'DELETE',
+          headers: authHeaders(),
+        });
+        await loadPantryItemsList();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Voice recording for pantry
+    let voiceMediaRecorder = null;
+    let voiceAudioChunks = [];
+
+    async function startVoiceRecording() {
+      try {
+        startVoiceRecording.disabled = true;
+        stopVoiceRecording.disabled = false;
+        voiceRecordingStatus.hidden = false;
+        
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        voiceAudioChunks = [];
+        voiceMediaRecorder = new MediaRecorder(stream);
+        
+        voiceMediaRecorder.ondataavailable = event => { 
+          if (event.data.size) voiceAudioChunks.push(event.data); 
+        };
+        
+        voiceMediaRecorder.onstop = async () => {
+          voiceRecordingStatus.hidden = true;
+          startVoiceRecording.disabled = false;
+          stopVoiceRecording.disabled = true;
+          
+          const blob = new Blob(voiceAudioChunks, { type: 'audio/webm' });
+          const form = new FormData();
+          form.append('audio', blob, 'voice.webm');
+          form.append('action', 'update_pantry');
+          
+          try {
+            const res = await fetch('/api/transcribe/voice', { 
+              method: 'POST', 
+              headers: authHeaders(), 
+              body: form 
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || res.statusText);
+            
+            if (voiceTranscriptionResult && voiceTranscriptionBody) {
+              voiceTranscriptionResult.hidden = false;
+              voiceTranscriptionBody.textContent = JSON.stringify(data, null, 2);
+            }
+            
+            // Refresh pantry list
+            await loadPantryItemsList();
+          } catch (err) {
+            if (voiceTranscriptionResult && voiceTranscriptionBody) {
+              voiceTranscriptionResult.hidden = false;
+              voiceTranscriptionBody.textContent = err.message;
+            }
+          }
+        };
+        
+        voiceMediaRecorder.start();
+      } catch (err) {
+        voiceRecordingStatus.hidden = true;
+        startVoiceRecording.disabled = false;
+        stopVoiceRecording.disabled = true;
+        alert(err.message || 'Microphone permission denied.');
+      }
+    }
+
+    function stopVoiceRecording() {
+      if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') {
+        voiceMediaRecorder.stop();
+      }
+    }
+
+    // Event listeners
+    receiptForm?.addEventListener('submit', handleReceiptUpload);
+    manualPantryForm?.addEventListener('submit', handleManualPantryAdd);
+    loadPantryItems?.addEventListener('click', loadPantryItemsList);
+    startVoiceRecording?.addEventListener('click', startVoiceRecording);
+    stopVoiceRecording?.addEventListener('click', stopVoiceRecording);
+
+    // Handle pantry item deletion
+    pantryItemsList?.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const id = target.dataset.id;
+      if (target.dataset.action === 'delete-pantry' && id) {
+        handleDeletePantryItem(id);
+      }
+    });
 
     let mediaRecorder = null;
     let audioChunks = [];

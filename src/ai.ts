@@ -10,15 +10,98 @@ import {
 import { truncate } from './utils';
 
 const CHAT_MODEL = '@cf/meta/llama-3.1-70b-instruct';
-const EMBEDDING_MODEL = '@cf/embedding/embeddinggemma-300m';
+const EMBEDDING_MODEL = '@cf/google/embeddinggemma-300m';
 const ASR_MODEL = '@cf/openai/whisper';
-const OCR_MODEL = '@cf/meta/llama-3.1-70b-instruct';
+const OCR_MODEL = '@cf/meta/llama-3.2-11b-vision-instruct';
+const VISION_MODEL = '@cf/meta/llama-3.2-11b-vision-instruct';
 
 type PdfJsModule = typeof import('pdfjs-dist/legacy/build/pdf.mjs');
 
 async function tryExtractWithPdfJs(pdf: Uint8Array): Promise<string | null> {
   try {
-    const pdfjs: PdfJsModule = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    // Add polyfills for missing DOM APIs in Cloudflare Workers
+    if (typeof (globalThis as any).DOMMatrix === 'undefined') {
+      (globalThis as any).DOMMatrix = class DOMMatrix {
+        constructor(_init?: string | number[]) {
+          // Simple polyfill - PDF.js might not use this extensively
+        }
+        static fromMatrix() {
+          return new DOMMatrix();
+        }
+        toString() {
+          return 'matrix(1, 0, 0, 1, 0, 0)';
+        }
+      };
+    }
+    
+    if (typeof (globalThis as any).DOMPoint === 'undefined') {
+      (globalThis as any).DOMPoint = class DOMPoint {
+        constructor(x = 0, y = 0, z = 0, w = 1) {
+          this.x = x;
+          this.y = y;
+          this.z = z;
+          this.w = w;
+        }
+        x: number;
+        y: number;
+        z: number;
+        w: number;
+      };
+    }
+
+    // Add more polyfills that PDF.js might need
+    if (typeof (globalThis as any).DOMRect === 'undefined') {
+      (globalThis as any).DOMRect = class DOMRect {
+        constructor(x = 0, y = 0, width = 0, height = 0) {
+          this.x = x;
+          this.y = y;
+          this.width = width;
+          this.height = height;
+        }
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        get top() { return this.y; }
+        get right() { return this.x + this.width; }
+        get bottom() { return this.y + this.height; }
+        get left() { return this.x; }
+      };
+    }
+
+    // Add URL polyfill if needed
+    if (typeof (globalThis as any).URL === 'undefined') {
+      (globalThis as any).URL = class URL {
+        constructor(_url: string, _base?: string) {
+          // Simple polyfill
+        }
+        toString() {
+          return '';
+        }
+      };
+    }
+
+    // Add polyfill for String.prototype.includes if missing
+    if (typeof String.prototype.includes === 'undefined') {
+      String.prototype.includes = function(search: string, start?: number): boolean {
+        if (typeof start !== 'number') {
+          start = 0;
+        }
+        if (start + search.length > this.length) {
+          return false;
+        } else {
+          return this.indexOf(search, start) !== -1;
+        }
+      };
+    }
+
+    let pdfjs: PdfJsModule;
+    try {
+      pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    } catch (importError) {
+      console.warn('Failed to import PDF.js:', importError);
+      return null;
+    }
     if (!pdfjs.getDocument) {
       return null;
     }
@@ -57,6 +140,16 @@ async function tryExtractWithPdfJs(pdf: Uint8Array): Promise<string | null> {
 }
 
 async function extractTextFromPdfViaAi(env: Env, pdf: Uint8Array): Promise<string> {
+  // Convert PDF to base64 for vision model using a more efficient method
+  let binary = '';
+  const chunkSize = 8192; // Process in chunks to avoid call stack overflow
+  for (let i = 0; i < pdf.length; i += chunkSize) {
+    const chunk = pdf.slice(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  const base64 = btoa(binary);
+  const dataUrl = `data:application/pdf;base64,${base64}`;
+  
   const result = await env.AI.run(OCR_MODEL, {
     messages: [
       {
@@ -65,19 +158,10 @@ async function extractTextFromPdfViaAi(env: Env, pdf: Uint8Array): Promise<strin
       },
       {
         role: 'user',
-        content: [
-          {
-            type: 'input_text',
-            text: 'Please extract the manual text from this PDF.',
-          },
-          {
-            type: 'input_file',
-            data: pdf,
-            mime_type: 'application/pdf',
-          },
-        ],
+        content: 'Please extract the manual text from this PDF.',
       },
     ],
+    image: dataUrl,
   });
 
   if (typeof result?.text === 'string') {
@@ -953,4 +1037,198 @@ function extractContentFromResponse(response: any): string {
     return response.output_text;
   }
   return '{}';
+}
+
+// Receipt processing functions
+export async function extractTextFromReceipt(env: Env, imageBytes: Uint8Array): Promise<string> {
+  // Convert image to base64 for vision model
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < imageBytes.length; i += chunkSize) {
+    const chunk = imageBytes.slice(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  const base64 = btoa(binary);
+  const dataUrl = `data:image/jpeg;base64,${base64}`;
+
+  try {
+    const result = await env.AI.run(VISION_MODEL, {
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an OCR assistant specialized in reading receipts. Extract all text from the receipt image in reading order, preserving the structure and layout.',
+        },
+        {
+          role: 'user',
+          content: 'Please extract all text from this receipt image.',
+        },
+      ],
+      image: dataUrl,
+    });
+
+    if (typeof result?.text === 'string') {
+      return result.text;
+    }
+    if (Array.isArray(result?.choices) && result.choices[0]?.message?.content) {
+      return String(result.choices[0].message.content);
+    }
+    if (typeof result?.result === 'string') {
+      return result.result;
+    }
+    if (typeof result?.response === 'string') {
+      return result.response;
+    }
+    if (typeof result?.output_text === 'string') {
+      return result.output_text;
+    }
+    return '';
+  } catch (error) {
+    console.error('Receipt OCR failed:', error);
+    return '';
+  }
+}
+
+export async function parseReceiptItems(env: Env, receiptText: string): Promise<Array<{ name: string; quantity?: string; unit?: string }>> {
+  const prompt = `Parse this receipt text and extract grocery items. For each item, identify:
+1. The item name (normalize to common ingredient names)
+2. Quantity (if mentioned)
+3. Unit (if mentioned)
+
+Return the result as a JSON array of objects with "name", "quantity", and "unit" fields.
+
+Receipt text:
+${receiptText}
+
+Example format:
+[
+  {"name": "organic tomatoes", "quantity": "2", "unit": "lbs"},
+  {"name": "milk", "quantity": "1", "unit": "gallon"},
+  {"name": "bread", "quantity": "1", "unit": "loaf"}
+]`;
+
+  try {
+    const result = await env.AI.run(CHAT_MODEL, {
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a receipt parsing assistant. Extract grocery items from receipt text and return them as a JSON array.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    });
+
+    let responseText = '';
+    if (typeof result?.text === 'string') {
+      responseText = result.text;
+    } else if (Array.isArray(result?.choices) && result.choices[0]?.message?.content) {
+      responseText = String(result.choices[0].message.content);
+    } else if (typeof result?.result === 'string') {
+      responseText = result.result;
+    } else if (typeof result?.response === 'string') {
+      responseText = result.response;
+    } else if (typeof result?.output_text === 'string') {
+      responseText = result.output_text;
+    }
+
+    // Extract JSON from response
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const items = JSON.parse(jsonMatch[0]);
+      return Array.isArray(items) ? items : [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Receipt parsing failed:', error);
+    return [];
+  }
+}
+
+// Voice transcription functions
+export async function transcribeAudioForPantry(env: Env, audioBytes: Uint8Array): Promise<string> {
+  try {
+    const result = await env.AI.run(ASR_MODEL, {
+      audio: [...audioBytes],
+    });
+
+    if (typeof result?.text === 'string') {
+      return result.text;
+    }
+    if (typeof result?.transcription === 'string') {
+      return result.transcription;
+    }
+    if (typeof result?.result === 'string') {
+      return result.result;
+    }
+    if (typeof result?.response === 'string') {
+      return result.response;
+    }
+    if (typeof result?.output_text === 'string') {
+      return result.output_text;
+    }
+    return '';
+  } catch (error) {
+    console.error('Audio transcription failed:', error);
+    return '';
+  }
+}
+
+export async function parsePantryFromTranscription(env: Env, transcription: string): Promise<Array<{ name: string; quantity?: string; unit?: string }>> {
+  const prompt = `Parse this voice transcription about pantry items and extract ingredient information. For each item mentioned, identify:
+1. The ingredient name (normalize to common names)
+2. Quantity (if mentioned)
+3. Unit (if mentioned)
+
+Return the result as a JSON array of objects with "name", "quantity", and "unit" fields.
+
+Transcription:
+${transcription}
+
+Example format:
+[
+  {"name": "tomatoes", "quantity": "3", "unit": "pieces"},
+  {"name": "milk", "quantity": "1", "unit": "gallon"},
+  {"name": "eggs", "quantity": "12", "unit": "pieces"}
+]`;
+
+  try {
+    const result = await env.AI.run(CHAT_MODEL, {
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a pantry assistant. Extract ingredient information from voice transcriptions and return them as a JSON array.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    });
+
+    let responseText = '';
+    if (typeof result?.text === 'string') {
+      responseText = result.text;
+    } else if (Array.isArray(result?.choices) && result.choices[0]?.message?.content) {
+      responseText = String(result.choices[0].message.content);
+    } else if (typeof result?.result === 'string') {
+      responseText = result.result;
+    } else if (typeof result?.response === 'string') {
+      responseText = result.response;
+    } else if (typeof result?.output_text === 'string') {
+      responseText = result.output_text;
+    }
+
+    // Extract JSON from response
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const items = JSON.parse(jsonMatch[0]);
+      return Array.isArray(items) ? items : [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Pantry parsing from transcription failed:', error);
+    return [];
+  }
 }

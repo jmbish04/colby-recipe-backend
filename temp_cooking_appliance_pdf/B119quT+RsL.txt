@@ -1,0 +1,6379 @@
+Owner’s Manual
+Convection/Broil/Microwave Oven
+Household Use Only
+Model No. NN-CD87KS
+
+Scan this code for product registration
+
+PLEASE READ THESE INSTRUCTIONS CAREFULLY BEFORE USING THIS PRODUCT,
+AND SAVE THIS MANUAL FOR FUTURE USE.
+To register your product and for all other assistance, please contact us via the web at:
+http://shop.panasonic.com/support
+(U.S.A Only)
+
+For microwave oven safety reference, please visit the FDA’s web page at:
+http://www.fda.gov/radiation-emittingproducts/resourcesforyouradiationemittingproducts/ucm252762.htm
+Para obtener instrucciones en español, por favor visite la página web en:
+http://shop.panasonic.com/support
+F0003CD60AP
+PA0220-0
+Printed in China
+© Panasonic Appliances Microwave Oven (Shanghai) Co., Ltd. 2020
+
+F0003CD60AP_EN_0303.indd 1
+
+2020/3/3 9:58:08
+
+CONTENTS
+Auto Cook ................................................................. 37-41
+Melt & Soften ........................................................... 37
+Convection Bake/Combo .............................. 38-39
+Beverage.................................................................... 40
+Re-Bake Bread.......................................................... 41
+Auto Steam Clean ........................................................ 42
+Defrosting Tips & Techniques ....................................... 43
+Microwave shortcuts .................................................. 44-45
+Defrosting Chart ............................................................... 46
+Reheating Chart ................................................................ 47
+Cooking Chart ............................................................... 48-50
+Food Characteristics ......................................................... 51
+Cooking Techniques ......................................................... 52
+
+Safety Information
+IMPORTANT SAFETY INSTRUCTIONS .........................3-5
+Installation and Grounding Instructions ......................6
+Food Preparation ..............................................................7-8
+
+Operation
+Location of Controls ......................................................... 10
+Oven Accessories ............................................................... 11
+Control Panel....................................................................... 12
+Display Window ................................................................. 13
+Dial Feature.......................................................................... 13
+Cooking Modes .................................................................. 14
+Operation ....................................................................... 15-42
+Using the Microwave for the First Time ............... 15
+Function Features ........................................................ 15
+Demo Mode ................................................................... 16
+Menu Action ON/OFF ................................................. 16
+Setting the Clock .......................................................... 17
+Setting the Child Safety Lock................................... 17
+Airfry ................................................................................. 18
+Airfry Chart ..................................................................... 19
+Broil ................................................................................... 20
+Combo ............................................................................. 21
+Casserole Recipes......................................................... 22
+Convection Bake .................................................... 23-24
+Microwave ...................................................................... 25
+Keep Warm ..................................................................... 26
+Quick 30........................................................................... 26
+Setting the Kitchen Timer ......................................... 27
+Setting a Standing Time ............................................ 28
+Setting a Delayed Start .............................................. 29
+Add Time ......................................................................... 30
+3-Stage Setting ............................................................. 31
+Sensor Reheat (One Push Reheating) ................... 32
+Auto Defrost .................................................................. 33
+Auto Cook (Sensor) ............................................... 34-36
+Popcorn ..................................................................... 34
+
+Maintenance
+Care and Cleaning of Your Microwave Oven........... 53
+Shop Accessories ............................................................... 53
+Before Requesting Service ............................................. 54
+Limited Warranty (Only for U.S.A.) ............................... 55
+
+General Information
+Cookware and Utensil Chart .............................................9
+Specifications ...................................................................... 56
+Trim Kit Information ......................................................... 56
+User’s Record ....................................................................... 56
+
+2
+
+F0003CD60AP_EN_0303.indd 2
+
+2020/3/3 9:58:09
+
+IMPORTANT SAFETY INSTRUCTIONS
+Your safety and the safety of others are very important.
+We have provided important safety messages in this manual and on your appliance. Always read and obey all safety
+messages.
+This is the safety alert symbol. It is used to alert you to potential hazards that can kill or hurt you and others.
+All safety messages will follow the safety alert symbol and either the word “DANGER”, “WARNING” or “CAUTION”. These
+words mean:
+
+DANGER
+
+You can be killed or seriously injured if you don’t immediately follow instructions.
+
+WARNING
+
+You can be killed or seriously injured if you don’t follow instructions.
+
+CAUTION
+
+You can be exposed to a potentially hazardous situation which, if not avoided, may result in
+minor or moderate injury.
+
+All safety messages will tell you what the potential hazard is, tell you how to reduce the chance of injury, and tell you what can happen
+if the instructions are not followed.
+
+PRECAUTIONS TO AVOID POSSIBLE EXPOSURE
+TO EXCESSIVE MICROWAVE ENERGY
+(a) DO NOT attempt to operate this oven with the door open,
+since open-door operation can result in harmful exposure
+to microwave energy. It is important not to defeat or tamper
+with the safety interlocks.
+(b) DO NOT place any object between the oven front face and the
+door, or allow soil or cleaner residue to accumulate on sealing
+surfaces.
+
+(c) DO NOT operate the oven if it is damaged. It is particularly
+important that the oven door close properly and that there is
+no damage to the:
+(1) door (bent),
+(2) hinges and latches (broken or loosened),
+(3) door seals and sealing surfaces.
+(d) The oven should not be adjusted or repaired by anyone except
+properly qualified service personnel.
+
+Thank you for purchasing a Panasonic Microwave Oven
+Your microwave oven is a cooking appliance and you should use as much care as you use with a stove or any other cooking appliance.
+When using this electric appliance, basic safety precautions should be followed, including the following:
+
+WARNING excessive microwave energy:
+
+To reduce the risk of burns, electric shock, fire, injury to persons, or exposure to
+
+1.
+
+Read all instructions before using this appliance.
+
+2.
+
+Read and follow the specific “PRECAUTIONS TO AVOID POSSIBLE EXPOSURE TO EXCESSIVE MICROWAVE ENERGY,” above.
+
+3.
+
+This appliance must be grounded. Connect only to a properly grounded outlet. See “GROUNDING INSTRUCTIONS” found on page 6.
+
+4.
+
+As with any cooking appliance, DO NOT leave oven unattended while in use.
+
+5.
+
+Install or locate this appliance only in accordance with the installation instructions found on page 6.
+
+6.
+
+DO NOT cover or block any openings on this appliance.
+
+7.
+
+DO NOT store this appliance outdoors. DO NOT use this product near water (for example, near a kitchen sink, in a wet basement, or
+near a swimming pool or similar locations).
+
+8.
+
+Use this appliance only for its intended use as described in this manual. DO NOT use corrosive chemicals, vapors or non-food products
+in this appliance. This type of oven is specifically designed to heat or cook food. It is not designed for industrial or laboratory use. The use
+of corrosive chemicals in heating or cleaning will damage the appliance and may result in radiation leaks.
+
+3
+
+F0003CD60AP_EN_0303.indd 3
+
+2020/3/3 9:58:09
+
+IMPORTANT SAFETY INSTRUCTIONS (continued)
+9.
+
+When cleaning surfaces of the door and oven that come together on closing the door, use only mild, non-abrasive soaps or
+detergents applied with a sponge or soft cloth.
+
+10. DO NOT allow children to use this appliance, unless closely supervised by an adult. DO NOT assume that because a child has
+mastered one cooking skill he/she can cook everything.
+11. DO NOT operate this appliance if it has a damaged cord or plug, if it is not working properly, or if it has been damaged or dropped.
+12. DO NOT immerse cord or plug in water.
+13. Keep cord away from heated surfaces.
+14. DO NOT let cord hang over edge of a table or counter.
+15. This appliance should be serviced only by qualified service personnel. Contact the nearest authorized service center for examination,
+repair or adjustment.
+16. Some products such as whole eggs, with or without shell, narrow neck bottles and sealed containers (for example, closed glass jars)
+may explode and should not be heated in this oven.
+17. To reduce the risk of fire in the oven cavity:
+(a) DO NOT overcook food. Carefully attend appliance when paper, plastic, or other combustible materials are placed inside the
+oven to facilitate cooking.
+(b) Remove wire twist-ties from paper or plastic bags before placing bag in oven.
+(c) If material inside the oven ignites, keep oven door closed, turn oven off, and disconnect the power cord, or shut off
+power at the fuse or circuit breaker panel.
+(d) DO NOT use the cavity for storage purposes. DO NOT leave paper products, cooking utensils or food in the cavity
+when not in use.
+18. Superheated Liquids: Liquids, such as water, coffee or tea are able to be overheated beyond the boiling point without showing
+evidence (or signs) of boiling. Visible bubbling is not always present when the container is removed from the microwave oven. THIS
+COULD RESULT IN VERY HOT LIQUIDS SUDDENLY BOILING OVER WHEN THE CONTAINER IS DISTURBED OR A UTENSIL IS INSERTED
+INTO THE LIQUID. To reduce the risk of injury to persons:
+(a) STIR THE LIQUID BOTH BEFORE AND HALFWAY THROUGH HEATING.
+(b) DO NOT heat water and oil, or fats together. The film of oil will trap steam, and may cause a violent eruption.
+(c) DO NOT use straight-sided containers with narrow necks.
+(d) After heating, allow the container to stand in the microwave oven for a short time before removing the container.
+19. DO NOT cook directly on the glass tray. It can crack, and cause injury or damage to the oven.
+20. For the oven designed for installation into a wall cabinet:
+(a) DO NOT operate any heating or cooking appliance beneath this appliance.
+(b) DO NOT mount unit over or near any portion of a heating or cooking appliance.
+(c) DO NOT mount over a sink.
+(d) DO NOT store anything directly on the top of the appliance surface when the appliance is in operation.
+21. Oversized foods or oversized metal utensils should not be used in a microwave/broiler oven as they may create a fire or risk of
+electric shock.
+22. DO NOT clean with metal scouring pads. Pieces can burn off the pad and touch electrical parts involving a risk of electric shock.
+23. DO NOT use paper products when appliance is operated in the broil mode.
+24. DO NOT store any materials, other than manufacturer’s recommended accessories in this oven when not in use.
+25. DO NOT cover racks or any other part of the oven with metal foil. This will cause overheating of the oven.
+Attention: Hot Surfaces
+
+SAVE THESE INSTRUCTIONS
+For proper use of your oven, read remaining safety cautions and owner’s manual.
+
+4
+
+F0003CD60AP_EN_0303.indd 4
+
+2020/3/3 9:58:09
+
+IMPORTANT SAFETY INSTRUCTIONS (continued)
+
+WARNING
+
+Safety Precautions
+
+TO AVOID THE RISK OF SHOCK:
+
+Glass Tray
+
+DO NOT remove top or outer panel
+from oven. Repairs must be done
+only by a qualified service person.
+
+1. DO NOT operate the oven without the Roller Ring and the Glass
+Tray in place.
+2. DO NOT operate the oven without the Glass Tray fully engaged
+on the drive hub. Improper cooking or damage to the oven
+could result. Verify that the Glass Tray is properly engaged and
+rotating by observing its rotation when you press Start.
+Note: The Glass Tray can turn in either direction.
+
+TO REDUCE THE RISK OF EXPOSURE TO MICROWAVE ENERGY:
+DO NOT tamper with, or make any adjustments or repairs to Door,
+Control Panel Frame, Safety Interlock Switches, or any other part of
+the oven. Microwave leakage may result.
+
+3. Use only the Glass Tray specifically designed for this oven.
+DO NOT substitute any other Glass Tray.
+
+TO AVOID THE RISK OF ARCING DAMAGE OR FIRE:
+
+5. DO NOT cook directly on the Glass Tray. Always place food in
+a microwave safe dish, or on a rack set in a microwave safe dish.
+
+4. If the Glass Tray is hot, allow to cool before cleaning or placing
+in water.
+
+1. DO NOT operate the microwave
+oven empty, cook small food
+portions unattended, or use
+metal containers. When using the
+microwave oven without water or
+food, or cook too small a serving,
+microwave energy cannot be
+absorbed and will continuously
+reflect throughout the cavity. This will cause arcing and damage
+the oven cavity, door or other components.
+
+6. If food or utensil on the Glass Tray touches oven walls, causing
+the tray to stop moving, the tray will automatically rotate in the
+opposite direction.
+
+Roller Ring
+1. The Roller Ring and oven floor should be cleaned frequently to
+prevent excessive noise.
+
+2. DO NOT store flammable materials next
+to, on top of, or in the oven.
+
+2. Always replace the Roller Ring and the Glass Tray in their proper
+positions.
+
+3. DO NOT dry clothes, newspapers or other
+materials in the oven, or use newspaper or
+paper bags for cooking.
+
+3. The Roller Ring must always be used for cooking along with the
+Glass Tray.
+
+4. DO NOT hit or strike Control Panel.
+Damage to controls may occur.
+5. DO NOT use recycled paper products unless the paper product
+is labeled as safe for microwave oven use. Recycled paper
+products may contain impurities, which may cause sparking.
+
+TO AVOID THE RISK OF SCALDING AND BURNING:
+POT HOLDERS should always be
+used when removing items from
+the oven. Heat is transferred from
+the HOT food to the cooking
+container and from the container
+to the Glass Tray. The Glass
+Tray can also be very HOT after
+removing the cooking container from the oven. The wire rack is
+designed for use in the Convection, Broil, Airfry and Combo modes,
+and will be hot after use.
+Care in handling the Wire Rack, Enamel Tray and Airfry Basket
+must be exercised.
+5
+
+F0003CD60AP_EN_0303.indd 5
+
+2020/3/3 9:58:09
+
+Installation and Grounding Instructions
+Examine Your Oven
+
+Power Supply
+
+Unpack oven, remove all packing material and examine the oven
+1. A short power-supply cord is provided to reduce the risks resulting
+for any damage such as dents, broken door latches or cracks in the
+from becoming entangled in or tripping over a longer cord.
+door. Notify dealer immediately if oven is damaged. DO NOT install
+2. Longer cord sets or extension cords may be used if care is
+if oven is damaged.
+exercised in their use. DO NOT let cord hang over edge of a
+table or counter.
+Placement of Oven
+1. The oven must be placed
+3. If a long cord or extension cord is used,
+on a flat, stable surface,
+(1) The marked electrical rating
+3-Pronged Plug
+which is more than 36
+of the cord set or extension
+inches (91.6 cm) height
+cord should be at least as
+from the ground. Place
+great as the electrical rating
+the front surface of the
+of the appliance.
+door 3 inches (7.6 cm) or
+Ground Plug
+(2) The extension cord must be a
+more from the counter
+grounding-type 3-wire cord,
+top edge to avoid
+3-Prong Receptacle
+accidental tipping of
+and
+the microwave oven during normal use. For proper operation,
+(3) The longer cord should be arranged so that it will not drape
+the oven must have sufficient air flow. Allow 6 inches (15 cm)
+over the counter top or tabletop where it can be pulled on by
+of space on the top of the oven, 4 inches (10 cm) at back
+children or tripped over accidentally.
+and 2 inches (5 cm) on both sides. If one side of the oven
+is placed flush to a wall, the other side or top must not be
+Wiring Requirements
+blocked. Do not remove feet.
+1. The oven must be operated on a SEPARATE CIRCUIT. No other
+(a) DO NOT block air vents. If they are blocked during operation,
+appliance should share the circuit with the microwave oven.
+the oven may overheat and be damaged.
+If it does, the branch circuit fuse may blow or the circuit breaker
+(b) DO NOT place oven near a hot, damp surface such as a gas
+may trip.
+or electric range, or dishwasher.
+2. The oven must be plugged into at least a 20 A, 120 V, 60 Hz
+(c) DO NOT operate oven when room humidity is excessive.
+GROUNDED OUTLET. Where a standard two-prong outlet is
+2. This oven is manufactured for household use only. It is not
+encountered, it is the personal responsibility and obligation
+approved or tested for mobile vehicle, marine, or commercial use.
+of the consumer to have it replaced with a properly grounded
+three-prong outlet.
+Installation
+3. The VOLTAGE used must be the same as specified on this
+1. DO NOT block air vents. If they are blocked during operation,
+microwave oven (120 V, 60 Hz). Using a higher voltage is
+the oven may overheat. If the oven overheats, a thermal safety
+dangerous and may result in a fire or oven damage. Using
+device will turn the oven off. The oven will remain inoperable
+a lower voltage will cause slow cooking. Panasonic is NOT
+until it has cooled.
+responsible for any damages resulting from the use of the oven
+with any voltage other than specified.
+2. The oven is designed for installation into a wall cabinet by using
+the proper trim kit available from a local Panasonic dealer,
+TV / RADIO / WIRELESS EQUIPMENT INTERFERENCE
+follow all instructions packed with the kit.
+This product has been tested and found to comply with the
+WARNING: IMPROPER USE OF THE GROUNDING
+limits for Microwave Oven, pursuant to Part 18 of the FCC Rules.
+This product can radiate radio frequency energy, which could
+PLUG CAN RESULT IN A RISK OF ELECTRIC SHOCK.
+cause interference to such products as radio, TV, baby monitor,
+Consult a qualified electrician or service person if the grounding
+cordless phone, Bluetooth, wireless router, etc., which can be
+instructions are not completely understood, or if doubt exists as to
+whether the appliance is properly grounded. If it is necessary to use confirmed by turning this product off and on. If present, the user is
+encouraged to try to correct by taking one or more of the following
+an extension cord, use only a three-wire extension cord that has a
+countermeasures:
+three-prong polarized grounding plug, and a three-slot receptacle
+that will accept the plug of the appliance. The marked rating of the (1) Increase the spacing distance between the microwave oven and
+other product receiving the interference.
+extension cord should be equal to or greater than the electrical
+(2)
+If possible, use a properly installed receiver antenna and/or
+rating of the appliance.
+reorient the receiving antenna of the other product receiving the
+interference.
+Grounding Instructions
+(3)
+Plug the microwave oven into a different outlet from the other
+THIS APPLIANCE MUST BE GROUNDED.
+product
+receiving the interference.
+In the event of an electrical short circuit, grounding reduces the risk
+(4)
+Clean
+door
+and sealing surfaces of the oven. (See Care and
+of electric shock by providing an escape wire for the electric current.
+Cleaning
+of
+Your Microwave Oven)
+This appliance is equipped with a cord having a grounding wire with
+a grounding plug. The plug must be plugged into an outlet that is
+properly installed and grounded.
+• Plug into properly installed and grounded three-prong outlet.
+• DO NOT remove ground prong.
+• DO NOT use an adapter.
+6
+
+F0003CD60AP_EN_0303.indd 6
+
+2020/3/3 9:58:09
+
+Food Preparation
+Follow these Safety Precautions when cooking in your oven.
+IMPORTANT
+Proper cooking depends upon the power, the time setting
+and quantity of food. If you use a smaller portion than
+recommended but cook at the time for the recommended
+portion, fire could result.
+
+4) FOODS WITH NONPOROUS SKINS
+• DO NOT COOK / REHEAT WHOLE EGGS, WITH OR WITHOUT
+THE SHELL.
+Steam buildup in whole
+eggs may cause them to
+explode, and possibly
+damage the oven or
+cause injury. Reheating
+SLICED hard-boiled eggs
+and cooking SCRAMBLED eggs is safe.
+• Potatoes, apples, whole squash and
+sausages are examples of foods with
+nonporous skins. These types of foods
+must be pierced before microwave
+cooking to prevent them from
+exploding.
+CAUTION: Cooking dry or old
+potatoes can cause fire.
+
+1) HOME CANNING / STERILIZING / DRYING FOODS / SMALL
+QUANTITIES OF FOODS
+• DO NOT use your oven for home canning. Your oven cannot
+maintain the food at the proper canning temperature. The food
+may be contaminated and then spoil.
+• DO NOT use the microwave oven to sterilize objects (baby
+bottles, etc.). It is difficult to keep the oven at the high
+temperature needed for sterilization.
+• DO NOT dry meats, herbs, fruits or vegetables in your oven.
+Small quantities of food or foods with low moisture content can
+dry out, scorch or catch on fire if overheated.
+• DO NOT prepare small food portions at high power. This can
+cause energy concentration at a fixed spot, which can lead to
+arcing and damage to your oven. Select a lower cook power
+setting when preparing small portions.
+
+5) GLASS TRAY / COOKING CONTAINERS / FOIL
+• Cooking containers get hot during microwaving. Heat is
+transferred from the HOT food to the container and the Glass
+Tray. Use pot holders when removing containers from the oven
+or when removing lids or plastic wrap covers from cooking
+containers, to avoid burns.
+• The Glass Tray will get hot during cooking. It should be allowed
+to cool before handling or before paper products, such as paper
+plates or microwave popcorn bags, are placed in the oven for
+microwave cooking.
+• When using foil in the oven, allow at least 1-inch (2.5 cm) of
+space between foil and interior oven walls or door.
+• Dishes with metallic trim should not be used, as arcing
+may occur.
+
+2) POPCORN
+Popcorn may be popped in a microwave oven corn popper.
+Microwave popcorn that pops in its own package is also
+available. Follow popcorn manufacturers’ directions and use a
+brand suitable for the cooking power of your microwave oven.
+CAUTION: When using pre-packaged microwave popcorn,
+you can follow recommended package instructions or use the
+Popcorn menu (refer to page 34). Otherwise, the popcorn may
+not pop adequately or may ignite and cause a fire. Never leave
+the oven unattended when popping popcorn. Allow the popcorn
+bag to cool before opening, and always open the bag facing
+away from your face and body to prevent steam burns.
+
+6) PAPER TOWELS / CLOTHS
+• DO NOT use paper towels or cloths that contain a synthetic fiber
+woven into them. The synthetic fiber may cause the towel to
+ignite. Use paper toweling under supervision.
+
+7) BROWNING DISHES / OVEN COOKING BAGS
+• Browning dishes or grills are designed for microwave cooking
+only. Always follow instructions provided by the manufacturer.
+DO NOT preheat browning dish more
+than six minutes.
+• If an oven cooking bag is used for
+microwave cooking, prepare according to
+package directions. DO NOT use a wire
+twist-tie to close bag. Instead use plastic
+ties, cotton string or a strip cut from the
+open end of the bag.
+
+3) DEEP FAT FRYING
+• DO NOT deep fat fry in your microwave oven. Cooking oils
+may burst into flames and may cause damage to the oven and
+may result in burns. Microwave utensils may not withstand the
+temperature of the hot oil, and can shatter or melt.
+
+7
+
+F0003CD60AP_EN_0303.indd 7
+
+2020/3/3 9:58:10
+
+Food Preparation (continued)
+8) THERMOMETERS
+• DO NOT use a conventional
+meat thermometer in your
+oven. Arcing may occur.
+Microwave safe thermometers
+are available for both meat and
+candy.
+
+12) HEATER OPERATION
+• Exterior oven surfaces, including air vents on the cabinet and
+the oven door will get hot during Airfry, Convection, Combo
+or Broil functions. To prevent burns, take care when opening
+or closing the door and when inserting or removing food and
+accessories.
+• The oven has heaters situated in the top of the oven. During
+and after using either the Airfry, Convection, Combo or Broil
+functions, all inside surfaces of the oven will be very hot. To
+prevent burns, care should be taken to avoid touching the
+inside surfaces of the oven.
+• TO AVOID THE RISK OF SCALDING, please use caution when
+touching accessible parts when oven is operated in Convection,
+Combo or Broil mode, because the accessible parts may
+become extremely hot.
+
+9) BABY FORMULA / BABY FOOD
+• DO NOT heat baby formula or baby
+food in the microwave oven. The glass
+jar or surface of the food may appear
+warm while the interior can be so
+hot as to burn the infant’s mouth and
+esophagus.
+
+13) BEFORE USING YOUR OVEN
+• Before using the oven for the first time, wipe excessive oil off
+in the oven cavity and operate the oven without food and
+accessories on Convection at 425 °F (220 °C), for 10 minutes.
+This will allow the oil that is used for rust protection to be
+burned off. This is the only time the oven is used empty.
+(with the exception of preheating on Convection.)
+
+10) REHEATING PASTRY PRODUCTS
+• When reheating pastry products, check temperatures of any
+fillings before eating. Some foods have fillings, which heat
+faster and can be extremely hot, while the surface remains
+warm to the touch (for example, jelly donuts).
+11) GENERAL OVEN USAGE GUIDELINES
+• DO NOT use the oven for any purpose other than the
+preparation of food. This oven is specifically designed to heat
+or cook food. DO NOT use this oven to heat chemicals or other
+non-food products.
+• Before use, check that utensils/containers are suitable for use in
+microwave ovens.
+• DO NOT attempt to use this microwave oven to dry newspaper,
+clothing or any other materials. They may catch fire.
+• When the oven is not being used, DO NOT store any objects
+other than oven accessories inside the oven in case it is
+accidentally turned on.
+• The appliance shall not be operated by Microwave or Combo
+WITHOUT FOOD IN THE OVEN.
+Operation in this manner may damage the appliance.
+• If smoke or a fire occurs in the oven, press the Stop/Reset button
+and leave the door closed in order to extinguish the flames.
+Disconnect the power cord, or shut off power at the fuse.
+• Extreme caution must be used when moving hot liquids.
+• When handling cooking containers take care not to let the
+contents spill.
+• Avoid hot steam, serious burns and scalds could result.
+• To prevent injury, do not allow anyone to lean, hang, sit or
+place heavy items on the open door of the appliance.
+Severe personal injury could result.
+• Do not use a steam cleaner to clean this appliance. The steam
+from the cleaning appliance could penetrate live components
+and permanently damage the oven or cause injury.
+• The use of accessories not recommended by Panasonic may
+cause injury.
+
+8
+
+F0003CD60AP_EN_0303.indd 8
+
+2020/3/3 9:58:10
+
+Cookware and Utensil Chart
+Combo
+Microwave
+
+Broil
+
+Convection
+
+Airfry
+
+Aluminium foil
+
+for shielding
+
+yes
+
+yes
+
+no
+
+for shielding
+
+for shielding
+
+Ceramic plate
+
+yes
+
+yes
+
+yes
+
+no
+
+yes
+
+yes
+
+Browning dish
+
+yes
+
+no
+
+no
+
+no
+
+no
+
+no
+
+Brown paper bags
+
+no
+
+no
+
+no
+
+no
+
+no
+
+no
+
+Dinnerware
+oven/microwave safe
+
+yes
+
+yes
+
+yes
+
+no
+
+yes
+
+yes
+
+non-oven/microwave safe
+
+no
+
+no
+
+no
+
+no
+
+no
+
+no
+
+Disposable
+paperboard containers
+
+yes*
+
+yes*
+
+yes*
+
+no
+
+yes*
+
+yes*
+
+Glassware
+oven glassware & ceramic
+
+yes
+
+yes
+
+yes
+
+no
+
+yes
+
+yes
+
+non-heat resistant
+
+no
+
+no
+
+no
+
+no
+
+no
+
+no
+
+Metal cookware
+
+no
+
+yes
+
+yes
+
+no
+
+no
+
+no
+
+Metal twist-ties
+
+no
+
+yes
+
+yes
+
+no
+
+no
+
+no
+
+Oven cooking bag
+
+yes
+
+yes*
+
+yes*
+
+no
+
+yes
+
+yes
+
+Paper towels and napkins
+
+yes
+
+no
+
+no
+
+no
+
+no
+
+no
+
+Plastic defrosting rack
+
+yes
+
+no
+
+no
+
+no
+
+no
+
+no
+
+Plastic dishes
+microwave safe
+
+yes
+
+no
+
+no
+
+no
+
+no
+
+no
+
+non microwave safe
+
+no
+
+no
+
+no
+
+no
+
+no
+
+no
+
+Microwave safe plastic wrap
+
+yes
+
+no
+
+no
+
+no
+
+no
+
+no
+
+Straw, wicker, wood
+
+yes
+
+no
+
+no
+
+no
+
+no
+
+no
+
+Thermometers
+microwave safe
+
+yes
+
+no
+
+no
+
+no
+
+no
+
+no
+
+conventional
+
+no
+
+yes
+
+yes
+
+no
+
+no
+
+no
+
+Waxed paper
+
+yes
+
+yes
+
+no
+
+no
+
+yes
+
+no
+
+Silicon bakeware
+
+yes*
+
+yes*
+
+yes*
+
+no
+
+yes*
+
+yes*
+
+Combo 1
+Combo 2
+(Broil + Microwave) (Convection + Microwave)
+
+* Check manufacturers’ recommendation, must withstand heat or follow the recipe instructions.
+
+CONTAINER TEST
+TO TEST A CONTAINER FOR SAFE MICROWAVE OVEN USE: Fill a microwave safe cup with cool water and place it in the
+microwave oven along side the empty container to be tested; heat one (1) minute at 1000 W (HIGH). If the container is
+microwave oven safe (transparent to microwave energy), the empty container should remain comfortably cool and the
+water should be hot. If the container is hot, it has absorbed some microwave energy and should NOT be used. This test
+cannot be used for plastic containers.
+
+9
+
+F0003CD60AP_EN_0303.indd 9
+
+2020/3/3 9:58:10
+
+Location of Controls
+5
+
+4
+
+11 7
+
+17
+10
+
+2
+18
+
+12
+13
+1
+14
+
+3
+6
+
+9
+
+21
+
+8
+
+2 22
+
+19
+15
+
+16
+
+20
+
+Enamel Tray
+a. The enamel tray is for cooking on Airfry, Broil, Convection and
+Combo. Do not use enamel tray in Microwave mode only.
+b. The enamel tray must always be in place on the glass
+tray (unless stated).
+c. Take it out with thermal insulation gloves after use. To
+avoid scalding, do not touch it with your hands.
+16 Wire Rack (with spacers)
+a. A wire rack is included with the oven in order to
+facilitate browning of small dishes.
+b. Wire rack should be cleaned regularly.
+c. When using wire rack in the manual Airfry, Broil,
+Convection and Combo cooking modes, be careful
+to choose heat-proof containers; containers made of
+plastic or paper may melt or burn when exposed to the
+heat radiating from the Broil.
+d. When using the Combo mode, never place any
+aluminum or metal container directly on wire rack.
+Always insert a glass plate or dish between wire rack
+and the aluminum container. This will prevent sparking
+that may damage the oven.
+e. Do not use wire rack when cooking in the MICROWAVE
+mode only.
+f. Spacers: Do not remove when cooking.
+17 Oven Light
+Oven Light will turn on during cooking and also when
+door is opened.
+18 Warning Label
+19 DHHS Label
+20 Airfry Basket
+The Airfry Basket is for Airfry function.
+The Airfry Basket must always be in place on the wire rack
+on Enamel tray, and glass tray (unless stated).
+21 Function Label
+22 Identification Plate
+
+Oven Window
+2 Door Safety Lock System
+3 Door Release Button
+Push to open the door. Opening the door during cooking will
+stop the cooking process without cancelling the program.
+Cook resumes as soon as the door is closed and Start is
+pressed. It is quite safe to open the door at any time during a
+cooking program and there is no risk of Microwave exposure.
+4 External oven air vents
+5 Glass Tray
+a. DO NOT operate the oven without the roller ring and
+glass tray in place.
+b. Only use the glass tray specifically designed for this
+oven. Do not substitute any other glass tray.
+c. If the glass tray is hot, allow to cool before cleaning or
+placing in water.
+d. DO NOT cook directly on the glass tray. Always place
+food on a microwave-safe dish, or on a rack set in a
+microwave-safe dish.
+e. If food or utensil on the glass tray touches oven
+walls, causing the tray to stop moving, the tray will
+automatically rotate in the opposite direction. This is
+normal.
+f. Glass tray can rotate in either direction.
+g. Always place the container on the center of glass tray
+when cooking.
+6 Roller Ring
+a. Roller ring should be cleaned regularly to avoid
+excessive noise.
+b. Roller ring and glass tray should be used at the same time.
+7 Broil and Convection Heater
+8 Waveguide Cover (do not remove)
+9 Menu Label
+10 Caution Label (hot surfaces)
+11 Warning Label
+12 Control Panel
+13 Power Supply Cord
+14 Power Supply Plug
+1
+
+15
+
+Notes:
+1. The above illustration is for reference only.
+2. The glass tray, wire rack, enamel tray and airfry basket are the only
+accessories with this oven. All other cooking utensils mentioned in
+this manual must be purchased separately.
+10
+
+F0003CD60AP_EN_0303.indd 10
+
+2020/3/3 9:58:10
+
+Oven Accessories
+The following chart shows correct use of the accessories in the oven.
+
+Glass Tray
+
+Enamel Tray
+
+Wire Rack
+
+Airfry Basket
+
+Microwave
+
+YES
+
+NO
+
+NO
+
+NO
+
+Broil
+
+YES
+
+YES
+
+YES
+
+NO
+
+Airfry
+
+YES
+
+YES
+
+YES
+
+YES
+
+Convection
+
+YES
+
+YES
+
+YES
+
+NO
+
+Combo 1
+(Broil + Microwave)
+
+YES
+
+YES
+
+YES
+
+NO
+
+Combo 2
+(Convection + Microwave)
+
+YES
+
+YES
+
+YES
+
+NO
+
+Mode
+
+Combo
+
+11
+
+F0003CD60AP_EN_0303.indd 11
+
+2020/3/3 9:58:10
+
+Control Panel
+
+Display Window (page 13)
+
+Airfry/Broil/Combo Button
+(pages 18-22)
+
+Microwave Button
+(pages 25)
+
+Convection Bake Button
+(pages 23-24)
+
+Quick 30 Button
+(page 26)
+
+Timer/Clock Button
+(pages 27-29, 17)
+
+Stop/Reset Button
+Before cooking:
+One press clears your instructions.
+During cooking:
+One press temporarily stops the
+cooking process. Another press cancels
+all your instructions and colon or time
+of day appears in the display window.
+
+Dial
+The dial have 4 functions
+(see details on next page)
+
+Beep Sound:
+When a Button is pressed correctly, a beep sound will be heard. If a Button is pressed and no beep is heard, the unit did not or could not
+accept the instruction. The oven will beep twice between programmed stages. The oven will beep three times after preheating. At the
+end of any completed program, the oven will beep 5 times.
+
+Note:
+If an operation (except “One Push Reheating”) is set and Start is not pressed, after 6 minutes, the oven will automatically cancel the
+operation. This display will revert back to clock or colon mode.
+
+12
+
+F0003CD60AP_EN_0303.indd 12
+
+2020/3/3 9:58:10
+
+Display Window
+To help you operate the oven conveniently, the present state will appear in the display window.
+
+Preheating
+Child Safety Lock Setting
+
+Temperature
+Number/Character
+
+Time (Minute/Second)
+Popcorn Display
+Weight
+
+Defrost Mode/Frozen Food Mark
+
+Beverage
+3-Stage Display
+
+Auto Cook Program
+
+Convection Mode
+
+Sensor Cook Program
+
+Broil Mode
+
+More/Less
+
+Microwave Mode
+Enamel Tray
+
+Wire Rack
+
+Note: When cooking time is longer than 60 minutes, the time will appear in hours and minutes.
+
+Dial Feature
+Time (Cooking time)
+After selecting a manual cooking mode, enter time by turning the dial. Use the dial for
+the Add Time function (page 30).
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+Defrost/Auto Cook (Defrost, Auto/Sensor Cook, Steam Clean)
+a. When clock mode is displayed, turn the dial to select auto programs and weight
+(pages 33-41).
+b. Steam Clean: This Program is to clean the cavity and remove any food odour from
+the microwave oven (page 42).
+
+Start/Select (Confirmation)
+Press the dial to start operating the oven or confirm the setting. If during cooking the
+door is opened or Stop/Reset is pressed once, Start has to be pressed again to continue
+cooking.
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Sensor Reheat (One Push Reheating)
+When Clock mode is displayed, press dial for quick start reheating chilled meal (page 32).
+
+13
+
+F0003CD60AP_EN_0303.indd 13
+
+2020/3/3 9:58:10
+
+Cooking Modes
+The diagrams shown below are examples of the accessories. It may vary depending on recipe/dish used.
+Cooking modes
+
+Microwave
+
+Recommended
+accessories
+
+Uses
+ Defrosting
+ Reheating
+ Melting: butter, chocolate, cheese.
+ Cooking: fish, vegetables, fruits, eggs, rice and
+porridge.
+ Simmering: soup, stew, casseroles, double boiled
+ Preparing: stewed fruits, jam, sauces, custards,
+choux, pastry, caramel, meat, fish.
+ Keep warming cooked food.
+
+-
+
+Containers
+
+Use your own
+microwaveable dishes,
+plates or bowls.
+No metal.
+
+No Preheating
+Broil
+
+ Broiling of chicken pieces or seafood.
+ Toast broiling.
+ Colouring of gratin dishes, meat pie or meringue
+pies.
+
+Wire rack on
+enamel tray
+
+Use heatproof dishes,
+plates or bowls.
+
+Airfry basket
++
+wire rack
++
+enamel tray
+
+Put the food on the
+airfry basket directly.
+
+No Preheating
+Airfry
+
+ Baking french fries.
+ Baking steak, pork chops, hamburgers.
+ Baking frozen breaded foods.
+No Preheating
+
+Convection
+ Baking of small pastry items with short cooking
+times: puff, pastry, cookies, choux, short pastry, roll
+cakes.
+ Special roasting: steak, big joint lamb, whole
+chicken.
+ Baking of pizzas and tarts.
+
+Enamel tray
+or
+Wire rack
+
+Heatproof, metal tin can
+be used on enamel tray.
+Do not place dishes
+directly on glass tray.
+
+Preheating advised
+
+Combo 1
+(Broil + Microwave)
+ Cooking casserole dishes: potato casserole, seafood
+casserole, beef casserole.
+
+-
+
+Microwaveable
+casserole dishes without
+lids, directly on glass
+tray.
+
+No Preheating
+No metal.
+Combo 2
+(Convection + Microwave)
+ Baking frozen foods: frozen chicken nuggets, frozen
+pizza, frozen chicken wings.
+No preheating
+
+Enamel tray on
+wire rack
+
+Put the frozen foods
+directly on the enamel
+tray on wire rack.
+No metal.
+
+14
+
+F0003CD60AP_EN_0303.indd 14
+
+2020/3/3 9:58:11
+
+Operation
+Using the Microwave
+for the First Time
+
+WEIGHT/TEMPERATURE
+UNITS CHOICE: The oven
+has a choice of Metric Units or
+Imperial Units display.
+
+LANGUAGE CHOICE: The oven
+has a choice of English, French
+or Spanish display.
+
+BEEP CHOICE: The oven has
+both Beep On and Beep Off
+mode.
+
+1
+
+1
+
+1
+
+Display Window
+
+Plug into a properly grounded
+electrical outlet. "WELCOME
+TO PANASONIC REFER TO
+OWNER’S MANUAL BEFORE
+USE" scrolls across display
+window.
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press Start (Dial) once.
+"LB-F/KG-C" scrolls across
+display window.
+
+Press Start (Dial) twice.
+"LANGUAGE" scrolls across
+display window.
+The default language is English.
+
+Press Start (Dial) 3 times.
+"BEEP ON/OFF" scrolls across
+display window.
+The default mode is Beep ON.
+
+2
+
+2
+
+2
+
+Function Features
+This unique function of your
+Panasonic microwave oven
+allows you to establish the
+initial non-cooking features of
+your Oven.
+This microwave oven has the
+functions below:
+• WEIGHT/TEMPERATURE
+UNITS CHOICE
+• LANGUAGE CHOICE
+• BEEP CHOICE
+Plug into a properly
+grounded electrical outlet.
+
+NOTES:
+1. These choices can be
+selected only when you
+plug-in the oven.
+2. Press Stop/Reset, it will
+revert to initial mode (" : ").
+3. After setting, it will revert
+back to Weight/Temperature
+Units Choice setting if Start
+is pressed again, press Stop/
+Reset to exit.
+
+Select the "LB-F" or "KG-C" by
+pressing Timer/Clock.
+The default weight unit is LB-F.
+
+Press
+“Timer/Clock”
+Once
+Twice
+3 times
+
+3
+
+Display
+Language
+French
+Spanish
+English
+
+3
+
+After setting, press Stop/Reset
+to exit.
+
+Press Timer/Clock once. The
+mode changes to Beep OFF.
+
+3
+After setting, press Stop/Reset
+to exit.
+
+After setting, press Stop/Reset
+to exit.
+15
+
+F0003CD60AP_EN_0303.indd 15
+
+2020/3/3 9:58:11
+
+Operation (continued)
+Demo Mode
+
+1
+
+When "DEMO MODE
+PRESS ANY KEY" or "D"
+appears in the display
+window, it means the oven is
+under demonstration mode,
+microwave does not emit.
+Demo mode is designed for
+retail store display. In this mode,
+the oven can be demonstrated
+with no cooking power in the
+oven.
+
+Menu Action ON/OFF
+NOTES:
+1. To set Demo Mode, repeat
+step 1-3.
+2. Default mode is Demo
+Mode off.
+
+This feature helps you to
+program your oven by
+prompting the next step to
+be taken. When you become
+familiar with your oven, the
+prompt can be turned off. This
+feature can be selected when
+colon or clock appears in the
+display window.
+
+To turn ON/OFF:
+
+2
+To cancel:
+Press Microwave once, Start
+4 times and Stop/Reset 4 times.
+
+Step 1.
+
+Step 2.
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+Press Timer/Clock 4 times to
+turn Menu Action ON/OFF.
+The default setting is Menu
+Action ON.
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+NOTES:
+This function only can be
+operated when word prompt
+turns on.
+Step 3.
+
+16
+
+F0003CD60AP_EN_0303.indd 16
+
+2020/3/3 9:58:12
+
+Operation (continued)
+Setting the Clock
+
+Setting the Child Safety Lock
+
+1
+
+3
+
+1
+
+With the oven NOT cooking,
+press Timer/Clock twice; the
+colon will blink.
+
+Press Timer/Clock to finish
+setting and the colon (:) will
+stop blinking.
+
+When the colon or time of day
+appears in the display, press
+Stop/Reset three times; “
+”
+will appear in the display.
+
+NOTES:
+1. To reset the clock, repeat
+steps.
+2. The clock will retain the
+time of day as long as the
+oven is plugged in and
+electricity is supplied.
+3. The clock is a 12-hour
+display.
+4. Oven will not operate while
+colon (:) is flashing.
+
+2
+
+2
+
+NOTES:
+1. This feature prevents the
+electronic operation of the
+oven until cancelled. It does
+not lock the door.
+2. To set or cancel Child Safety
+Lock, Stop/Reset button
+must be pressed 3 times
+within 10 seconds.
+3. You can set Child Safety
+Lock feature when the
+display shows a colon or
+time of day.
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press Stop/Reset three times;
+the display will return to
+the colon or time of the day
+and Child Safety Lock will be
+cancelled.
+
+Set time of day by turning dial.
+Time appears in the display
+window; colon continues
+flashing.
+
+17
+
+F0003CD60AP_EN_0303.indd 17
+
+2020/3/3 9:58:12
+
+Operation (continued)
+Airfry
+The Airfry function combines
+intense heat and maximized
+airflow to cook food crispy
+and brown. No need to set
+temperature and preheating,
+turn the Dial to set the cooking
+time up to 9 hours after
+selecting Airfry function.
+
+3
+
+Oven accessories to use
+Airfry basket on wire rack on
+enamel tray
+
+1
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+NOTES:
+1. Ensure to use the proper
+accessories. Put the food on
+the Airfry Basket on the Wire
+Rack on the Enamel Tray
+for dripping oil. DO NOT
+remove the spacer on the
+Wire Rack.
+2. Arrange food evenly in
+the Airfry Basket. For best
+results, place food in a
+single layer and leave space
+between pieces. For large
+amount of food, stir or rearrange the food several
+times during cooking.
+3. When the selected cooking
+time is less than one hour,
+the time counts down
+second by second.
+4. When the selected cooking
+time is over one hour, the
+time counts down minute
+by minute until only “1H 00”
+(1 hour) remains. The display
+then indicates minutes and
+seconds and counts down
+second by second.
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press dial to Start, the cooking
+will start and the time will count
+down in the display. At the
+end of cooking, five beeps will
+sound.
+
+Press Airfry/Broil/Combo
+button once.
+
+2
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+CAUTION:
+Food, accessories and the
+surrounding oven will get very
+hot. Use oven mitts.
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set desired cooking time by
+turning dial (up to 9 hours).
+
+18
+
+F0003CD60AP_EN_0303.indd 18
+
+2020/3/3 9:58:12
+
+Operation (continued)
+Airfry Chart
+Weight range
+
+Recommended
+time
+(minute)
+
+8 - 16 oz. (225 - 450 g)
+
+20-30
+
+16 - 32 oz. (450 - 900 g)
+
+30-40
+
+Thick frozen fries/Frozen
+potato steak fries/
+wedges
+
+16 - 32 oz. (450 - 900 g)
+
+25-30
+
+stir at 2/3 of total time for over 16 oz. (450 g)
+
+Frozen potato steak
+fries/wedges
+
+16 - 32 oz. (450 - 900 g)
+
+25-30
+
+stir at 2/3 of total time for over 16 oz. (450 g)
+
+Frozen cheese sticks
+
+16 - 42 oz. (450 - 1200 g)
+
+16-20
+
+-
+
+Frozen chicken nuggets
+
+16 - 40 oz. (450 - 1100 g)
+
+20-30
+
+stir at 2/3 of total time for over 16 oz. (450 g)
+
+Frozen fish sticks
+
+16 - 42 oz. (450 - 1200 g)
+
+20-30
+
+stir at 2/3 of total time for over 16 oz. (450 g)
+
+Homemade fries
+
+16 - 32 oz. (450 - 900 g)
+
+30-40
+
+soak in cold water for 1 hour in the
+refrigerator, dry and mix with oil, stir at 2/3 of
+total time for over 16 oz. (450 g)
+
+Steak
+(½ inch of thickness)
+
+2 - 4 pcs (12 - 24 oz.)
+(340 - 670 g)
+
+16-18
+
+seasoned, turn over at 2/3 of total time
+
+Pork chops
+
+2 - 6 pcs (8 - 24 oz.)
+(225 - 670 g)
+
+20-30
+
+seasoned, turn over at 2/3 of total time
+
+Hamburger
+
+2 - 4 pcs (10 - 20 oz.)
+(280 - 560 g)
+
+16-20
+
+seasoned, turn over at 2/3 of total time
+
+Chicken wings
+
+16 - 36 oz. (450 - 1000 g)
+
+25-30
+
+seasoned, turn over at 2/3 of total time
+
+Drumsticks
+
+4 - 8 pcs (16 - 42 oz.)
+(450 - 1200 g)
+
+35-40
+
+seasoned, turn over at 2/3 of total time
+
+Chicken breast
+
+2 - 4 pcs (12 - 24 oz.)
+(340 - 670 g)
+
+25-30
+
+seasoned, turn over at 2/3 of total time
+
+Fish fillets
+
+2 - 4 pcs (8 - 16 oz.)
+(225 - 450 g)
+
+20-25
+
+seasoned, less than 1½ inch of thickness
+
+Food
+
+stir at 2/3 of total time for over 16 oz. (450 g)
+
+Thin frozen fries
+
+Frozen
+
+Fresh
+
+Hints
+
+19
+
+F0003CD60AP_EN_0303.indd 19
+
+2020/3/3 9:58:13
+
+Operation (continued)
+Broil
+Directions for Broiling:
+There are two power levels for
+Broil. When broiling, heat is
+radiated from heater. The Broil
+is especially suitable for thin
+slices of meat and seafood as
+well as bread and meals.
+Preheating isn’t required
+before broiling. Select Broil
+setting, set the time and start
+the oven. The food being
+broiled should normally be
+turned over after half the
+broiling time. When the oven
+door is opened, the program
+is interrupted. Turn the food
+over, place it back the oven,
+close the door and restart
+oven. While broiling, the oven
+door can be opened at any
+time to check the food.
+
+2
+
+Oven accessories to use
+When broiling foods the glass
+tray should be in position, with
+the enamel tray and the wire
+rack on top.
+Place food on wire rack on the
+enamel tray on the glass tray.
+The wire rack will allow fat to
+drip through into the enamel
+tray to reduce excess splatter
+and smoke when broiling
+steaks, chops and other fatty
+foods.
+If broiling fish or small items,
+place the enamel tray on top of
+the wire rack.
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set desired cooking time by
+turning dial (up to 1 hour and
+30 minutes).
+
+1
+
+CAUTION:
+Food, accessories and the
+surrounding oven will get very
+hot. Use oven mitts.
+
+3
+
+Press Airfry/Broil/Combo
+button until the desired power
+level appears in the display
+window.
+Press
+twice
+3 times
+
+Power level
+Broil 1 (High)
+Broil 2 (Low)
+
+NOTES:
+1. There is no microwave
+power on the Broil only
+program.
+2. Use the accessories
+provided, as explained.
+3. The Broil will only operate
+with the oven door closed.
+4. Do not preheat the broil.
+5. Never cover the food when
+broiling.
+6. After broiling it is
+important that the broil
+accessories are removed
+for cleaning before reuse
+and that the oven walls
+and floor are wiped with
+a cloth squeezed in hot
+soapy water to remove any
+grease.
+
+Cooking Tips:
+1. Most meat items e.g.
+sausages, chops can be
+cooked on the hottest
+setting - Broil 1 (High). This
+setting is also suitable for
+toasting bread, muffins and
+teacakes etc.
+2. Broil 2 (Low) used for more
+delicate foods or those that
+require a longer broil time
+e.g. fish or chicken portions.
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press dial to Start, the cooking
+will start and the time will count
+down in the display. At the
+end of cooking, five beeps will
+sound.
+
+20
+
+F0003CD60AP_EN_0303.indd 20
+
+2020/3/3 9:58:13
+
+Operation (continued)
+Combo
+
+1
+
+3
+
+Combo 1 (Casserole)
+This function is suitable for cooking casserole dishes. The cooking
+power combines microwave and broil. Follow the recommended
+recipes and cooking time on the next page, use microwaveable
+dishes, and cook without lids. For other recipe of casserole,
+please set cooking time as you desired.
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+Press
+4 times
+5 times
+
+Power level
+Combo 1
+(Casserole)
+Combo 2
+(Frozen foods)
+
+2
+
+Recommended
+time (minute)
+
+Hints
+
+Macaroni
+and Cheese
+Beef and
+Macaroni
+casserole
+Potato
+Casserole
+Tuna
+Casserole
+
+4-6 servings
+(3 quarts)
+
+25-30
+
+stir at ½ of total time
+
+4-6 servings
+(3 quarts)
+
+35-40
+
+stir at ½ of total time
+
+35-40
+
+stir at ½ of total time
+
+30-35
+
+stir at ½ of total time
+
+4-6 servings
+(3 quarts)
+4-6 servings
+(3 quarts)
+
+Combo 2 (Frozen foods)
+This function is suitable for baking frozen foods. The cooking
+power combines microwave and convection bake. Follow the
+chart as below, put the frozen foods directly on the enamel tray
+on the wire rack, turn over at recommended time.
+For other Frozen foods, please set cooking as you desired.
+
+Press dial to Start; the cooking
+will start and the time will
+count down in the display. At
+the end of cooking, five beeps
+will sound.
+CAUTION:
+Food, accessories and the
+surrounding oven will get very
+hot. Use oven mitts.
+
+Recipe
+
+Weight
+
+Recommended
+time (minute)
+
+Chicken Wings
+
+1.0 lb (450 g)
+
+25-28
+
+French Fries
+
+8 oz. (225 g)
+
+18-20
+
+Chicken Nuggets
+
+1.0 lb (450 g)
+
+24-28
+
+Frozen Pizza
+
+12 inch (30 cm)
+
+20-22
+
+Hints
+turn over at 2/3 of
+total time
+turn over at 2/3 of
+total time
+-
+
+NOTES:
+1. Food is usually cooked uncovered.
+2. The wire rack and enamel tray are designed to be used for
+Combo and broiling. Never attempt to use any other metal
+accessory except the one provided with the oven. Place the
+enamel tray underneath to catch any fat or drips.
+3. Do not use plastic microwave containers on Combo
+programs. Dishes must be able to withstand the heat of the
+top heater. Do not put dishes on wire rack directly under the
+heater, use the enamel tray.
+4. When the selected cooking time is less than one hour, the
+time counts down second by second.
+5. When the selected cooking time is over one hour, the time
+counts down minute by minute until only “1H 00” (1 hour)
+remains. The display then indicates minutes and seconds and
+counts down second by second.
+6. To turn food just press the door release, take out the enamel
+tray and wire rack, turn the food, return to the oven, close the
+door and press dial to Start. The oven will continue to count
+down the remaining cooking time.
+7. Foods should always be cooked until browned and piping hot.
+8. After cooking it is important that the accessories are removed
+for cleaning before re-use and that the oven walls and floor
+are wiped with a cloth squeezed in hot soapy water to remove
+any grease.
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+Weight
+
+* See casserole recipes on next page.
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press Airfry/Broil/Combo
+button until the desired power
+level appears in the display
+window.
+
+Recipe
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set desired cooking time by
+turning dial (up to 9 hours).
+
+21
+
+F0003CD60AP_EN_0303.indd 21
+
+2020/3/3 9:58:14
+
+Operation (continued)
+Casserole Recipes
+Macaroni and cheese (4-6 servings)
+
+Potato casserole (4-6 servings)
+
+2½ tbsp. (40 g)
+1½ tbsp. (25 g)
+½
+4 tbsp. (60 g)
+2/3 tsp. (2.5 g)
+2/3 tsp. (2.5 g)
+to taste
+1½ cups (375ml)
+1½ cups (300 g)
+5 oz. (140 g)
+
+1½ lb. (750 g)
+½ cup (125 ml)
+½ cup (125 ml)
+3
+1
+¼ cup (50 g)
+2
+
+3 tbsp. (45 g)
+2/3 tsp. (2.5 g)
+
+butter
+chopped onion
+clove minced garlic
+all-purpose flour
+dry mustard
+salt
+ground black pepper
+milk
+grated cheddar cheese
+(dry weight) macaroni, cooked and
+drained
+bread crumbs
+paprika
+
+In a 3-quart casserole dish, layer potatoes, sour cream and
+onions. Top with cheese and bacon. Pour milk on the top. Put the
+casserole dish on the glass tray and cook uncovered at “Combo 1”
+for 35-40 minutes. Stand, covered, 5-10 minutes before serving.
+
+In a 3-quart casserole dish, melt the butter for 20 seconds at 1000 W.
+Add onion and garlic, and cook for 1 minute at 1000 W. Stir in flour,
+mustard, salt and pepper, and gradually add the milk. Cook for 4-5
+minutes at 1000 W until sauce thickens, stir once. Add the cheddar
+cheese and the macaroni into the sauce and stir well. Sprinkle the
+bread crumbs and paprika on the top of the dish. Cook uncovered at
+“Combo 1” for 25-30 minutes, let stand for 10 minutes.
+
+Tuna casserole (4-6 servings)
+6½ oz. (180 g)
+4 cups (1 L)
+10 oz. (280 g)
+4 oz. (120 g)
+10 oz. (280 g)
+¾ cup (175 ml)
+2 tbsp. (25 g)
+1 cup (250 g)
+
+Beef and Macaroni casserole (4-6 servings)
+8 oz. (225 g)
+½
+¼
+½ cup (110 g)
+15 oz. (430 g)
+2/3 cup (150 ml)
+½ cup (110 g)
+½ tsp. (2 g)
+¼ tsp. (1 g)
+to taste
+¼ cup (50 g)
+
+potatoes, peeled and sliced
+sour cream
+milk
+green onions, finely chopped
+small onion, thinly sliced
+parmesan cheese
+bacon slices, finely chopped
+
+lean ground beef
+small onion, chopped
+green bell pepper, chopped
+chopped celery
+can tomato sauce
+water
+uncooked elbow macaroni
+parsley
+salt
+grounded black pepper
+grated cheddar cheese
+
+can tuna, drained and flaked
+pasta, cooked and drained
+can condensed cream of mushroom
+soup
+can of sliced mushrooms, drained
+package of frozen peas, defrosted
+milk
+pimento, chopped
+crushed potato chips
+
+In a 3-quart casserole dish, combine all ingredients except potato
+chips, mix well. Put the casserole dish on the glass tray and cook
+uncovered at “Combo 1” for 30-35 minutes. Stir occasionally during
+cooking. Top with potato chips. Stand, uncovered, 3-5 minutes.
+
+In a 3-quart casserole dish, combine all ingredients except
+cheese, mix well. Put the casserole dish on the glass tray and
+cook uncovered at “Combo 1” for 35-40 minutes. Stir occasionally
+during cooking. Sprinkle with cheese. Cover and let stand 5
+minutes.
+
+22
+
+F0003CD60AP_EN_0303.indd 22
+
+2020/3/3 9:58:14
+
+Operation (continued)
+Convection Bake
+The oven can be used as a
+conventional oven using the
+Convection mode which
+incorporates a heating element
+with a fan. There is a choice of
+Convection temperatures 100 °F
+(40 °C) and 215 °F (100 °C) - 425 °F
+(220 °C). For quick selection of the
+most commonly used cooking
+temperatures, the oven starts at
+300 °F (150 °C) and then for each
+press the temperature will count
+up in 18 °F (10 °C) stages to 425 °F
+(220 °C), then to, 100 °F (40 °C),
+215 °F (100 °C), 230 °F (110 °C) etc.
+This feature provides 2 modes to
+select. For best results always
+place food in a preheated oven.
+
+3
+
+With Preheating:
+
+1
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press
+
+Temperature
+
+once
+twice
+3 times
+4 times
+5 times
+6 times
+7 times
+8 times
+9 times
+10 times
+11 times
+12 times
+13 times
+14 times
+
+300 °F (150 °C)
+325 °F (160 °C)
+340 °F (170 °C)
+350 °F (180 °C)
+375 °F (190 °C)
+400 °F (200 °C)
+410 °F (210 °C)
+425 °F (220 °C)
+100 °F (40 °C)
+215 °F (100 °C)
+230 °F (110 °C)
+250 °F (120 °C)
+270 °F (130 °C)
+285 °F (140 °C)
+
+Press Convection Bake until
+the desired temperature
+appears in the display window.
+
+Set desired cooking time by
+turning dial (up to 9 hours).
+
+2
+
+4
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press dial to preheat.
+“PREHEAT” will scrolls across
+display window once then a
+“P” will appear in the display
+window. When preheating is
+completed, the oven will beep
+and “P END” will display in the
+display window.
+Then open the door and place
+the food inside.*
+
+Press dial to Start.
+The cooking time appears in
+the display window and begins
+to count down.
+
+NOTES:
+1. * Open the door using
+the door release button,
+because if the Stop/
+Reset button is pressed
+the program may be
+cancelled.
+2. When preheating, the
+screen displays the
+actual temperature of
+the oven cavity. The
+current temperature is not
+displayed until more than
+215 °F (100 °C) is reached.
+To change the temperature
+during cooking, press the
+Convection Bake button.
+3. The oven will maintain
+the selected preheated
+temperature for
+approximately 30 minutes
+without the door opened.
+If no food has been placed
+inside the oven or a cooking
+time set, then it will beep
+5 times and automatically
+cancel the cooking program
+and revert to colon or time
+of day.
+4. Once you open the door
+and Start is not pressed,
+after 6 minutes, the oven
+will automatically cancel
+the preheated program.
+This display will revert back
+to clock or colon mode.
+5. The oven cannot preheat to
+100 °F (40 °C).
+
+23
+
+F0003CD60AP_EN_0303.indd 23
+
+2020/3/3 9:58:14
+
+Operation (continued)
+Convection Bake
+Without Preheating:
+(100 °F (40 °C) is available
+in Convection without
+preheating.)
+
+2
+
+NOTES:
+1. When the selected cooking
+time is less than one hour,
+the time counts down
+second by second.
+2. When the selected cooking
+time is over one hour, the
+time counts down minute
+by minute until only “1H 00”
+(1 hour) remains. The display
+then indicates minutes and
+seconds and counts down
+second by second.
+
+1
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Oven accessories to use
+When using the Convection
+oven the glass tray should be
+in position and must have the
+enamel tray placed on top.
+The food is then placed onto
+the enamel tray. Follow your
+individual recipe guidelines.
+When using the oven as a
+Convection oven, there is
+NO MICROWAVE POWER, i.e.
+the oven is operating as a
+conventional oven and you
+can use all your standard metal
+baking tins and ovenware.
+It is not recommended to cook
+on more than one level when
+using the Convection oven.
+When cooking 2 trays of buns
+etc, cook in two batches.
+
+Set desired cooking time by
+turning dial. (up to 9 hours).
+Press Convection Bake until
+the desired temperature
+appears in the display window.
+
+3
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+CAUTION:
+Food, accessories and the
+surrounding oven will get very
+hot. Use oven mitts.
+
+Press dial to Start.
+The cooking time appears in
+the display window and begins
+to count down.
+
+24
+
+F0003CD60AP_EN_0303.indd 24
+
+2020/3/3 9:58:15
+
+Operation (continued)
+Microwave
+This feature allows you to set
+the desired power and time to
+cook food. Do not place food
+directly on the glass tray. Use
+microwave safe dishes, plates
+or bowls covered with a lid or
+pierced cling film.
+
+2
+
+NOTES:
+1. Opening the door and
+taking out the defrosted
+parts during the operating
+time is recommended. Turn
+over, stir or rearrange the
+parts which are still in icy.
+2. When the selected cooking
+time is less than one hour,
+the time counts down
+second by second.
+3. When the selected cooking
+time is over one hour, the
+time counts down minute
+by minute until only “1H 00”
+(1 hour) remains. The display
+then indicates minutes and
+seconds and counts down
+second by second.
+
+1
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set cooking time by turning
+dial. 1000 W and KEEP WARM
+have max. cooking time of 30
+minutes. For other power levels,
+the max. time is 1 hour and 30
+minutes.
+
+Press Microwave until the
+desired power level appears
+in the display. 1000 W is the
+highest and 100 W is the
+lowest.
+Press
+
+Power level
+
+once
+twice
+3 times
+4 times
+5 times
+6 times
+7 times
+
+1000 W (HIGH)
+800 W (MED-HIGH)
+600 W (MEDIUM)
+440 W (MED-LOW)
+300 W (DEFROST)
+100 W (LOW)
+KEEP WARM
+
+DO NOT OVERCOOK:
+This oven requires less time
+to cook than older units.
+Overcooking will cause food to
+dry out and may cause a fire.
+A microwave oven’s cooking
+power tells you the amount of
+microwave power available for
+cooking.
+
+3
+
+Caution:
+DO NOT defrost food at a high
+power setting. Doing so can
+cause energy concentration at
+a focused point, which can lead
+to arcing and damage to the
+oven. Use the “Defrost” function
+instead.
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press dial to Start; the cooking
+will start and the time will
+count down in the display. At
+the end of cooking, five beeps
+will sound.
+
+25
+
+F0003CD60AP_EN_0303.indd 25
+
+2020/3/3 9:58:15
+
+Operation (continued)
+Keep Warm
+
+Quick 30
+
+(Will keep “cooked“ food warm for up to 30 minutes after cooking)
+
+(Set or add cooking time in 30 seconds increments)
+
+1
+
+1
+
+3
+
+NOTES:
+1. If desired, you can use
+other power levels. Select
+desired power level before
+pressing Quick 30.
+2. After setting the time
+by Quick 30 button, you
+cannot use the Dial.
+3. Quick 30 button can also
+be used to add more time
+during manual cooking.
+4. It cannot be used with auto
+programs (such as Defrost,
+Sensor Reheat, Auto/Sensor
+Cook and Steam Clean).
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press Quick 30 until the
+desired cooking time (up to
+5 minutes) appears in the
+display. Power level is pre-set
+at 1000 W.
+
+Press Microwave 7 times to
+select the KEEP WARM.
+Press dial to Start, the cooking
+will start and the time will
+count down in the display. At
+the end of cooking, five beeps
+will sound.
+
+2
+
+2
+
+NOTES:
+KEEP WARM can be set as
+the final stage after cook time
+has been manually entered.
+It cannot be used with auto
+programs (such as Defrost,
+Sensor Reheat, Auto/Sensor
+Cook and Steam Clean).
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set warming time by turning
+dial (up to 30 minutes). Set
+20 minutes cooking for an
+example.
+
+Press dial to Start; the cooking
+will start and the time will
+count down in the display. At
+the end of cooking, five beeps
+will sound.
+
+26
+
+F0003CD60AP_EN_0303.indd 26
+
+2020/3/3 9:58:16
+
+Operation (continued)
+Setting the Kitchen Timer
+
+3
+
+1
+
+NOTES:
+1. If the oven door is opened
+during Kitchen Timer,
+Standing Time, Delay Start,
+the time in the display
+window will continue to
+count down.
+2. If the time exceeds one
+hour, it will count down
+in units of minutes. If less
+than one hour, the time
+will count down in units of
+seconds.
+3. An “H” will appear in the
+display to denote hours.
+
+This feature allows you to
+program the oven as a kitchen
+timer. Press Timer/Clock once.
+
+2
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press dial to Start. Time will
+count down without oven
+operating.
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set desired amount of kitchen
+time by turning dial (up to 1 hour
+and 30 minutes).
+
+Caution: If oven lamp is lit
+while using the timer feature
+with door closed, the oven is
+NOT set properly; STOP OVEN
+IMMEDIATELY and re-read
+instructions.
+
+27
+
+F0003CD60AP_EN_0303.indd 27
+
+2020/3/3 9:58:16
+
+Operation (continued)
+Setting a Standing Time
+
+1
+
+5
+
+3
+Press Timer/Clock once.
+
+4
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Some recipes call for a
+standing time after cooking.
+Press Microwave until the
+desired power level appears
+in the display. 1000 W is the
+highest and 100 W is the
+lowest.
+
+2
+
+Press dial to Start. Cooking will
+start. After cooking, standing
+time will count down without
+oven operating.
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set desired standing time by
+turning dial (up to 1 hour and
+30 minutes).
+
+NOTES:
+1. If the oven door is opened
+during Kitchen Timer,
+Standing Time, Delay Start,
+the time in the display
+window will continue to
+count down.
+2. Standing Time and
+Delay Start can not be
+programmed together
+with auto programs
+(such as Defrost, Sensor
+Reheat, Auto/Sensor
+Cook and Steam Clean)
+and preheating. This is
+to prevent the starting
+temperature of food from
+rising before defrosting or
+cooking begins. A change is
+starting temperature could
+cause inaccurate results.
+3. When using Standing Time
+or Delay Start, it is up to 2
+power stages.
+4. If the time exceeds one
+hour, it will count down in
+units of minutes. If less than
+one hour, the time will count
+down in units of seconds.
+5. An “H” will appear in the
+display to denote hours.
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set cooking time by turning
+dial (see previous page for
+maximum times).
+
+28
+
+F0003CD60AP_EN_0303.indd 28
+
+2020/3/3 9:58:16
+
+Operation (continued)
+Setting a Delayed Start
+
+5
+
+3
+
+1
+The start time can be delayed
+to start cooking at a later time.
+To do this, first press Timer/
+Clock once.
+
+2
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press Microwave until the
+desired power level appears
+in the display. 1000 W is the
+highest and 100 W is the
+lowest.
+
+Press dial to Start, the delay
+time will count down, then
+cooking will begin.
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+
+4
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+NOTES:
+1. If the oven door is opened
+during Kitchen Timer,
+Standing Time, Delay Start,
+the time in the display
+window will continue to
+count down.
+2. Standing Time and
+Delay Start can not be
+programmed together
+with auto programs
+(such as Defrost, Sensor
+Reheat, Auto/Sensor
+Cook and Steam Clean)
+and preheating. This is
+to prevent the starting
+temperature of food from
+rising before defrosting or
+cooking begins. A change is
+starting temperature could
+cause inaccurate results.
+3. When using Standing Time
+or Delay Start, it is up to 2
+power stages.
+4. If the time exceeds one
+hour, it will count down
+in units of minutes. If less
+than one hour, the time
+will count down in units of
+seconds.
+5. An “H” will appear in the
+display to denote hours.
+
+Set the desired delay time by
+turning dial (up to 1 hour and
+30 minutes).
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set cooking time by turning
+dial (see previous page for
+maximum times).
+
+29
+
+F0003CD60AP_EN_0303.indd 29
+
+2020/3/3 9:58:17
+
+Operation (continued)
+Add Time
+(Example: To add cooking time after Broil 1 (High).)
+
+1
+
+3
+
+NOTES:
+1. This feature is not available
+for auto programs (such
+as Defrost, Sensor Reheat,
+Auto/Sensor Cook and
+Steam Clean).
+2. The Add Time function
+will be cancelled if you
+do not perform any
+operation within 1
+minute after cooking.
+3. The Add Time function can
+be used after the 3-stage
+cooking.
+4. The power level is the
+same as the last stage.
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set the desired cooking
+program, by entering cooking
+method and time required.
+After cooking, “ADD TIME
+OR ENJOY YOUR MEAL” will
+appear in the display window,.
+
+Press dial to Start. Time will be
+added. The time in the display
+window will count down.
+
+2
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set desired cooking time by
+turning dial.
+
+30
+
+F0003CD60AP_EN_0303.indd 30
+
+2020/3/3 9:58:17
+
+Operation (continued)
+3-Stage Setting
+(Example: Continually set [800 W] 2 minutes, [Combo 2 (Frozen foods)] 3 minutes and [Broil 2 (Low)] 2 minutes.)
+
+1
+
+3
+
+5
+
+7
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press twice to select 800 W.
+
+2
+
+Press 5 times to select Combo 2
+(Frozen foods).
+
+Press 3 times to select Broil 2
+(Low).
+
+4
+
+6
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+ヵㄊㄎㄆ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヸㄆㄊㄈㄉㄕ
+
+ヵㄊㄎㄆ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set as 2 minutes by turning
+dial.
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Set as 3 minutes by turning
+dial.
+
+Set as 2 minutes by turning
+dial.
+
+Press dial to Start. The time
+will count down at the first
+stage in the display window.
+NOTES:
+1. When operating, two beeps
+will sound between each
+stage.
+2. Auto programs (such as
+Defrost, Sensor Reheat,
+Auto/Sensor Cook
+and Steam Clean) and
+preheating can not be used
+with 3-stage cooking.
+3. Standing Time, Delay Start
+can be used with 3-stage
+cooking.
+4. During cooking, one press
+on Stop/Reset stops the
+operation. You can re-start it
+by pressing Start. A second
+press of Stop/Reset will
+cancel the selected program.
+5. Whilst not operating, one
+press of Stop/Reset cancels
+the selected program.
+Example to use:
+Mug cake (1 mug)
+Stage 1 800 W 1 minute
+Stage 2 timer 20 seconds
+Stage 3 800 W 1 minute
+
+31
+
+F0003CD60AP_EN_0303.indd 31
+
+2020/3/3 9:58:18
+
+Operation (continued)
+Sensor Reheat
+(One Push Reheating)
+Program
+This unique feature ‘the
+Genius’ built-in sensor allows
+you to reheat a chilled meal
+with one push of the dial. It
+is not necessary to select the
+power level or cooking time.
+The built-in sensor measures
+the humidity of the food and
+calculates the cooking time.
+
+Sensor Reheat
+
+Weight
+
+8 - 36 oz.
+(200 - 1000 g)
+
+Accessories
+
+Instructions
+All foods must be pre-cooked. Foods
+should be at refrigerator temperature approx. 41 °F (+ 5 °C). Reheat in
+microwaveable container as purchased.
+If transferring food to dish, cover with
+pierced plastic wrap. Press dial to Start.
+Stir at beeps. Stir again at end of program and allow a few minutes standing
+time. Large pieces of meat/fish in a thin
+sauce may require longer cooking.
+
+One Push Reheating food chart:
+Suitable foods
+
+Unsuitable foods
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+Pre-Cooked Dishes: Casserole, Stew, Leftover
+Chilled Meal, Entrée
+Raw Foods: Vegetables, Meats, Rice
+Thicker Foods, cannot not be stirred: Lasagne, Shepherds Pie
+Beverages: Water, Milk, Coffee
+
+How it works
+Once the One Push Reheating has been selected, the food is heated up. As food begins to get hot,
+steam is emitted. When the food reaches a certain temperature and begins to cook, an even greater
+amount of steam is released. The increase in steam emission is detected by a humidity sensor in
+the oven. This acts as a signal for the oven to calculate how much longer the food needs to cook.
+The remaining cooking time will appear in the display window after two beeps. Whilst the Sensor
+symbol is still flashing in the display window the oven door should not be opened. Wait until the
+cooking time appears in the window, and then open the door if required, to stir or turn the food.
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+When clock mode is displayed,
+press the dial to Start. To reset
+oven and return to clock mode,
+press Stop/Reset twice.
+
+Adjust to Taste
+The One Push Reheating reheats a chilled meal for average tastes. You are able to adjust the
+reheating program to your own taste. After pressing Start, +/- symbol and flashing bar appears in
+the display, turn dial clockwise for more time or anticlockwise for less time. This operation should be
+completed within 14 seconds. Default mode is normal.
+
+Notes:
+1. Press the dial in two minutes right after the door was closed, otherwise One Push Reheating
+Function will be rejected and beeps will sound. Open the door and close it again will release
+the One Push Reheating Function.
+2. The oven automatically calculates the reheating time or the remaining reheating time.
+3. The door should not be opened before the time appears in the display window.
+4. To prevent any mistakes during One Push Reheating ensure that glass tray and the container
+are dry.
+5. The room temperature should not be more than 95 °F (35 °C) and not less than 32 °F (0 °C).
+6. If the oven has previously been used and it is too hot to be used on One Push Reheating, “HOT INSIDE
+WAIT” will appear in the display window. After the “HOT INSIDE WAIT” disappears, the One Push
+Reheating may be used. If in a hurry, cook food manually by selecting the correct cooking mode and
+cooking time yourself.
+
+32
+
+F0003CD60AP_EN_0303.indd 32
+
+2020/3/3 9:58:18
+
+Operation (continued)
+Auto Defrost (No.1)
+
+1
+
+2
+
+3
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+4
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+To allow auto program
+operation, ensure the oven is in
+clock mode. Select the Defrost
+by turning dial. The weight is
+0.1 - 6.0 lbs (0.1 - 3.0 kg).
+(see chart on page 36.)
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press the dial to confirm the
+program.
+
+Select the weight of the food
+by turning dial. Turning the dial
+slowly will count up in 0.1 lb
+(0.1 kg) steps.
+
+NOTES:
+1. Defrost can be used to defrost many cuts of meat, poultry and
+fish by weight. The oven will determine the defrosting time and
+power levels. Once the oven is programmed, the defrosting
+time will appear in the display. For best results the minimum
+recommended weight is 0.1 lb (0.1 kg).
+2. Turn over the food, remove defrosted food and shield thin
+ends/fat bones of roast with foil when buzzer rings in the
+middle of cooking.
+3. Allow standing time so that the center of the food thaws out.
+(Minimum of 1 hour for joints of meat and whole chickens).
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press dial to Start. The time
+appears in the display window
+and begins to count down.
+
+Conversion
+Follow the chart to convert ounces or hundredths of a pound
+into tenths of a pound. To use Defrost, enter the weight of the
+food in pounds (1.0) and tenths of a pound (0.1). If a piece of
+meat weighs 1.95 lbs or 1 lb 14 oz., enter 1.9 lbs.
+Hundredths Tenths of
+of a Pound a Pound
+0
+.01 - .05
+0.0
+1-2
+.06 - .15
+0.1
+3-4
+.16 - .25
+0.2
+5
+.26 - .35
+0.3
+6-7
+.36 - .45
+0.4
+.46 - .55
+0.5
+8
+0.6
+9 - 10
+.56 - .65
+11 - 12
+.66 - .75
+0.7
+13
+.76 - .85
+0.8
+14 - 15
+.86 - .95
+0.9
+
+Ounces
+
+33
+
+F0003CD60AP_EN_0303.indd 33
+
+2020/3/3 9:58:19
+
+Operation (continued)
+Auto Cook (Sensor):
+Popcorn (No.2)
+
+1
+
+2
+
+3
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+To allow auto program
+operation, ensure the oven is in
+clock mode. Select the Popcorn
+by turning the dial. The weight
+is 1.5 - 3.2 oz. (42 - 90 g).
+(see chart on page 36.)
+
+Press dial to Start. The food
+category will be repeated in
+the display window until the
+oven calculates the cooking
+time after detecting a burst
+of steam. Do not open the
+oven door until the remaining
+cooking time appears in the
+display window.
+
+Press the dial to confirm the
+program.
+
+9. Never leave the oven unattended.
+10. If popping slows to 2 to 3 seconds between pops, stop
+oven. Overcooking can burn popcorn or cause fire.
+11. When popping multiple bags one right after the other, the
+cooking time may vary slightly. This does not affect the
+popcorn results.
+12. If the temperature of the cavity is too high, Sensor Cook
+feature cannot be used. The message “HOT INSIDE WAIT” will
+appears in the display window. Sensor Cook feature can be
+used again when the “HOT INSIDE WAIT” message disappears.
+Please open the door in order to cool the temperature of the
+cavity more quickly.
+
+NOTES:
+1. If desires, More/Less adjustment can be done. Turn dial to
+add or subtract the cooking time (5 levels can be select), after
+turning the dial within 14 seconds.
+2. Pop one bag at a time.
+3. Place bag in oven according to manufacturers’ directions.
+4. Start with popcorn at room temperature.
+5. Allow popped corn to sit unopened for a few minutes.
+6. Open bag carefully to prevent burns, because steam will
+escape.
+7. Do not reheat unpopped kernels or reuse bag.
+8. If popcorn is of a different weight than listed, follow
+instructions on popcorn package.
+
+34
+
+F0003CD60AP_EN_0303.indd 34
+
+2020/3/3 9:58:19
+
+Operation (continued)
+Auto Cook (Sensor): (No.3 - No.5)
+
+1
+
+2
+
+3
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヵㄊㄎㄆ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+To allow auto program
+operation, ensure the oven is in
+Clock mode. Select the desired
+menu by turning the dial.
+(see chart on the next page.)
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press dial to Start. The food
+category will be repeated in
+the display window until the
+oven calculates the cooking
+time after detecting a burst
+of steam. Do not open the
+oven door until the remaining
+cooking time appears in the
+display window.
+
+Press the dial to confirm the
+program.
+
+NOTES:
+1. If desires, More/Less adjustment can be done. Turn dial to
+add or subtract the cooking time (3 levels can be select), after
+turning the dial within 14 seconds.
+2. After having used the Sensor Cook feature a few times, you
+may decide you would prefer your food cooked to a different
+doneness – that is why you would like to turning the dial.
+3. When steam is detected by the Genius Sensor and two beeps
+sound, the remaining cooking time will appear in the display.
+4. Automatic features are provided for your convenience. If
+results are not suitable to your individual preference, or if
+serving size is other than what is listed in next page, please
+refer to manual cooking on page 25.
+5. If the temperature of the cavity is too high, Sensor Cook feature
+cannot be used. The message “HOT INSIDE WAIT” will appears
+in the display window. Sensor Cook feature can be used again
+when the “HOT INSIDE WAIT” message disappears. Please open
+the door in order to cool the temperature of the cavity more
+quickly.
+
+For the best results with the GENIUS SENSOR, follow these
+recommendations:
+BEFORE Reheating/Cooking:
+1. The room temperature surrounding the oven should be below
+95 °F (35 °C).
+2. Food weight should exceed 4 oz. (110 g).
+3. Be sure the glass tray, the outside of the cooking containers
+and the inside of the microwave oven are dry before placing
+food in the oven. Residual beads of moisture turning into
+steam can mislead the sensor.
+4. Cover food with lid, or with vented plastic wrap. Never use
+tightly sealed plastic containers—they can prevent steam from
+escaping and cause food to overcook.
+DURING Reheating/Cooking:
+DO NOT open the oven door until two beeps sound and cooking time
+appears in the display. Doing so will cause inaccurate cooking since
+the steam from food is no longer contained within the oven cavity.
+Once the cooking time begins to count down, the oven door may
+be opened to stir, turn or rearrange foods.
+AFTER Reheating/Cooking:
+All foods should have a standing time.
+
+35
+
+F0003CD60AP_EN_0303.indd 35
+
+2020/3/3 9:58:19
+
+Operation (continued)
+No.
+
+Menu
+
+1
+
+Defrost
+
+2
+
+Popcorn
+
+3
+
+Potatoes
+
+4
+
+Steam Vegetables
+
+5
+
+Fresh Fish
+
+Weight Range
+
+Recommended Container
+
+Accessory and Placement
+
+microwave safe dish
+
+Directly on the glass tray
+
+orignal bag
+
+Directly on the glass tray
+
+kitchen paper
+
+Directly on the glass tray
+
+8 - 36 oz.
+(200 - 1000 g)
+
+microwave safe casserole with a lid
+or plastic wrap
+
+Directly on the glass tray
+
+8 - 30 oz.
+(200 - 800 g)
+
+microwave safe casserole with a lid
+or plastic wrap
+
+Directly on the glass tray
+
+0.1 - 6.0 lb
+(0.1 - 3.0 kg)
+1.5 - 3.2 oz.
+(42 - 90 g)
+8 - 56 oz.
+(200 - 1500 g)
+
+1. Defrost
+
+3. Potatoes
+
+This feature allows you to defrost minced meat, chops, chicken
+portions, meat joints. Foods should be placed in a suitable dish.
+Chops, chicken portions should be placed in a single layer. It is not
+necessary to cover the foods. Turn over or stir the food after beeps.
+Allow standing time so that the center of the food thaws out.
+
+Pierce each potato with a fork 6 times spacing around surface.
+Place potato or potatoes around the edge of paper-towel-lined
+glass tray, at least 1 inch (2.5 cm) apart. Do not cover. Turn at
+beeps. Let stand 5 minutes to complete cooking.
+
+4. Steam Vegetables
+2. Popcorn
+
+All pieces should be the same size. Wash thoroughly, add 1 tbsp
+(15 ml) of water per ½ cup (125 ml) of vegetables, and cover with
+lid or plastic wrap. Pierce with a fork several times. Stir at beeps. Do
+not salt/butter until after cooking.
+
+Pop one bag at a time. Place bag in oven according to
+manufacturers’ directions. Start with popcorn at room
+temperature. Allow popped corn to sit unopened for a few
+minutes. Open bag carefully to prevent burns, because steam will
+escape. Do not reheat unpopped kernels or reuse bag. If popcorn
+is of a different weight than listed, follow instructions on popcorn
+package.
+
+5. Fresh Fish
+To cook fresh fillets or steaks of fish. Place fish in a suitable size
+container, add 2 tbsp (30 ml) water. Cover with lid or plastic wrap.
+Pierce with a fork several times.
+
+36
+
+F0003CD60AP_EN_0303.indd 36
+
+2020/3/3 9:58:20
+
+Operation (continued)
+Auto Cook:
+Melt & Soften (No.6 - No.8)
+
+1
+
+2
+
+3
+
+4
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+To allow auto program
+operation, ensure the oven is in
+Clock mode. Select the desired
+menu by turning the dial.
+(see chart below)
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press the dial to confirm the
+program.
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Select the weight of the food by
+turning dial.
+
+Press dial to Start. The time
+appears in the display window
+and begins to count down.
+
+No.
+
+Menu
+
+Weight Range
+
+Recommended Container
+
+Accessory and Placement
+
+6
+
+Cream Cheese
+
+2/4/6/8/10/12 oz.
+(50/100/150/200/250/300 g)
+
+microwave safe dish with
+plastic wrap
+
+Directly on the glass tray
+
+7
+
+Chocolate
+
+2/4/6/8/10/12 oz.
+(50/100/150/200/250/300 g)
+
+microwave safe dish
+
+Directly on the glass tray
+
+8
+
+Butter
+
+2/4/6/8/10/12 oz.
+(50/100/150/200/250/300 g)
+
+microwave safe dish with
+plastic wrap
+
+Directly on the glass tray
+
+6. Cream Cheese
+
+8. Butter
+
+Remove wrapper, cut cheese into 1 inch (3 cm) cube, and place in
+a microwave safe dish. Cover with plastic wrap.
+
+Remove wrapper, cut butter into 1 inch (3 cm) cube, and place in
+a microwave safe dish. Cover with plastic wrap.
+
+7. Chocolate
+Suitable for melting milk chocolate. Remove wrapper, separate
+chocolate into small pieces, and place in a microwave safe dish.
+Cook without cover. Stir after cooking.
+
+37
+
+F0003CD60AP_EN_0303.indd 37
+
+2020/3/3 9:58:20
+
+Operation (continued)
+Auto Cook:
+Convection Bake/Combo (No.9 - No.16)
+
+1
+
+3
+
+2
+
+Press the dial to preheat
+the oven. “PREHEAT” will
+scrolls across display window
+once then a “P” will appear in
+the display window.
+(Skip this step when
+preheating is not required)
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+After preheating, the oven will
+beep and “P END” will display
+in the display window. Open
+the door, put the food into the
+oven immediately and close
+the door.
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヸㄆㄊㄈㄉㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+To allow auto program
+operation, ensure the oven is in
+clock mode. Select the desired
+menu by turning the dial.
+Press the dial to confirm the
+program.
+(see chart below, for detials on the
+next page.)
+
+4
+
+Press dial to Start. The time
+appears in the display window
+and begins to count down.
+
+Select the weight of the food
+by turning dial. (except Menu
+No.9, No.10 and No.14)
+
+No.
+
+Menu
+
+Weight Range
+
+Recommended
+Container
+
+Accessory and Placement
+
+9*
+
+Cake
+
+9 inch (23 cm)
+
+9 inch cake pan
+
+Enamel tray on glass tray
+
+10*
+
+Cookie
+
+15 pcs
+
+—
+
+Enamel tray on glass tray
+
+11**
+
+Frozen Pizza
+
+9 inch/12 inch (23 cm/30 cm)
+
+—
+
+Wire rack on enamel tray on glass tray
+
+12*
+
+Fresh Pizza
+
+9 inch/12 inch (23 cm/30 cm)
+
+—
+
+Enamel tray on glass tray
+
+13*
+
+Roast Chicken
+
+36 - 80 oz. (900 - 2000 g)
+
+—
+
+Enamel tray on glass tray
+
+14**
+
+Slow Cook/Stew
+
+6 servs
+
+microwave safe
+casserole
+
+Directly on the glass tray
+
+15**
+
+Beef Rare
+
+20 - 80 oz. (500 - 2000 g)
+
+—
+
+Enamel tray on glass tray
+
+16**
+
+Beef Medium
+
+20 - 80 oz. (500 - 2000 g)
+
+—
+
+Enamel tray on glass tray
+
+* With preheating
+Refer to P39
+
+** Without preheating
+
+38
+
+F0003CD60AP_EN_0303.indd 38
+
+2020/3/3 9:58:21
+
+Operation (continued)
+Toppings:
+2 oz. (55 g)
+3 oz. (80 g)
+4 oz. (110 g)
+
+9. Cake
+Ingredient:
+15 oz. (420 g)
+3
+4 oz. (110 g)
+10 oz. (280 g)
+
+cake mix
+eggs
+vegetable oil
+water
+
+Directions:
+1. Roll the dough out to 9 inch (23 cm)/12 inch (30 cm) and
+brush the bottom with oil, then put it on enamel tray , top
+crust with sauce, cheese and pepperoni.
+2. Use the dial to set the program, then press Start to preheat
+the oven.
+3. After preheating, beeps sound and “P END” will flash in the
+display. Put the enamel tray on glass tray quickly and press
+the dial to Start.
+
+Method:
+1. Beat cake mix, eggs, vegetable oil and water in a large bowl
+with electric mixer on low speed for 30 seconds, then on
+medium speed for 2 minutes.
+2. Use the dial to set the program, then press Start to preheat
+the oven.
+3. Pour cake batter into a 9 inch (23 cm) round and at least 2 inch
+(5 cm) deep cake pan with baking paper. Place cake pan on
+enamel tray.
+4. After preheating, beeps sound and “P END” will flash in the
+display. Put the enamel tray on glass tray quickly and press
+the dial to Start. Cool for 10 minutes in pan and gently
+remove from pan onto wire rack to cool completely.
+
+13. Roast Chicken
+1.
+2.
+3.
+
+10. Cookie
+Ingredient:
+8½ oz. (240 g)
+1½ oz. (40 g)
+1 oz. (25 g)
+
+tomato sauce
+pepperoni
+shredded mozzarella cheese, or more to taste
+
+cookie mix
+butter
+egg wash
+
+Marinated the whole chicken for 30 minutes.
+Use the dial to set the program, then press Start to preheat
+the oven.
+After preheating, beeps sound and “P END” will flash in the
+display. Put the chicken on enamel tray on glass tray quickly
+and press the dial to Start. Turn it over at beeps.
+
+14. Slow Cook/Stew
+Beef curry casserole (6 servings)
+Ingredient:
+½ oz. (15 g)
+oil
+1
+large onion, chopped
+1
+large tomato, chopped
+1 oz. (25 g)
+curry paste
+1 tbsp. (15 g)
+flour
+8 oz. (225 g)
+beef stock
+36 oz. (1000 g)
+chuck steak, fat removed and cut into
+1 inch (2.5 cm) cubes
+1 tbsp. (15 g)
+vinegar
+
+Method:
+1. Stir cookie mix, butter and egg in a large bowl with a wooden
+spoon until just combined. Use your hands to form a soften dough.
+2. Measure tablespoons of cookie dough and roll into balls.
+Place onto baking paper lined enamel tray, spacing about
+2 inch (5 cm) apart.
+3. Use the dial to set the program, then press Start to preheat
+the oven.
+4. After preheating, beeps sound and “P END” will flash in the
+display. Put the enamel tray on glass tray quickly and press
+the dial to Start. Cool on tray for 10 minutes, then gently
+remove from tray onto a wire rack to cool completely.
+
+Place all ingredients in a 4-quart casserole dish. Put the microwave
+safe casserole on the glass tray. Uncovered. Stir at beeps.
+
+15. Beef Rare
+
+11. Frozen Pizza
+
+For cooking rare fresh roast beef (top side, rump or silver-side).
+Place the beef on the enamel on glass tray. Turn at beeps. Allow
+to stand for 10 to 20 minutes after cooking.
+
+For reheating and browning frozen, purchased pizza. Remove all
+packaging and place pizza on wire rack on enamel tray on glass tray.
+
+12. Fresh Pizza
+
+16. Beef Medium
+
+Ingredients:
+(9 inch)
+6 oz. (150 g)
+fresh pizza dough
+Extra oil for brushing
+Toppings:
+1 oz. (25 g)
+tomato sauce
+2 oz. (55 g)
+pepperoni
+2 oz. (55 g)
+shredded mozzarella cheese, or more to taste
+(12 inch)
+10 oz. (280 g)
+fresh pizza dough
+Extra oil for brushing
+
+For cooking medium fresh roast beef (top side, rump or silverside). Place the beef on the enamel on glass tray. Turn at beeps.
+Allow to stand for 10 to 20 minutes after cooking.
+
+39
+
+F0003CD60AP_EN_0303.indd 39
+
+2020/3/3 9:58:21
+
+Operation (continued)
+Auto Cook:
+Beverage (No.17 - No.18)
+(Example: To reheat 1 cup milk.)
+
+1
+
+2
+
+3
+
+4
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+To allow auto program
+operation, ensure the oven is in
+clock mode. Select the desired
+menu by turning the dial.
+(see chart below)
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press the dial to confirm the
+program selection.
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Select the weight of the food by
+turning dial.
+
+Press dial to Start. The time
+appears in the display window
+and begins to count down.
+
+No.
+
+Menu
+
+Weight Range
+
+Recommended Container
+
+Accessory and Placement
+
+17
+
+Tea/Coffee
+
+1 cup/2 cups
+(250/500 ml)
+
+microwave safe cup
+
+Directly on the glass tray
+
+18
+
+Milk/Hot Chocolate/
+Milky Coffee
+
+1 cup/2 cups
+(250/500 ml)
+
+microwave safe cup
+
+Directly on the glass tray
+
+NOTES:
+1. Use a microwave safe cup.
+2 Heated Beverage can erupt if not mixed with air. Do not heat Beverage in your microwave oven without stirring before and halfway
+through heating.
+3. Care must be exercised not to overheat Beverage. It is programmed to give proper result when heating 1 cup or 2 cups of Beverage,
+starting from room temperature for Tea/Coffee and refrigerator temperature for Milk/Hot Chocolate/Milky Coffee. Overheating will
+cause an increased risk of scalding, or water eruption. Refer to page 4, item 18.
+
+40
+
+F0003CD60AP_EN_0303.indd 40
+
+2020/3/3 9:58:21
+
+Operation (continued)
+Auto Cook:
+Re-Bake Bread (No.19 - No.20)
+
+1
+
+2
+
+3
+
+4
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+To allow auto program
+operation, ensure the oven is in
+clock mode. Select the desired
+menu by turning the dial.
+(see chart below)
+
+No.
+
+Menu
+
+19
+
+Baguette/Crusty Rolls
+
+20
+
+Croissants
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヸㄆㄊㄈㄉㄕ
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press the dial to confirm the
+program.
+
+Select the weight of the food by
+turning dial.
+
+Press dial to Start. The time
+appears in the display window
+and begins to count down.
+
+Weight Range
+
+Recommended Container
+
+Accessory and Placement
+
+—
+
+Enamel tray on glass tray
+
+—
+
+Enamel tray on glass tray
+
+4 - 20 oz.
+(100 - 500 g)
+2 - 14 oz.
+(50 - 350 g)
+
+19. Baguette/Crusty Rolls
+
+20. Croissants
+
+To re-bake pre-purchased baguettes and rolls from room
+temperature. Ensure height of baguette/rolls is no more than 2 inch
+(5 cm). Place baguette/crusty rolls on enamel tray on glass tray.
+After cooking place on a wire rack for a few minutes.
+
+To re-bake pre-purchased croissants from room temperature.
+Place croissants on enamel tray on glass tray. After cooking place
+on a wire rack for a few minutes.
+
+41
+
+F0003CD60AP_EN_0303.indd 41
+
+2020/3/3 9:58:22
+
+Operation (continued)
+Auto Steam Clean: (No.21)
+
+1 Place 1¼ cups (300 ml)
+
+tap water with 1 tbsp
+(15 ml) lemon juice in a
+microwaveable container
+(e.g. jug or bowl). Use a jug
+or bowl of at least 2 cups
+(500 ml) volume.
+
+2
+
+4 Five beeps sound at
+
+3
+
+the completion of the
+program. Open oven
+door and wipe the cavity
+and door area with a soft
+cloth.
+
+ュㄆㄇㄓㄐㄔㄕバモㄖㄕㄐチヤㄐㄐㄌ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+
+ヴㄕ㄂ㄓㄕバヴㄆㄍㄆ㄄ㄕ
+ヵㄊㄎㄆ
+
+ヸㄆㄊㄈㄉㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+ヴㄆㄏㄔㄐㄓチンㄆㄉㄆ㄂ㄕ
+
+Press dial to Start. The time
+appears in the display window
+and begins to count down.
+The program runs for 20
+minutes.
+
+To allow auto program
+operation, ensure the oven is in
+clock mode. Select the desired
+menu by turning the dial.
+Press the dial to confirm the
+program.
+
+NOTES:
+1. This program is to clean the cavity and remove any food odour from the microwave oven.
+2. Do not remove the glass tray and roller ring during this program.
+3. To clean the glass tray and roller ring, refer to page 53.
+4. Repeat the above procedure as required.
+
+42
+
+F0003CD60AP_EN_0303.indd 42
+
+2020/3/3 9:58:22
+
+Defrosting Tips & Techniques
+After Defrosting:
+1. Large items may be icy in the center. Defrosting will complete
+during Standing Time.
+2. Let stand, covered, following standing time directions on page 28.
+3. Rinse foods indicated in the chart.
+4. Items which have been layered should be rinsed separately or
+have a longer standing time.
+
+Preparation For Freezing:
+1. Freeze meats, poultry, and fish in packages with only one or two
+layers of food. Place wax paper between layers.
+2. Package in heavy-duty plastic wraps, bags (labeled “For Freezer”),
+or freezer paper.
+3. Remove as much air as possible.
+4. Seal securely, date, and label.
+To Defrost:
+1. Remove wrapper. This helps moisture to evaporate. Juices from
+food can get hot and cook the food.
+2. Set food in microwave safe dish.
+3. Place roasts fat-side down. Place whole poultry breast-side down.
+4. Select power and minimum time so that items will be underdefrosted.
+5. Drain liquids during defrosting.
+6. Turn over (invert) items during defrosting.
+
+AFTER DEFROSTING
+
+MANUAL DEFROST
+TIME at 300 W
+(min/kg) (min/lb)
+
+DURING DEFROSTING
+
+12
+
+6
+
+Break apart/Rearrange
+
+Fish Steaks
+
+10 to 12
+
+5 to 6
+
+Turn over
+
+Fish Fillets
+
+10 to 12
+
+5 to 6
+
+Turn over/Rearrange/Shield ends
+
+Sea Scallops
+
+10 to 12
+
+5 to 6
+
+Break apart/
+Remove defrosted pieces
+
+Whole fish
+
+10 to 12
+
+5 to 6
+
+Turn over
+
+Meat
+Ground Meat
+
+8 to 10
+
+4 to 5
+
+Turn over/Remove defrosted
+portion/Shield edges
+
+10 min.
+
+Roasts
+[2½-4 lbs. (1.1-1.8 kg)]
+
+8 to 16
+
+4 to 8
+
+Turn over/Shield ends and defrosted
+surface
+
+30 min. in fridge.
+
+Chops/Steak
+
+12 to 16
+
+6 to 8
+
+Turn over/Rearrange/Shield
+ends and defrosted surface
+
+Ribs/T-bone
+
+12 to 16
+
+6 to 8
+
+Turn over/Rearrange/Shield
+ends and defrosted surface
+
+Stew Meat
+
+8 to 16
+
+4 to 8
+
+Break apart/Rearrange/
+Remove defrosted pieces
+
+Liver (thinly sliced)
+
+8 to 12
+
+4 to 6
+
+Drain liquid/Turn over/
+Separate pieces
+
+8
+
+4
+
+Turn over
+
+----
+
+8 to 12
+
+4 to 6
+
+Turn over/Shield
+
+20 min. in fridge
+
+8 to 12
+
+4 to 6
+
+Break apart/Turn over/
+Remove defrosted Pieces
+
+5 min.
+
+Pieces
+
+8 to 12
+
+4 to 6
+
+Break apart/Turn over/Shield
+
+Cornish hens
+
+12 to 16
+
+6 to 8
+
+Turn over/Shield
+
+12
+
+6
+
+Turn over/Shield
+
+FOOD
+Fish and Seafood
+[up to 3 lbs. (1.4 kg)]
+Crabmeat
+
+Bacon (sliced)
+Poultry
+Chicken, Whole
+[up to 3 lbs. (1.4 kg)]
+Cutlets
+
+Turkey Breast
+[5-6 lbs. (2.3-2.7 kg)]
+
+Standing Time
+
+Rinse
+
+5 min.
+
+YES
+
+NO
+5 min.
+
+YES
+10 min.
+20 min. in fridge
+
+43
+
+F0003CD60AP_EN_0303.indd 43
+
+2020/3/3 9:58:22
+
+Microwave shortcuts
+FOOD
+
+POWER
+
+TIME (in mins.)
+
+DIRECTIONS
+
+To separate refrigerated Bacon,
+16 oz. (450 g)
+
+1000 W
+
+30 sec.
+
+Remove wrapper and place in microwave safe dish. After
+heating, use a plastic spatula to separate slices.
+
+To soften refrigerated Butter,
+1 stick, 4 oz. (110 g)
+To melt refrigerated Butter,
+1 stick, 4 oz. (110 g)
+
+300 W
+
+1
+
+600 W
+
+1½ - 2
+
+To melt Chocolate,
+1 square, 1 oz. (25 g)
+To melt Chocolate,
+½ cup (125 ml) chips
+
+600 W
+
+1 - 1½
+
+600 W
+
+1 - 1½
+
+To toast Coconut,
+½ cup (125 ml)
+
+1000 W
+
+1
+
+To soften Cream Cheese,
+8 oz. (225 g)
+
+300 W
+
+1 - 1½
+
+To brown Ground Beef,
+16 oz. (450 g)
+
+1000 W
+
+4-5
+
+Crumble into a microwave safe colander set into another
+dish. Cover with plastic wrap. Stir twice. Drain grease.
+
+800 W
+
+4-5
+
+All pieces should be the same size. Wash thoroughly, add
+1 tbsp of water per ½ cup of vegetables, and cover with
+lid or vented plastic wrap. Do not salt/butter until after
+cooking.
+
+Frozen
+10 oz. (280 g)
+
+800 W
+
+6-7
+
+Wash thoroughly, add 1 tbsp of water per ½ cup of
+vegetables, and cover with lid or vented plastic wrap.
+Do not salt/butter until after cooking. (Not suitable for
+vegetables in butter or sauce.)
+
+Canned
+15 oz. (420 g)
+
+800 W
+
+3½ - 4
+
+Empty contents into microwave safe serving bowl. Cover
+with lid or vented plastic wrap.
+
+To cook Vegetables,
+Fresh
+8 oz. (225 g)
+
+Remove wrapper and place butter in a microwave safe
+dish covered with lid or vented plastic wrap.
+
+Remove wrapper and place chocolate in a microwave
+safe dish. After heating, stir until completely melted.
+NOTE: Chocolate holds its shape even when softened.
+Place in a microwave safe dish.
+Stir every 30 seconds.
+
+To cook baked Potato,
+6 - 8 oz. each (165 - 225 g)
+1 piece
+2 pieces
+
+800 W
+800 W
+
+4-5
+6-7
+
+To steam Hand Towel
+
+1000 W
+
+20 - 30 sec.
+
+To soften Ice Cream,
+½ gallon (2 L)
+
+300 W
+
+1 - 1½
+
+Remove wrapper and place in a microwave safe bowl.
+
+Pierce each potato with a fork 6 times spacing around
+surface. Place potato or potatoes around the edge of
+paper-towel-lined glass tray (Turntable), at least 1 inch
+(2.5 cm) apart. Do not cover. Let stand 5 minutes to
+complete cooking.
+Soak in water, then wring out excess.
+Place on a microwave safe dish.
+Heat. Present immediately.
+Check often to prevent melting.
+
+44
+
+F0003CD60AP_EN_0303.indd 44
+
+2020/3/3 9:58:22
+
+Microwave shortcuts (continued)
+FOOD
+Cup of liquid
+To boil water, broth, etc.
+1 cup, 8 oz. (250 ml)
+2 cups, 16 oz. (500 ml)
+Cup of liquid
+To warm Beverage,
+1 cup, 8 oz. (250 ml)
+2 cups, 16 oz. (500 ml)
+
+POWER
+
+TIME (in mins.)
+
+1000 W
+
+1½ - 2
+2½ - 3
+
+DIRECTIONS
+
+Heated liquids can erupt if not stirred.
+Do not heat liquids in microwave oven
+Cup of liquid without stirring before heating.
+
+800 W
+
+1½ - 2
+2½ - 3
+
+To roast Nuts,
+1½ cups (340 g)
+
+1000 W
+
+3-4
+
+To toast Sesame Seeds,
+¼ cup (55 g)
+
+1000 W
+
+2 - 2½
+
+To skin Tomatoes,
+(one at a time)
+
+1000 W
+
+30 sec.
+
+Place tomato into a microwave safe bowl containing
+boiling water. Rinse and peel. Repeat for each tomato.
+
+To remove Cooking Odours
+
+1000 W
+
+5
+
+Combine 1 to 1½ cups (250 - 375 ml) water with the juice
+and peel of one lemon in a 2 quart microwave safe bowl.
+After water finishes boiling, wipe interior of oven with a
+cloth. You can also use a Combo of several whole cloves
+and ¼ cup of vinegar with 1 cup of water.
+
+Spread nuts into a 9-inch (23 cm) microwave safe pie
+plate. Stir occasionally.
+Place in a small microwave safe bowl. Stir twice.
+
+45
+
+F0003CD60AP_EN_0303.indd 45
+
+2020/3/3 9:58:23
+
+Defrosting Chart
+Select Defrost microwave. The times given below are a guideline only. Always check the progress of the food by opening the oven door
+and then re-starting.
+For larger quantities adjust times accordingly. Food should not be covered during defrosting.
+Food
+Meat
+Beef/Lamb/Pork
+joint
+18 oz. (500 g)
+Minced beef
+18 oz. (500 g)
+Chops
+16 oz. (450 g)
+Sausages
+16 oz. (450 g)
+Bacon rashers
+18 oz. (500 g)
+Stewing steak
+16 oz. (450 g)
+Whole chicken
+18 oz. (500 g)
+Chicken portions
+16 oz. (450 g)
+Fish
+Whole
+12 oz. (340 g)
+Fillets/Steak
+16 oz. (450 g)
+Prawns
+16 oz. (450 g)
+General
+Bread sliced
+14 oz. (400 g)
+Slice of bread
+2 oz. (55 g)
+Pastry
+18 oz. (500 g)
+Soft fruit
+16 oz. (450 g)
+
+Defrosting Time
+
+Method
+
+Standing Time
+
+Place in a suitable dish or on an upturned saucer or use a microwave
+safe rack. Turn once. Shield.
+
+30 mins
+
+Place in a suitable dish. Break up and turn once.
+
+5 mins
+
+6-7 mins
+
+Place in a suitable dish in a single layer. Turn once. Shield if necessary.
+
+5 mins
+
+6 mins
+
+Place in a suitable dish in a single layer. Turn twice. Shield if necessary.
+
+5 mins
+
+4-6 mins
+
+Place in a suitable dish. Turn and separate twice. Shield if necessary.
+
+3 mins
+
+6 mins
+
+Place in a suitable dish. Break up frequently.
+
+5 mins
+
+6-8 mins
+
+Place in a suitable dish on an upturned saucer or use a microwave safe
+rack. Turn once. Shield.
+
+10 mins
+
+5-7 mins
+
+Place in a suitable dish in a single layer. Turn once. Shield if necessary.
+
+10 mins
+
+7-9 mins
+
+Place in a suitable dish. Turn once. Shield.
+
+5 mins
+
+5-6 mins
+
+Place in a suitable dish. Turn once, separate and shield if necessary.
+
+5 mins
+
+5-7 mins
+
+Place in a suitable dish. Stir halfway during defrosting.
+
+5 mins
+
+4 mins
+
+Place on a plate. Separate and rearrange during defrosting.
+
+5 mins
+
+Place on a plate.
+
+1-2 mins
+
+4 mins
+
+Place on a plate. Turn halfway.
+
+5-10 mins
+
+5-6 mins
+
+Place in a suitable dish. Stir once during defrosting.
+
+2 mins
+
+8-9 mins
+6 mins 30 secs
+
+20 secs-30 secs
+
+Note:
+Opening the door and taking out the defrosted parts during the operating time is recommended. Turn over, stir or rearrange the
+parts which are still in icy.
+
+46
+
+F0003CD60AP_EN_0303.indd 46
+
+2020/3/3 9:58:23
+
+Reheating Chart
+The times given in the charts below are a guideline only, and will vary depending on starting temperature, dish size etc.
+
+Weight/
+Quantity
+
+Power Level
+
+Time to Select
+(approx)
+
+8 oz. (225 g)
+16 oz. (450 g)
+
+1000 W
+1000 W
+
+2 mins
+3 mins
+
+16 oz. (450 g)
+
+1000 W
+
+3-4 mins
+
+16 oz. (450 g)
+
+1000 W
+
+2-3 mins
+
+Stewed steak
+16 oz. (450 g)
+1000 W
+Canned soups
+Cream of mushroom
+16 oz. (450 g)
+1000 W
+Minestrone
+16 oz. (450 g)
+1000 W
+Canned vegetables - Drain where appropriate
+Carrots, whole
+12 oz. (340 g)
+1000 W
+
+3-4 mins
+
+Food
+
+Instructions/Guidelines
+
+Canned beans, pasta
+Baked beans
+Baked beans &
+sausages/burgers
+Canned meat
+Hot dogs (drained)
+
+3-4 mins
+2 mins 30 secs
+
+Place in a micro-safe bowl on glass tray. Cover.
+
+Place in a micro-safe bowl on glass tray. Cover.
+
+Place in a micro-safe bowl on glass tray. Cover.
+Stir halfway.
+
+2 mins
+
+Place in a micro-safe bowl on glass tray. Cover.
+Stir halfway.
+2 mins
+2 mins Place in a micro-safe bowl on glass tray. Cover.
+Peas, garden
+12 oz. (340 g)
+1000 W
+2 mins 30 secs
+8 oz. (225 g)
+1000 W
+1 min 30 secs Place in a micro-safe bowl on glass tray. Cover.
+Sweetcorn
+Stir halfway.
+12 oz. (340 g)
+1000 W
+2-3 mins
+Tomatoes, whole
+14 oz. (400 g)
+1000 W
+3 mins 30 secs Place in a micro-safe bowl on glass tray. Cover.
+Pastry products – precooked – N.B. Pastries reheated by microwave will have a soft base. For combination cooking, if pie comes
+in foil container place directly onto enamel tray.
+1000 W or
+5 oz. (150 g)
+1-2 mins
+Place in micro-safe dish on glass tray. Do not cover.
+Combo 2
+Cornish pastie
+1000 W or
+12 oz. (340 g)
+2-3 mins
+Place in micro-safe dish on glass tray. Do not cover.
+Combo 2
+Pastry products – precooked – N.B. Pastries reheated by microwave will have a soft base. If pie comes in foil container place
+directly onto enamel tray.
+Meat pies
+12 oz. (340 g)
+Combo 2
+2-3 mins
+Place on enamel tray on glass tray
+Steak and kidney
+8 oz. (225 g)
+Combo 2
+2-3 mins
+Shortcrust pie
+1000 W
+4-5 mins
+Place in micro-safe dish on glass tray. Do not cover.
+Quiche
+16 oz. (450 g)
+or Combo 2
+3-4 mins
+Place on wire rack on enamel tray on glass tray.
+Do not cover.
+Sausage roll
+12 oz. (340 g)
+Combo 2
+3-4 mins
+Xmas mince pies
+4 oz. (110 g)
+1000 W
+10-20 secs
+Place in micro-safe dish on glass tray. Do not cover.
+Plated meals – homemade – chilled
+Child size
+1
+1000 W
+2-3 mins
+Place on a micro-safe plate on glass tray. Cover.
+Adult size
+1
+1000 W
+4-5 mins
+Puddings and desserts- Transfer puddings to a micro-safe/heatproof dish
+1000 W or
+Apple pie (chilled)
+18 oz. (500 g)
+3-4 mins
+Place in micro-safe dish on glass tray. Do not cover.
+Combo 2
+Apple and blackcurrant
+Convection
+Place in foil cases on wire rack on enamel tray on glass
+x6
+6-7 mins
+pies (room temperature)
+425 °F (220 °C)
+tray. Do not cover.
+Bread and butter
+18 oz. (500 g)
+1000 W
+3-4 mins
+Place on glass tray. Do not cover.
+pudding (chilled)
+2 mins Custard (chilled)
+1¼ cups (300 ml)
+1000 W
+Place in large jug. Stir during reheating.
+2 mins 30 secs
+Peas, mushy
+
+12 oz. (340 g)
+
+1000 W
+
+Note:
+Always check that food is piping hot after reheating in the microwave. If unsure return to oven. Foods will still require a standing
+time, especially if they cannot be stirred. The denser the food the longer the standing time.
+47
+
+F0003CD60AP_EN_0303.indd 47
+
+2020/3/3 9:58:23
+
+Cooking Chart
+The times given in the charts below are a guideline only, and will vary depending on starting temperature, dish size etc.
+
+Weight/
+Quantity
+
+Power Level
+
+Time to Select
+(approx)
+
+Part-baked rolls
+
+8 oz. (225 g)
+
+Combo 2
+
+3-4 mins
+
+Part-baked garlic
+baguette
+
+5 oz. (140 g)
+
+Combo 2
+
+3-4 mins
+
+1000 W
+
+4-6 mins or
+1 min
+per rasher
+
+Place on micro-safe rack or plate on glass tray and cover
+with kitchen towel to minimise splatter.
+
+or Broil 1
+
+12-14 mins
+
+Place on enamel tray on wire rack on glass tray.
+Turn halfway.
+
+1000 W
+
+4-5 mins
+
+Place on micro-safe rack or plate on glass tray. Cover.
+
+or Broil 1
+
+28-30 mins
+
+Place on wire rack on enamel tray on glass tray.
+Turn halfway.
+
+Food
+
+Instructions/Guidelines
+
+Bread – Frozen
+Place on enamel tray on glass tray.
+
+Bacon – from raw
+
+Rashers
+
+Steaks
+
+12 oz. (340 g)
+
+8 oz. (225 g)
+
+Beans & pulses – should be pre-soaked (except lentils)
+Black eyed beans
+
+8 oz. (225 g)
+
+1000 W then
+300 W
+
+10 mins
+25-30 mins
+
+Chick peas
+
+8 oz. (225 g)
+
+1000 W then
+300 W
+
+10 mins
+45 mins
+
+Lentils
+
+8 oz. (225 g)
+
+600 W
+
+10-15 mins
+
+Red kidney beans
+
+8 oz. (225 g)
+
+1000 W then
+300 W
+
+15 mins
+35-40 mins
+
+Use 2½ cups (600 ml) boiling water in a large bowl. Cover.
+
+Beef - Joints from raw – Caution: Hot fat! Remove dish with care.
+Topside, Forerib,
+Sirloin
+Mince
+
+-
+
+Combo 2
+
+18 oz. (500 g)
+
+1000 W then
+600 W
+
+10-12 min
+Place on an upturned saucer on enamel tray on glass tray.
+per 16 oz. (450 g) Turn halfway.
+10 mins
+15 mins
+
+Place in micro-safe dish with stock and seasonings on glass
+tray. Stir halfway. Cover.
+
+Chicken from raw – Caution: Hot Fat! Remove oven accessories with care.
+Breasts,
+26 oz. (730 g)
+600 W
+12-14 mins
+Place on micro-safe rack or plate on glass tray. Cover.
+boneless
+
+Drumsticks
+
+28 oz. (780 g)
+
+600 W
+
+12-14 mins
+
+Place on micro-safe rack or plate on glass tray. Cover.
+
+or Convection
+425 °F (220 °C)
+
+25-30 mins
+
+Place on wire rack on enamel tray on glass tray.
+Turn halfway.
+
+1000 W
+
+30 secs
+
+1000 W
+
+20 secs
+
+1000 W
+
+50 secs
+
+Eggs – Scrambled
+Egg
+
+1
+
+Eggs
+
+2
+
+Eggs
+
+3
+
+1000 W
+
+30 secs
+
+1000 W
+
+1 min 20 secs
+
+1000 W
+
+30 secs
+
+Add 1 tablespoon of milk for each egg used.
+Beat eggs, milk and knob of butter together.
+Cook for 1st cooking time then stir.
+Cook for 2nd cooking time then stand for 1 minute.
+
+Note:
+Always check that food is piping hot after reheating in the microwave. If unsure return to oven. Foods will still require a standing
+time, especially if they cannot be stirred. The denser the food the longer the standing time.
+
+48
+
+F0003CD60AP_EN_0303.indd 48
+
+2020/3/3 9:58:23
+
+Cooking Chart (continued)
+Weight/
+Quantity
+
+Power Level
+
+Time to Select
+(approx)
+
+Breaded fillets
+
+10 oz. (280 g)
+
+Broil 1
+
+10-15 mins
+
+Place on enamel tray on wire rack on glass tray.
+Turn halfway.
+
+1000 W
+
+3-4 mins
+
+Place in micro-safe dish. Add 2 tbsp (30 ml) of liquid. Cover.
+
+Fillets
+
+10 oz. (280 g)
+
+or Broil 1
+
+12-14 mins
+
+Place on enamel tray on wire rack on glass tray.
+Turn halfway.
+
+Steaks
+
+8 oz. (225 g)
+
+1000 W
+
+3-4 mins
+
+Place in micro-safe dish. Add 2 tbsp (30 ml) of liquid. Cover.
+
+or Broil 2
+
+16-20 mins
+
+Place on enamel tray on wire rack on glass tray. Turn halfway.
+
+Whole
+
+11 oz. (310 g)
+
+1000 W
+
+3-4 mins
+
+Place in micro-safe dish. Add 2 tbsp (30 ml) of liquid. Cover.
+
+or Broil 2
+
+22 mins
+
+Place on enamel tray on wire rack on glass tray. Turn halfway.
+
+Food
+
+Instructions/Guidelines
+
+Fish – Fresh from raw
+
+Lamb – from raw – Caution: Hot Fat! Remove accessory with care.
+Chops, cutlets
+
+11 oz. (310 g)
+
+600 W
+
+4-6 mins
+
+Place in micro-safe dish or rack on glass tray. Cover.
+
+Chops, loin
+
+20 oz. (560 g)
+
+600 W
+
+5-7 mins
+
+Place in micro-safe dish or rack on glass tray. Cover.
+
+-
+
+Combo 2
+
+Joints
+
+Stewing lamb
+
+16 oz. (450 g)
+
+5-6 mins
+Place on enamel tray on glass tray. Turn halfway.
+per 16 oz. (450 g)
+
+1000 W
+then 440 W
+
+10 mins
+40 mins
+
+Place in micro-safe dish with stock and vegetables on glass
+tray. Stir halfway. Cover.
+
+or Combo 1
+
+30-35 mins
+
+Place in casserole dish, add stock and vegetables, cover
+with lid on enamel tray on glass tray. Stir halfway.
+
+Pasta - Place in a large 3 litre microwave safe bowl.
+Twists
+
+8 oz. (225 g)
+
+1000 W
+
+8-10 mins
+
+Macaroni
+
+8 oz. (225 g)
+
+1000 W
+
+10-12 mins
+
+Spaghetti /
+tagliatelle
+
+8 oz. (225 g)
+
+1000 W
+
+8-10 mins
+
+Pasta shells - i.e.
+conchiglie
+
+8 oz. (225 g)
+
+1000 W
+
+10-12 mins
+
+Use 1 litre boiling water. Add 1 tbsp (15 ml) oil. Cover.
+Stir halfway.
+Use 1½ litres boiling water. Add 1 tbsp (15 ml) oil. Cover.
+Stir halfway.
+
+Pizza – fresh chilled – N.B. Remove all packaging. Pizzas will have a soft base if cooked by microwave only.
+
+Deep pan, ham
+
+Thin and crispy
+
+14 oz. (400 g)
+
+12 oz. (340 g)
+
+1000 W
+
+4-6 mins
+
+Place on micro-safe plate on glass tray. Do not cover.
+
+or Convection
+425 °F (220 °C)
+
+12-16 mins
+
+Place directly on wire rack on enamel tray on glass tray.
+Do not cover.
+
+Combo 2
+
+5-7 mins
+
+or Convection
+425 °F (220 °C)
+
+9 mins
+
+Place on wire rack on enamel tray on glass tray.
+Do not cover.
+
+Pork – from raw – Caution: Hot Fat! Remove oven accessories with care.
+Chops
+
+18 oz. (500 g)
+
+Broil 1
+
+35-40 mins
+
+Place on wire rack on enamel tray on glass tray. Turn halfway.
+
+Pork – from raw – Caution: Hot Fat! Remove oven accessories with care.
+Joints
+
+-
+
+600 W
+
+Place on upturned saucer in micro-safe dish on glass tray.
+15-18 mins
+Turn joint over halfway during cooking. Drain off fat during
+per 16 oz. (450 g)
+cooking.
+
+Gammon covered
+with water
+
+-
+
+1000 W
+then 600 W
+
+15 mins
+25-30 mins
+Place in large casserole dish with lid and cover with water.
+per 16 oz. (450 g)
+
+Note:
+Always check that food is piping hot after reheating in the microwave. If unsure return to oven. Foods will still require a standing
+time, especially if they cannot be stirred. The denser the food the longer the standing time.
+49
+
+F0003CD60AP_EN_0303.indd 49
+
+2020/3/3 9:58:23
+
+Cooking Chart (continued)
+Food
+
+Weight/
+Quantity
+
+Power Level
+
+Time to Select
+(approx)
+
+Instructions/Guidelines
+
+Potato products part cooked – frozen
+Croquettes
+
+12 oz. (340 g)
+
+Combo 1
+
+9-11 mins
+
+Place on enamel tray on wire rack on glass tray.
+Turn halfway.
+
+Hash browns
+
+12 oz. (340 g)
+
+Broil 1
+
+16-19 mins
+
+Place on enamel tray on wire rack on glass tray.
+Turn halfway.
+
+Sausages from raw – caution: Hot Fat! Remove oven accessories with care.
+Thick
+
+14 oz. (400 g)
+
+Broil 1
+
+17-18 mins
+
+Place on wire rack on enamel tray on glass tray.
+Turn halfway.
+
+Turkey from raw- Caution: Hot fat! Remove oven accessories with care.
+Turkey, crown
+
+-
+
+Combo 2
+
+12-14 mins
+Place on enamel tray on glass tray. Turn halfway.
+per 16 oz. (450 g)
+
+Fresh vegetables – place in shallow micro-safe dish
+Broad beans
+
+16 oz. (450 g)
+
+1000 W
+
+5-6 mins
+
+Beetroot
+
+16 oz. (450 g)
+
+600 W
+
+12-15 mins
+
+Brussel sprouts
+
+16 oz. (450 g)
+
+1000 W
+
+8-9 mins
+
+Cabbage
+- sliced
+
+16 oz. (450 g)
+
+1000 W
+
+8-10 mins
+
+Carrots
+- sliced
+
+16 oz. (450 g)
+
+1000 W
+
+8-10 mins
+
+Courgettes
+
+16 oz. (450 g)
+
+1000 W
+
+5 mins
+
+Corn on the cob
+
+16 oz. (450 g)
+
+1000 W
+
+6-7 mins
+
+Leeks
+- sliced
+
+16 oz. (450 g)
+
+1000 W
+
+7-8 mins
+
+Mushrooms
+
+16 oz. (450 g)
+
+1000 W
+
+5 mins
+
+Spinach
+
+16 oz. (450 g)
+
+1000 W
+
+6 mins
+
+Swede
+- cubed
+
+16 oz. (450 g)
+
+1000 W
+
+8-12 mins
+
+Add 6 tbsp (90 ml) water. Cover.
+
+Frozen vegetables - place in shallow micro-safe dish.
+Beans
+
+16 oz. (450 g)
+
+1000 W
+
+8 mins
+
+Beans
+- green
+
+16 oz. (450 g)
+
+1000 W
+
+8-9 mins
+
+Brocolli
+
+16 oz. (450 g)
+
+1000 W
+
+8-9 mins
+
+Brussels sprouts
+
+16 oz. (450 g)
+
+1000 W
+
+9-10 mins
+
+Cabbage
+- shredded
+
+16 oz. (450 g)
+
+1000 W
+
+7-8 mins
+
+Carrots
+- sliced
+
+16 oz. (450 g)
+
+1000 W
+
+8 mins
+
+Cauliflower
+
+16 oz. (450 g)
+
+1000 W
+
+9-10 mins
+
+Peas
+
+16 oz. (450 g)
+
+1000 W
+
+6-7 mins
+
+Sweetcorn
+
+16 oz. (450 g)
+
+1000 W
+
+7 mins
+
+Add 2 tbsp (30 ml) water. Cover.
+
+Note:
+Always check that food is piping hot after reheating in the microwave. If unsure return to oven. Foods will still require a standing
+time, especially if they cannot be stirred. The denser the food the longer the standing time.
+
+50
+
+F0003CD60AP_EN_0303.indd 50
+
+2020/3/3 9:58:23
+
+Food Characteristics
+Bone and Fat
+
+Shape
+
+Both bone and fat affect cooking. Bones may cause irregular cooking.
+Meat next to the tips of bones may overcook while meat positioned under
+a large bone, such as a ham bone, may be undercooked. Large amounts
+of fat absorb microwave energy and the meat next to these areas may
+overcook.
+
+Uniform sizes heat more evenly. The thin end of a drumstick will cook
+more quickly than the meaty end. To compensate for irregular shapes,
+place thin parts toward the center of the dish and thick pieces toward the
+edge.
+
+Size
+Thin pieces cook more quickly than thick pieces.
+
+Density
+Porous, airy foods such as breads, cakes or rolls take less time to cook
+than heavy, dense foods such as potatoes and roasts. When reheating
+donuts or other foods with different centers be very careful. Certain foods
+have centers made with sugar, water, or fat and these centers attract
+microwaves (for example, jelly donuts). When a jelly donut is heated,
+the jelly can become extremely hot while the exterior remains warm to
+the touch. This could result in a burn if the food is not allowed to cool
+properly in the center.
+
+Starting Temperature
+Foods that are at room temperature take less time to cook than if they are
+chilled, refrigerated or frozen.
+
+Quantity
+Two potatoes take longer to cook than one potato. As the quantity of
+the food decreases so does the cooking time. Overcooking will cause the
+moisture content in the food to decrease and a fire could result. Never
+leave microwave unattended while in use.
+
+51
+
+F0003CD60AP_EN_0303.indd 51
+
+2020/3/3 9:58:23
+
+Cooking Techniques
+Piercing
+
+Standing Time
+
+Foods with skins or membranes must be pierced, scored or have a strip of
+skin peeled before cooking to allow steam to escape. Pierce clams, oysters,
+chicken livers, whole potatoes and whole vegetables. Whole apples or new
+potatoes should have a 1-inch (2.5 cm) strip of skin peeled before cooking.
+Score sausages and frankfurters. Do not Cook/Reheat whole eggs, with or
+without the shell. Steam buildup in whole eggs may cause them to explode,
+and possibly damage the oven or cause injury. Reheating SLICED hard-boiled
+eggs and cooking SCRAMBLED eggs is safe.
+
+Most foods will continue to cook by conduction after the microwave oven
+is turned off. After cooking meat, the internal temperature will rise 5 °F to
+15 °F (3 °C to 8 °C), if allowed to stand, tented with foil, for 10 to 15 minutes.
+Casseroles and vegetables need a shorter amount of standing time, but this
+standing time is necessary to allow foods to complete cooking to the center
+without overcooking on the edges.
+
+Browning
+
+Test for Doneness
+
+Foods will not have the same brown appearance as conventionally cooked foods
+or those foods which are cooked utilizing a browning feature. Meats and poultry
+may be coated with browning sauce, Worcestershire sauce, barbecue sauce or
+shake-on browning sauce. To use, combine browning sauce with melted butter
+or margarine and brush on before cooking. For quick breads or muffins, brown
+sugar can be used in the recipe in place of granulated sugar, or the surface can be
+sprinkled with dark spices before baking.
+
+The same tests for doneness used in conventional cooking may be used for
+microwave cooking. Meat is done when fork-tender or splits at fibers. Chicken
+is done when juices are clear yellow and drumstick moves freely. Fish is done
+when it flakes and is opaque. Cake is done when a toothpick or cake tester is
+inserted and comes out clean.
+
+Spacing
+
+Check foods to see that they are cooked to the United States Department
+of Agriculture’s recommended temperatures.
+To test for doneness, insert a meat thermometer in a thick or dense area
+away from fat or bone. NEVER leave the thermometer in the food during
+cooking, unless it is approved for microwave oven use.
+
+Individual foods, such as baked potatoes, cupcakes and appetizers, will cook
+more evenly if placed in the oven equal distances apart. When possible,
+arrange foods in a circular pattern.
+
+Covering
+As with conventional cooking, moisture evaporates during microwave
+cooking. Casserole lids or plastic wrap are used for a tighter seal. When using
+plastic wrap, vent the plastic wrap by folding back part of the plastic wrap
+from the edge of the dish to allow steam to escape. Loosen or remove plastic
+wrap as recipe directs for standing time. When removing plastic wrap covers,
+as well as any glass lids, be careful to remove them away from you to avoid
+steam burns. Various degrees of moisture retention are also obtained by
+using wax paper or paper towels.
+
+Cook all food to these minimum internal temperatures as measured
+with a food thermometer before removing food from oven. For
+reasons of personal preference, you may choose to cook food at
+higher temperatures.
+
+Product
+Beef, Pork, Veal & Lamb
+Steaks, chops, roasts
+Ground meats
+Ham, fresh or smoked
+(uncooked)
+
+Shielding
+Thin areas of meat and poultry cook more quickly than meaty portions.
+To prevent overcooking, these thin areas can be shielded with strips of
+aluminum foil. Wooden toothpicks may be used to hold the foil in place.
+CAUTION is to be exercised when using foil. Arcing can occur if foil is too
+close to oven wall or door and damage to your oven will result.
+
+Fully Cooked Ham
+(to reheat)
+
+Cooking Time
+Cooking times will vary because of food shape variations, starting
+temperature, and regional preferences. Always cook food for the minimum
+cooking time given in a recipe and check for doneness. If the food is
+undercooked, continue cooking. It is easier to add time to an undercooked
+product. Once the food is overcooked, nothing can be done.
+
+All Poultry (breasts, whole
+bird, legs, thighs, and wings,
+ground poultry, and stuffing)
+Eggs
+Fish & Shellfish
+Leftovers
+Casseroles
+
+Stirring
+Stirring is usually necessary during microwave cooking. Always bring the
+cooked outside edges toward the center and the less cooked center portions
+toward the outside of the dish.
+
+Minimum Internal
+Temperature & Rest Time
+145 °F (63 °C) and allow to rest
+for at least 3 minutes
+160 °F (71 °C)
+145 °F (63 °C) and allow to rest
+for at least 3 min.
+Reheat cooked hams
+packaged in USDA-inspected
+plants to 140 °F (60 °C); all
+others to 165 °F (74 °C).
+165 °F (74 °C)
+160 °F (71 °C)
+145 °F (63 °C)
+165 °F (74 °C)
+165 °F (74 °C)
+
+Rearranging
+Rearrange small items such as chicken pieces, shrimp, hamburger patties or
+pork chops. Rearrange pieces from the edge to the center and pieces from
+the center to the edge of the dish.
+
+Turning
+It is not possible to stir some foods to distribute the heat evenly. At times,
+microwave energy will concentrate in one area of the food. To help ensure
+even cooking, these foods need to be turned. Turn over large foods, such as
+roasts or turkeys, halfway through cooking.
+52
+
+F0003CD60AP_EN_0303.indd 52
+
+2020/3/3 9:58:23
+
+Care and Cleaning of Your Microwave Oven
+Please see below and the following page for
+particular cleaning instructions for each section of
+the oven.
+
+
+ 
+ 
+BEFORE CLEANING: Unplug oven at wall outlet. If outlet
+is inaccessible, leave oven door open while cleaning.
+AFTER CLEANING: Be sure to place the Roller Ring and
+the Glass Tray in the proper position and press Stop/
+Reset Button to clear the Display.
+1. Outside oven surfaces: Clean with a damp cloth.
+
+To prevent damage to the operating parts inside
+the oven, water should not be allowed to seep into
+ventilation openings.
+2. Label: Do not remove. Wipe with a damp cloth.
+3. Inside the Oven: Wipe with a damp cloth after
+using. Mild detergent may be used if needed. Do not
+use harsh detergents or abrasives.
+4. Oven Door: Wipe with a soft dry cloth when steam
+accumulates inside or around the outside of the
+      
+oven door. During cooking, especially under high
+humidity conditions, steam is given off from the
+food. (Some steam will condense on cooler surfaces, such as the oven door. This is normal.) Inside surface is covered with a heat and
+vapor barrier film. Do not remove.
+5. Oven Cavity Floor: Clean the bottom surface of the oven with mild detergent, water or window cleaner, and dry.
+6. Waveguide Cover: Do not remove Waveguide Cover. It is important to keep cover clean in the same manner as the inside of
+the oven. Failure to do so may damage the cover.
+7. Control Panel: If the Control Panel becomes wet, clean it with a soft dry cloth. Do not use harsh detergents or abrasives.
+For some models: The Control Panel is covered with a removable protective film to prevent scratches during shipping. Small bubbles
+may appear under this film, so if this is the case, remove by applying masking or clear tape to an exposed corner and pull gently.
+8. Glass Tray: Remove and wash in warm soapy water or in a dishwasher.
+9. Roller Ring: Roller Ring may be washed in mild soapy water or dishwasher. These areas should be kept clean to avoid excessive noise.
+AS WITH ANY COOKING APPLIANCE, MICROWAVE OVENS REQUIRE THE SAME LEVEL OF CARE TO PREVENT OVERHEATING OR
+DAMAGE. IT IS IMPORTANT TO KEEP THE OVEN CLEAN AND DRY. FOOD RESIDUE AND CONDENSATION MAY CAUSE
+RUSTING OR ARCING AND DAMAGE TO THE OVEN. AFTER USE, WIPE DRY ALL SURFACES,
+INCLUDING VENT OPENINGS, OVEN SEAMS, AND UNDER GLASS TRAY.
+
+NOTES:
+1.
+2.
+
+After cooking, the oven should be cleaned with a soft cloth moistened with soapy water. If the oven is not cleaned occasionally to
+eliminate grease, it can accumulate and cause the oven to “Smoke” during use.
+DO NOT SPRAY DIRECTLY INSIDE THE OVEN.
+A steam cleaner is not to be used for cleaning.
+
+Shop Accessories
+Purchase Parts, Accessories and Instruction Books online for all Panasonic Products by visiting our Web Site at:
+shop.panasonic.com/support
+Parts Available to Order
+Owner’s Manual (this book)....................................................................................F0003CD60AP
+Glass Tray....................................................................................................................... F0601CD00BP
+Roller Ring Assembly ................................................................................................ F2181CD00BP
+Wire Rack .......................................................................................................................F0602CD60AP
+Enamel Tray .................................................................................................................. F0601BG60BP
+Airfry Basket .................................................................................................................F0603CD60AP
+53
+
+F0003CD60AP_EN_0303.indd 53
+
+2020/3/3 9:58:23
+
+Before Requesting Service
+See below before calling for service, as most problems can easily be remedied by following these simple solutions:
+Problem
+
+Solution
+
+The oven causes TV
+interference.
+
+Some radio, TV, Wi-Fi, cordless telephone, baby monitor, blue tooth or
+other wireless equipment interference might occur when you cook with the
+microwave oven. This interference is similar to the interference caused by small
+appliances such as mixers, vacuums, blow dryers, etc. It does not indicate a
+problem with your oven.
+
+Steam accumulates
+on oven door and
+warm air comes from
+the oven vents.
+
+During cooking, steam and warm air are given off from the food. Most of the
+steam and warm air are removed from the oven by the air which circulates in the
+oven cavity. However, some steam will condense on cooler surfaces such as the
+oven door. This is normal. After use, the oven should be wiped dry (see page 53).
+
+Smoke and burnt
+smell will occur after
+the first use.
+
+This is not a malfunction and will go away after a few uses.
+The oven is not plugged in securely or needs to be reset; remove plug from
+outlet, wait ten seconds and re-insert.
+
+Oven will not turn on.
+
+Main circuit breaker or main fuse is tripped or blown. Reset main circuit breaker
+or replace main fuse.
+There is a problem with the outlet; plug another appliance into the outlet to
+check if it is working.
+The door is not closed completely. Close the oven door securely.
+Start was not pressed after programming; Press dial to Start.
+
+Oven will not start
+cooking.
+
+Another program is already entered into the oven; press Stop/Reset to cancel
+the previous program and enter new program.
+The program is not correct; program again according to the Owner’s manual.
+Stop/Reset has been pressed accidentally; program oven again.
+
+The Glass Tray
+wobbles.
+
+The Glass Tray is not positioned properly on the Roller Ring or there is food under
+the Roller Ring. Take out Glass Tray and Roller Ring. Wipe with a damp cloth and
+reset Roller Ring and Glass Tray properly..
+
+When the oven is
+operating, there is
+noise coming from
+the Glass Tray.
+
+The Roller Ring and oven bottom are dirty; clean these parts according to Care
+and Cleaning of Your Microwave Oven (see page 53).
+
+“ appears in
+The “
+the display window.
+
+The CHILD SAFETY LOCK was activated by pressing Stop/Reset three times;
+Deactivate CHILD SAFETY LOCK by pressing Stop/Reset three times.
+
+The oven stops
+cooking and “H00“,
+“H97” or “H98”
+appears in the display.
+
+The oven’s power supply has failed; please contact an authorized Service Center
+(see next page).
+
+“HOT INSIDE WAIT”
+appears in the display
+window.
+
+The cavity is overheated. Operate again after it cools down. Please open the door
+in order to cool the temperature of the cavity more quickly.
+
+“DEMO MODE PRESS
+ANY KEY” or “D”
+appears in the display
+window.
+
+The oven is under demonstration mode. Press Microwave button once, Start
+4 times and Stop/Reset button 4 times.
+
+54
+
+F0003CD60AP_EN_0303.indd 54
+
+2020/3/3 9:58:24
+
+Limited Warranty (Only for U.S.A.)
+Panasonic Products Limited Warranty
+Limited Warranty Coverage (For USA Only)
+If your product does not work properly because of a defect in materials or
+workmanship, Panasonic Consumer Electronics Corporation (referred to
+as “the warrantor”) will, for the length of the period indicated on the chart
+below, which starts with the date of original purchase (“warranty period”),
+at its option either (a) repair your product with new or refurbished parts, (b)
+replace it with a new or a refurbished equivalent value product, or (c) refund
+your purchase price. The decision to repair, replace or refund will be made
+by the warrantor.
+Product or Part Name
+ALL PARTS (EXCEPT MAGNETRON TUBE)
+MAGNETRON TUBE
+
+Labor
+1 yr.
+1 yr.
+
+Parts
+1 yr.
+5 yr.
+
+During the “Labor” warranty period there will be no charge for labor. During
+the “Parts” warranty period, there will be no charge for parts.
+This warranty only applies to products purchased and serviced in the United
+States. This warranty is extended only to the original purchaser of a new
+product which was not sold “as is”.
+
+Some states do not allow the exclusion or limitation of incidental or
+consequential damages, or limitations on how long an implied warranty
+lasts, so the exclusions may not apply to you.
+This warranty gives you specific legal rights and you may also have other
+rights which vary from state to state. If a problem with this product develops
+during or after the warranty period, you may contact your dealer or Service
+Center. If the problem is not handled to your satisfaction, then write to:
+Panasonic Corporation of North America
+Consumer Affairs Department 8th Fl.
+Two Riverfront Plaza
+Newark NJ 07102-5490
+PARTS AND SERVICE, WHICH ARE NOT COVERED BY THIS LIMITED
+WARRANTY, ARE YOUR RESPONSIBILITY.
+
+Mail-In Service – Online Repair Request
+Online Repair Request
+To submit a new repair request, and for quick repair status visit our Web Site
+at: http://shop.panasonic.com/support
+When shipping the unit, carefully pack and send it in the original (or
+supplied) carton. Include a letter detailing the complaint along with the bill
+of sales and provide a daytime phone number where you can be reached. A
+valid registered receipt is required under the Limited Warranty.
+When shipping Lithium Ion batteries please visit our web site at
+http://shop.panasonic.com/support as Panasonic is committed to
+providing the most up to date information.
+IF REPAIR IS NEEDED DURING THE WARRANTY PERIOD, THE PURCHASER
+WILL BE REQUIRED TO FURNISH A SALES RECEIPT/PROOF OF PURCHASE
+INDICATING DATE OF PURCHASE, AMOUNT PAID AND PLACE OF
+PURCHASE. CUSTOMER WILL BE CHARGED FOR THE REPAIR OF ANY
+UNIT RECEIVED WITHOUT SUCH PROOF OF PURCHASE.
+Limited Warranty Limits And Exclusions
+This warranty ONLY COVERS failures due to defects in materials or
+workmanship, and DOES NOT COVER glass, plastic parts, temperature
+probes (if included) and normal wear and tear or cosmetic damage. The
+warranty ALSO DOES NOT COVER damages which occurred in shipment,
+or failures which are caused by products not supplied by the warrantor,
+or failures which result from accidents, misuse, abuse, neglect, bug
+infestation, mishandling, misapplication, alteration, faulty installation, set-up
+adjustments, maladjustment of consumer controls, improper maintenance,
+power line surge, lightning damage, modification, or commercial use (such
+as in a hotel, office, restaurant, or other business), rental use of the product,
+service by anyone other than a Factory Service center or other Authorized
+Servicer, or damage that is attributable to acts of God.
+THERE ARE NO EXPRESS WARRANTIES EXCEPT AS LISTED UNDER
+“LIMITED WARRANTY COVERAGE”.
+THE WARRANTOR IS NOT LIABLE FOR INCIDENTAL OR CONSEQUENTIAL
+DAMAGES RESULTING FROM THE USE OF THIS PRODUCT, OR ARISING
+OUT OF ANY BREACH OF THIS WARRANTY.
+(As examples, this excludes damages for lost time, travel to and from the
+servicer, loss of or damage to media or images, data or other memory or
+recorded content. The items listed are not exclusive, but for illustration only.)
+ALL EXPRESS AND IMPLIED WARRANTIES, INCLUDING THE WARRANTY
+OF MERCHANTABILITY, ARE LIMITED TO THE PERIOD OF THE LIMITED
+WARRANTY.
+
+Shop
+Accessories!
+for all your Panasonic gear
+Go to
+http://shop.panasonic.com/support
+Get everything you need to get the most out of
+your Panasonic products
+Accessories & Parts for your Camera, Phone, A/V
+products, TV, Computers & Networking, Personal
+Care, Home Appliances, Headphones, Batteries,
+Backup Chargers & more…
+
+Customer Services Directory
+For Product Information, Operating Assistance,
+Parts, Owner’s Manuals, Dealer and Service info
+go to http://shop.panasonic.com/support
+For the hearing or speech impaired TTY: 1-877-833-8855
+
+As of October 1 2019
+
+55
+
+F0003CD60AP_EN_0303.indd 55
+
+2020/3/3 9:58:24
+
+Specifications
+Power Source ............................................................................................................................................................................................................................120 V, 60 Hz
+Power Consumption
+Microwave .......................................................................................................................................................................................................9.5 Amps, 1,110 W
+Heater (Broil)................................................................................................................................................................................................ 11.4 Amps, 1,350 W
+Heater (Convection).................................................................................................................................................................................. 11.4 Amps, 1,350 W
+Combination (Combo) ............................................................................................................................................................................. 11.4 Amps, 1,350 W
+Cooking Power
+Microwave* ......................................................................................................................................................................................................................... 1,000 W
+Heater (Broil)....................................................................................................................................................................................................................... 1,300 W
+Heater (Convection)......................................................................................................................................................................................................... 1,300 W
+Operating Frequency ................................................................................................................................................................................................................ 2,450 MHz
+Outside Dimensions (W x H x D) .................................................................................................................................................................. 22 1⁄16” x 13 33⁄64” x 17 23⁄32”
+(560 mm x 343 mm x 450 mm)
+Oven Cavity Dimensions (W x H x D) ..................................................................................................................................................................14 31⁄32” x 9” x 15 23⁄64”
+(380 mm x 228.4 mm x 390 mm)
+Net Weight .......................................................................................................................................................................................................Approx. 39.1 lbs (17.7 kg)
+*IEC Test procedure
+
+Specifications subject to change without notice.
+
+Trim Kit Information
+Trim Kit for NN-CD87KS
+Model Number ..................................................................................................................................................................................................................... NN-TK81KC
+Outside Dimensions (W x H)............................................................................................................................................................................................ 23 1⁄2” x 16 5⁄32”
+........................................................................................................................................................................................................................................ (596 mm x 410 mm)
+Cabinet Opening (W x H x D) ................................................................................................................................................................................ 23 5⁄8” x 15 9⁄16” x 21”
+................................................................................................................................................................................................................... (600 mm x 395 mm x 533 mm)
+
+User’s Record
+
+The serial number of this product may be found on the back side of the oven or on the left side of the control panel.
+You should note the model number and the serial number of this oven in the space provided and retain this book as
+a permanent record of your purchase for future reference.
+Model No. ______________________________
+Serial No. ______________________________
+Date of Purchase ________________________
+
+Scan this code for product registration
+
+56
+
+F0003CD60AP_EN_0303.indd 56
+
+2020/3/3 9:58:24
+
+Panasonic Consumer Electronics Company,
+Division of Panasonic Corporation of North America
+Two Riverfront Plaza
+Newark, New Jersey 07102
+Panasonic Appliances Microwave Oven (Shanghai) Co., Ltd.
+Website : http://shop.panasonic.com/support
+
+F0003CD60AP_EN_0303.indd 57
+
+2020/3/3 9:58:24
+
+
