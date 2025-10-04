@@ -367,20 +367,19 @@
       <h2>Kitchen appliances</h2>
       <p>Upload manuals to personalize recipes for your gear. Manuals are stored securely in R2 and processed asynchronously.</p>
       <form id="applianceForm" class="stack">
-        <div class="row">
-          <div>
-            <label for="applianceBrand">Brand</label>
-            <input id="applianceBrand" type="text" placeholder="e.g. Breville" required />
-          </div>
-          <div>
-            <label for="applianceModel">Model</label>
-            <input id="applianceModel" type="text" placeholder="e.g. Smart Oven Air" required />
-          </div>
+        <div>
+          <label for="applianceNickname">Nickname (optional)</label>
+          <input id="applianceNickname" type="text" placeholder="e.g. My Air Fryer" />
         </div>
         <div>
-          <label for="applianceManual">Manual (PDF optional)</label>
+          <label for="applianceManual">Manual upload (PDF)</label>
           <input id="applianceManual" type="file" accept="application/pdf" />
         </div>
+        <div>
+          <label for="applianceManualUrl">Manual URL (public PDF)</label>
+          <input id="applianceManualUrl" type="url" placeholder="https://example.com/manual.pdf" />
+        </div>
+        <p class="muted">Provide either a manual file or a public manual URL.</p>
         <div class="row" style="align-items:center; gap:0.75rem;">
           <button type="submit">➕ Add appliance</button>
           <button type="button" id="refreshAppliances" class="secondary">🔄 Refresh list</button>
@@ -415,6 +414,7 @@
         <button id="loadRecipeDetail" class="secondary">📄 Load recipe detail</button>
         <button id="flowchartBtn" class="secondary">📈 Generate flowchart</button>
         <button id="tailorBtn">🤖 Tailor instructions</button>
+        <button id="adaptBtn" class="secondary">✨ Adapt instructions</button>
       </div>
       <div id="recipeDetailResult" class="response" hidden>
         <h3>Recipe detail</h3>
@@ -426,6 +426,10 @@
       </div>
       <div id="tailorResult" class="response" hidden>
         <h3>Tailored steps</h3>
+        <pre></pre>
+      </div>
+      <div id="adaptResult" class="response" hidden>
+        <h3>Adapted recipe</h3>
         <pre></pre>
       </div>
     </section>
@@ -678,9 +682,9 @@
     const toolCheckboxes = Array.from(document.querySelectorAll('.toolChk'));
     const themeInput = document.getElementById('theme');
     const applianceForm = document.getElementById('applianceForm');
-    const applianceBrand = document.getElementById('applianceBrand');
-    const applianceModel = document.getElementById('applianceModel');
+    const applianceNickname = document.getElementById('applianceNickname');
     const applianceManual = document.getElementById('applianceManual');
+    const applianceManualUrl = document.getElementById('applianceManualUrl');
     const applianceResult = document.getElementById('applianceResult');
     const applianceResultBody = document.getElementById('applianceResultBody');
     const appliancesList = document.getElementById('appliancesList');
@@ -691,9 +695,12 @@
     const flowchartPre = flowchartResult?.querySelector('pre');
     const tailorResult = document.getElementById('tailorResult');
     const tailorPre = tailorResult?.querySelector('pre');
+    const adaptResult = document.getElementById('adaptResult');
+    const adaptPre = adaptResult?.querySelector('pre');
     const loadRecipeDetailBtn = document.getElementById('loadRecipeDetail');
     const flowchartBtn = document.getElementById('flowchartBtn');
     const tailorBtnAgent = document.getElementById('tailorBtn');
+    const adaptBtn = document.getElementById('adaptBtn');
     const tailorRecipeId = document.getElementById('tailorRecipeId');
     const tailorApplianceId = document.getElementById('tailorApplianceId');
 
@@ -703,6 +710,16 @@
       const key = localStorage.getItem(API_KEY_STORAGE) || '';
       if (!key) throw new Error('API key required');
       return Object.assign({ 'X-API-Key': key }, extra);
+    }
+
+    function escapeHtml(value) {
+      const str = value == null ? '' : String(value);
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     async function callJson(url, options = {}) {
@@ -794,18 +811,41 @@
         }
         appliancesList.innerHTML = items
           .map((appliance) => {
-            const manualStatus = appliance.extractedText ? 'Manual processed' : 'Awaiting OCR';
-            const manualKey = appliance.manualR2Key ? `Manual key: ${appliance.manualR2Key}` : 'Manual not uploaded';
+            const specs = appliance.extractedSpecs || {};
+            const displayName =
+              appliance.nickname ||
+              [appliance.brand || specs.brand, appliance.model || specs.model]
+                .filter(Boolean)
+                .join(' ') ||
+              'Untitled appliance';
+            const status = appliance.processingStatus || 'QUEUED';
+            const safeStatus = escapeHtml(status);
+            const manualKey = appliance.manualR2Key
+              ? `Manual key: ${escapeHtml(appliance.manualR2Key)}`
+              : 'Manual pending upload';
+            const textKey = appliance.ocrTextR2Key ? `Text key: ${escapeHtml(appliance.ocrTextR2Key)}` : '';
+            const features = Array.isArray(specs.keyFeatures) && specs.keyFeatures.length
+              ? `<small>Features: ${specs.keyFeatures.map((f) => escapeHtml(f)).join(', ')}</small>`
+              : '';
+            const instructions = appliance.agentInstructions
+              ? `<details><summary>Agent instructions</summary><pre>${escapeHtml(appliance.agentInstructions)}</pre></details>`
+              : '';
+            const statusButton = status === 'COMPLETED'
+              ? ''
+              : `<button data-action="status" data-id="${escapeHtml(appliance.id)}" class="secondary">📡 Check status</button>`;
             return `
               <li>
                 <div class="appliance-meta">
-                  <strong>${appliance.brand} ${appliance.model}</strong>
-                  <span class="pill">${manualStatus}</span>
-                  <small>ID: ${appliance.id}</small>
-                  <small>${manualKey}</small>
+                  <strong>${escapeHtml(displayName)}</strong>
+                  <span class="pill">${safeStatus}</span>
+                  <small>ID: ${escapeHtml(appliance.id)}</small>
+                  <small>${manualKey}${textKey ? ` · ${textKey}` : ''}</small>
+                  ${features}
+                  ${instructions}
                 </div>
                 <div class="appliance-actions">
-                  <button data-action="delete" data-id="${appliance.id}" class="secondary">🗑 Remove</button>
+                  ${statusButton}
+                  <button data-action="delete" data-id="${escapeHtml(appliance.id)}" class="secondary">🗑 Remove</button>
                 </div>
               </li>`;
           })
@@ -823,10 +863,22 @@
       try {
         applianceForm.querySelector('button[type="submit"]').disabled = true;
         const form = new FormData();
-        form.append('brand', applianceBrand.value.trim());
-        form.append('model', applianceModel.value.trim());
-        if (applianceManual.files && applianceManual.files[0]) {
-          form.append('manual', applianceManual.files[0]);
+        const nickname = applianceNickname?.value.trim();
+        const manualUrlValue = applianceManualUrl?.value.trim();
+        const manualFile = applianceManual?.files && applianceManual.files[0];
+
+        if (!manualFile && !manualUrlValue) {
+          throw new Error('Provide a manual file or manual URL');
+        }
+
+        if (nickname) {
+          form.append('nickname', nickname);
+        }
+        if (manualFile) {
+          form.append('manual_file', manualFile);
+        }
+        if (manualUrlValue) {
+          form.append('manual_url', manualUrlValue);
         }
         const res = await fetch('/api/kitchen/appliances', {
           method: 'POST',
@@ -837,7 +889,7 @@
         if (!res.ok) throw new Error(data.error || res.statusText);
         if (applianceResult && applianceResultBody) {
           applianceResult.hidden = false;
-          applianceResultBody.textContent = JSON.stringify(data.appliance, null, 2);
+          applianceResultBody.textContent = JSON.stringify(data, null, 2);
         }
         applianceForm.reset();
         await loadAppliancesList();
@@ -864,12 +916,27 @@
       }
     }
 
+    async function handleApplianceStatus(id) {
+      try {
+        const data = await callJson(`/api/kitchen/appliances/${id}/status`, {
+          headers: authHeaders(),
+        });
+        alert(`Status: ${data.status}`);
+        await loadAppliancesList();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
     appliancesList?.addEventListener('click', (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
       const id = target.dataset.id;
       if (target.dataset.action === 'delete' && id) {
         handleDeleteAppliance(id);
+      }
+      if (target.dataset.action === 'status' && id) {
+        handleApplianceStatus(id);
       }
     });
 
@@ -943,6 +1010,36 @@
     }
 
     tailorBtnAgent?.addEventListener('click', handleTailorRecipe);
+
+    async function handleAdaptRecipe() {
+      if (!adaptResult || !adaptPre) return;
+      try {
+        adaptBtn.disabled = true;
+        adaptResult.hidden = false;
+        adaptPre.textContent = 'Loading…';
+        const recipeId = tailorRecipeId.value.trim();
+        const applianceId = tailorApplianceId.value.trim();
+        if (!recipeId) throw new Error('Recipe ID required');
+        if (!applianceId) throw new Error('Appliance ID required');
+        const data = await callJson(`/api/recipes/${encodeURIComponent(recipeId)}/adapt`, {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ appliance_id: applianceId }),
+        });
+        const steps = data.tailored_steps || [];
+        const summary = data.summary_of_changes || '';
+        const stepsText = steps.length
+          ? steps.map((step, index) => `${index + 1}. ${step}`).join('\n')
+          : 'No steps returned.';
+        adaptPre.textContent = `${summary ? `Summary: ${summary}\n\n` : ''}${stepsText}`;
+      } catch (err) {
+        adaptPre.textContent = err.message;
+      } finally {
+        adaptBtn.disabled = false;
+      }
+    }
+
+    adaptBtn?.addEventListener('click', handleAdaptRecipe);
 
     async function handlePrefsLoad() {
       try {

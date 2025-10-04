@@ -25,6 +25,10 @@ binding = "BROWSER"
 binding = "VEC"
 index_name = "recipes-index"
 
+[[vectorize]]
+binding = "APPLIANCE_VEC"
+index_name = "appliance-manuals-index"
+
 # D1 BINDING
 [[d1_databases]]
 binding = "DB"
@@ -39,7 +43,11 @@ id = "472e8adbec2f4aecac8d168a3910ca08"
 # R2 BUCKET BINDING
 [[r2_buckets]]
 binding = "BUCKET"
-bucket_name = "colby-recipes" 
+bucket_name = "menuforge-recipes"
+
+[[r2_buckets]]
+binding = "APPLIANCE_BUCKET"
+bucket_name = "menuforge-appliances"
 
 # CRON TRIGGERS
 [triggers]

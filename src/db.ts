@@ -3,6 +3,8 @@ import {
   Favorite,
   PrepPhase,
   KitchenAppliance,
+  ApplianceProcessingStatus,
+  ApplianceSpecs,
   Menu,
   MenuItem,
   NormalizedRecipe,
@@ -679,26 +681,43 @@ export async function createKitchenAppliance(
   input: {
     id?: string;
     userId: string;
-    brand: string;
-    model: string;
+    nickname?: string | null;
+    brand?: string | null;
+    model?: string | null;
     manualR2Key?: string | null;
-    extractedText?: string | null;
-    manualEmbedding?: number[] | null;
+    ocrTextR2Key?: string | null;
+    agentInstructions?: string | null;
+    extractedSpecs?: ApplianceSpecs | null;
+    processingStatus?: ApplianceProcessingStatus;
   }
 ): Promise<KitchenAppliance> {
   const id = input.id ?? crypto.randomUUID();
   await env.DB.prepare(
-    `INSERT INTO kitchen_appliances (id, user_id, brand, model, manual_r2_key, extracted_text, manual_embedding_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO kitchen_appliances (
+       id,
+       user_id,
+       nickname,
+       brand,
+       model,
+       extracted_specs_json,
+       manual_r2_key,
+       ocr_text_r2_key,
+       agent_instructions,
+       processing_status
+     )
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   )
     .bind(
       id,
       input.userId,
-      input.brand,
-      input.model,
+      input.nickname ?? null,
+      input.brand ?? null,
+      input.model ?? null,
+      input.extractedSpecs ? JSON.stringify(input.extractedSpecs) : null,
       input.manualR2Key ?? null,
-      input.extractedText ?? null,
-      input.manualEmbedding ? JSON.stringify(input.manualEmbedding) : null
+      input.ocrTextR2Key ?? null,
+      input.agentInstructions ?? null,
+      input.processingStatus ?? 'QUEUED'
     )
     .run();
 
@@ -711,7 +730,19 @@ export async function createKitchenAppliance(
 
 export async function listKitchenAppliances(env: Env, userId: string): Promise<KitchenAppliance[]> {
   const { results } = await env.DB.prepare(
-    `SELECT id, user_id, brand, model, manual_r2_key, extracted_text, manual_embedding_json, created_at, updated_at
+    `SELECT
+       id,
+       user_id,
+       nickname,
+       brand,
+       model,
+       extracted_specs_json,
+       manual_r2_key,
+       ocr_text_r2_key,
+       agent_instructions,
+       processing_status,
+       created_at,
+       updated_at
      FROM kitchen_appliances
      WHERE user_id = ?
      ORDER BY datetime(created_at) DESC`
@@ -724,7 +755,19 @@ export async function listKitchenAppliances(env: Env, userId: string): Promise<K
 
 export async function getKitchenAppliance(env: Env, id: string): Promise<KitchenAppliance | null> {
   const row = await env.DB.prepare(
-    `SELECT id, user_id, brand, model, manual_r2_key, extracted_text, manual_embedding_json, created_at, updated_at
+    `SELECT
+       id,
+       user_id,
+       nickname,
+       brand,
+       model,
+       extracted_specs_json,
+       manual_r2_key,
+       ocr_text_r2_key,
+       agent_instructions,
+       processing_status,
+       created_at,
+       updated_at
      FROM kitchen_appliances
      WHERE id = ?`
   )
@@ -734,61 +777,83 @@ export async function getKitchenAppliance(env: Env, id: string): Promise<Kitchen
   return row ? mapKitchenApplianceRow(row) : null;
 }
 
-export async function updateKitchenApplianceManualData(
+export async function updateKitchenApplianceFields(
   env: Env,
   id: string,
   updates: {
+    nickname?: string | null;
+    brand?: string | null;
+    model?: string | null;
+    agentInstructions?: string | null;
+    extractedSpecs?: ApplianceSpecs | null;
     manualR2Key?: string | null;
-    extractedText?: string | null;
-    manualEmbedding?: number[] | null;
+    ocrTextR2Key?: string | null;
+    processingStatus?: ApplianceProcessingStatus;
   }
 ): Promise<KitchenAppliance | null> {
   const sets: string[] = [];
   const values: any[] = [];
 
+  if (Object.prototype.hasOwnProperty.call(updates, 'nickname')) {
+    sets.push('nickname = ?');
+    values.push(updates.nickname ?? null);
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, 'brand')) {
+    sets.push('brand = ?');
+    values.push(updates.brand ?? null);
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, 'model')) {
+    sets.push('model = ?');
+    values.push(updates.model ?? null);
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, 'agentInstructions')) {
+    sets.push('agent_instructions = ?');
+    values.push(updates.agentInstructions ?? null);
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, 'extractedSpecs')) {
+    sets.push('extracted_specs_json = ?');
+    values.push(updates.extractedSpecs ? JSON.stringify(updates.extractedSpecs) : null);
+  }
   if (Object.prototype.hasOwnProperty.call(updates, 'manualR2Key')) {
     sets.push('manual_r2_key = ?');
     values.push(updates.manualR2Key ?? null);
   }
-  if (Object.prototype.hasOwnProperty.call(updates, 'extractedText')) {
-    sets.push('extracted_text = ?');
-    values.push(updates.extractedText ?? null);
+  if (Object.prototype.hasOwnProperty.call(updates, 'ocrTextR2Key')) {
+    sets.push('ocr_text_r2_key = ?');
+    values.push(updates.ocrTextR2Key ?? null);
   }
-  if (Object.prototype.hasOwnProperty.call(updates, 'manualEmbedding')) {
-    sets.push('manual_embedding_json = ?');
-    values.push(updates.manualEmbedding ? JSON.stringify(updates.manualEmbedding) : null);
+  if (Object.prototype.hasOwnProperty.call(updates, 'processingStatus')) {
+    sets.push('processing_status = ?');
+    values.push(updates.processingStatus ?? 'QUEUED');
   }
 
-  if (sets.length) {
-    sets.push('updated_at = CURRENT_TIMESTAMP');
-    await env.DB.prepare(
-      `UPDATE kitchen_appliances
-       SET ${sets.join(', ')}
-       WHERE id = ?`
-    )
-      .bind(...values, id)
-      .run();
+  if (sets.length === 0) {
+    return getKitchenAppliance(env, id);
   }
+
+  sets.push('updated_at = CURRENT_TIMESTAMP');
+  await env.DB.prepare(
+    `UPDATE kitchen_appliances
+     SET ${sets.join(', ')}
+     WHERE id = ?`
+  )
+    .bind(...values, id)
+    .run();
 
   return getKitchenAppliance(env, id);
 }
 
-export async function deleteKitchenAppliance(env: Env, userId: string, id: string): Promise<boolean> {
-  const row = await env.DB.prepare(
-    `SELECT id FROM kitchen_appliances WHERE id = ? AND user_id = ?`
-  )
-    .bind(id, userId)
-    .first<{ id: string }>();
-
-  if (!row) {
-    return false;
+export async function deleteKitchenAppliance(env: Env, userId: string, id: string): Promise<KitchenAppliance | null> {
+  const appliance = await getKitchenAppliance(env, id);
+  if (!appliance || appliance.userId !== userId) {
+    return null;
   }
 
   await env.DB.prepare(`DELETE FROM kitchen_appliances WHERE id = ? AND user_id = ?`)
     .bind(id, userId)
     .run();
 
-  return true;
+  return appliance;
 }
 
 export interface UserProfile {
@@ -1285,11 +1350,14 @@ type RecipeRow = {
 type KitchenApplianceRow = {
   id: string;
   user_id: string;
-  brand: string;
-  model: string;
+  nickname: string | null;
+  brand: string | null;
+  model: string | null;
+  extracted_specs_json: string | null;
   manual_r2_key: string | null;
-  extracted_text: string | null;
-  manual_embedding_json: string | null;
+  ocr_text_r2_key: string | null;
+  agent_instructions: string | null;
+  processing_status: string;
   created_at: string;
   updated_at: string;
 };
@@ -1349,29 +1417,59 @@ function mapPantryItemRow(row: PantryItemRow): PantryItem {
 }
 
 function mapKitchenApplianceRow(row: KitchenApplianceRow): KitchenAppliance {
-  let manualEmbedding: number[] | null = null;
-  if (row.manual_embedding_json) {
+  let extractedSpecs: ApplianceSpecs | null = null;
+  if (row.extracted_specs_json) {
     try {
-      const parsed = JSON.parse(row.manual_embedding_json);
-      if (Array.isArray(parsed)) {
-        manualEmbedding = parsed
-          .map((value) => (typeof value === 'number' ? value : Number(value)))
-          .filter((value) => Number.isFinite(value));
+      const parsed = JSON.parse(row.extracted_specs_json) as Record<string, unknown>;
+      if (parsed && typeof parsed === 'object') {
+        const keyFeatures = Array.isArray((parsed as any).key_features)
+          ? (parsed as any).key_features.map((value: unknown) => String(value))
+          : Array.isArray((parsed as any).keyFeatures)
+            ? (parsed as any).keyFeatures.map((value: unknown) => String(value))
+            : undefined;
+        extractedSpecs = {
+          ...(parsed as Record<string, unknown>),
+          brand: typeof parsed.brand === 'string' ? parsed.brand : null,
+          model: typeof parsed.model === 'string' ? parsed.model : null,
+          capacity: typeof parsed.capacity === 'string' ? parsed.capacity : null,
+          wattage: typeof parsed.wattage === 'string' ? parsed.wattage : null,
+          keyFeatures,
+          vectorChunkCount: Number.isFinite(Number((parsed as any).vectorChunkCount))
+            ? Number((parsed as any).vectorChunkCount)
+            : Number.isFinite(Number((parsed as any).__vectorChunkCount))
+              ? Number((parsed as any).__vectorChunkCount)
+              : undefined,
+        } as ApplianceSpecs;
       }
     } catch (error) {
-      console.warn('Failed to parse appliance embedding JSON', error);
+      console.warn('Failed to parse appliance specs JSON', error);
     }
   }
 
   return {
     id: row.id,
     userId: row.user_id,
+    nickname: row.nickname,
     brand: row.brand,
     model: row.model,
+    extractedSpecs,
     manualR2Key: row.manual_r2_key,
-    extractedText: row.extracted_text,
-    manualEmbedding,
+    ocrTextR2Key: row.ocr_text_r2_key,
+    agentInstructions: row.agent_instructions,
+    processingStatus: normalizeProcessingStatus(row.processing_status),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+function normalizeProcessingStatus(value: string | null | undefined): ApplianceProcessingStatus {
+  switch (value) {
+    case 'PROCESSING':
+    case 'COMPLETED':
+    case 'FAILED':
+    case 'QUEUED':
+      return value;
+    default:
+      return 'QUEUED';
+  }
 }

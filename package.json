@@ -25,6 +25,7 @@
     "wrangler": "^4.42.0"
   },
   "dependencies": {
-    "hono": "^4.9.9"
+    "hono": "^4.9.9",
+    "pdfjs-dist": "^5.4.149"
   }
 }

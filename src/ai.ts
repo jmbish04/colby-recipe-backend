@@ -1,11 +1,102 @@
 import { Env } from './env';
-import { NormalizedRecipe, PrepPhase, RecipeSummary, RecipeStep, UserPreferences } from './types';
+import {
+  ApplianceSpecs,
+  NormalizedRecipe,
+  PrepPhase,
+  RecipeSummary,
+  RecipeStep,
+  UserPreferences,
+} from './types';
 import { truncate } from './utils';
 
 const CHAT_MODEL = '@cf/meta/llama-3.1-70b-instruct';
 const EMBEDDING_MODEL = '@cf/embedding/embeddinggemma-300m';
 const ASR_MODEL = '@cf/openai/whisper';
 const OCR_MODEL = '@cf/meta/llama-3.1-70b-instruct';
+
+type PdfJsModule = typeof import('pdfjs-dist/legacy/build/pdf.mjs');
+
+async function tryExtractWithPdfJs(pdf: Uint8Array): Promise<string | null> {
+  try {
+    const pdfjs: PdfJsModule = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    if (!pdfjs.getDocument) {
+      return null;
+    }
+    const source =
+      pdf.byteOffset === 0 && pdf.byteLength === pdf.buffer.byteLength
+        ? pdf.buffer
+        : pdf.buffer.slice(pdf.byteOffset, pdf.byteOffset + pdf.byteLength);
+    const loadingTask = pdfjs.getDocument({ data: source });
+    const doc = await loadingTask.promise;
+    const pageTexts: string[] = [];
+    const clean = (value: unknown): string => {
+      if (typeof value === 'string') {
+        return value.replace(/\s+/g, ' ').trim();
+      }
+      return '';
+    };
+    for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+      const page = await doc.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const items = Array.isArray(textContent.items) ? textContent.items : [];
+      const text = items
+        .map((item: { str?: string; text?: string }) => clean(item?.str ?? item?.text))
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      if (text) {
+        pageTexts.push(text);
+      }
+    }
+    const joined = pageTexts.join('\n\n').trim();
+    return joined.length ? joined : null;
+  } catch (error) {
+    console.warn('PDF.js extraction failed', error);
+    return null;
+  }
+}
+
+async function extractTextFromPdfViaAi(env: Env, pdf: Uint8Array): Promise<string> {
+  const result = await env.AI.run(OCR_MODEL, {
+    messages: [
+      {
+        role: 'system',
+        content: 'You are an OCR assistant. Read the attached PDF manual and return all text in reading order.',
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'input_text',
+            text: 'Please extract the manual text from this PDF.',
+          },
+          {
+            type: 'input_file',
+            data: pdf,
+            mime_type: 'application/pdf',
+          },
+        ],
+      },
+    ],
+  });
+
+  if (typeof result?.text === 'string') {
+    return result.text;
+  }
+  if (Array.isArray(result?.choices) && result.choices[0]?.message?.content) {
+    return String(result.choices[0].message.content);
+  }
+  if (typeof result?.result === 'string') {
+    return result.result;
+  }
+  if (typeof result?.response === 'string') {
+    return result.response;
+  }
+  if (typeof result?.output_text === 'string') {
+    return result.output_text;
+  }
+  return '';
+}
 
 export async function embedText(env: Env, text: string): Promise<number[]> {
   if (!text.trim()) {
@@ -96,39 +187,250 @@ export async function extractTextFromImage(env: Env, image: Uint8Array): Promise
 }
 
 export async function extractTextFromPdf(env: Env, pdf: Uint8Array): Promise<string> {
-  const result = await env.AI.run(OCR_MODEL, {
+  const localText = await tryExtractWithPdfJs(pdf);
+  if (localText && localText.length > 200) {
+    return localText;
+  }
+
+  const aiText = await extractTextFromPdfViaAi(env, pdf);
+  if (aiText && aiText.length > 0) {
+    if (localText && aiText.length < localText.length / 4) {
+      return localText;
+    }
+    return aiText;
+  }
+
+  return localText ?? '';
+}
+
+export async function extractApplianceSpecs(env: Env, text: string): Promise<ApplianceSpecs | null> {
+  if (!text.trim()) {
+    return null;
+  }
+
+  const prompt =
+    "Analyze the following user manual text and return a JSON object with the keys: 'brand', 'model', 'capacity', 'wattage', and a list of 'key_features'.";
+
+  const response = await env.AI.run(CHAT_MODEL, {
     messages: [
       {
         role: 'system',
-        content: 'You are an OCR assistant. Read the attached PDF manual and return all text in reading order.',
+        content:
+          'You are a structured data extraction assistant. Always respond with valid JSON and avoid extra commentary.',
+      },
+      { role: 'user', content: `${prompt}\n\nManual Text:\n${truncate(text, 12000)}` },
+    ],
+  });
+
+  const raw = typeof response?.choices?.[0]?.message?.content === 'string'
+    ? response.choices[0].message.content
+    : typeof response?.result === 'string'
+      ? response.result
+      : typeof response?.response === 'string'
+        ? response.response
+        : typeof response?.output_text === 'string'
+          ? response.output_text
+          : '{}';
+
+  const jsonString = raw.trim().startsWith('```')
+    ? raw.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
+    : raw;
+
+  try {
+    const parsed = JSON.parse(jsonString) as Record<string, unknown>;
+    const keyFeatures = Array.isArray(parsed.key_features)
+      ? parsed.key_features.map((value) => String(value))
+      : Array.isArray(parsed.keyFeatures)
+        ? parsed.keyFeatures.map((value) => String(value))
+        : [];
+    const specs: ApplianceSpecs = {
+      brand: typeof parsed.brand === 'string' ? parsed.brand : null,
+      model: typeof parsed.model === 'string' ? parsed.model : null,
+      capacity: typeof parsed.capacity === 'string' ? parsed.capacity : null,
+      wattage: typeof parsed.wattage === 'string' ? parsed.wattage : null,
+      keyFeatures,
+    };
+    for (const [key, value] of Object.entries(parsed)) {
+      if (!(key in specs)) {
+        (specs as Record<string, unknown>)[key] = value;
+      }
+    }
+    return specs;
+  } catch (error) {
+    console.warn('Failed to parse appliance specs JSON', error);
+  }
+  return null;
+}
+
+export async function generateApplianceInstructions(
+  env: Env,
+  input: {
+    specs: ApplianceSpecs | null;
+    preferences: UserPreferences | null;
+    nickname?: string | null;
+    brand?: string | null;
+    model?: string | null;
+  }
+): Promise<string> {
+  const preferenceSummary = input.preferences
+    ? {
+        cuisines: input.preferences.cuisines,
+        allergies: input.preferences.allergies,
+        dislikedIngredients: input.preferences.dislikedIngredients,
+        favoredTools: input.preferences.favoredTools,
+        skillLevel: input.preferences.skillLevel,
+      }
+    : null;
+
+  const specSummary = input.specs
+    ? {
+        ...input.specs,
+        keyFeatures: input.specs.keyFeatures ?? [],
+      }
+    : null;
+
+  const response = await env.AI.run(CHAT_MODEL, {
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are MenuForge, a culinary agent designer. Produce concise, helpful guidance (2-3 sentences) for another agent that will cook with this appliance.',
       },
       {
         role: 'user',
-        content: [
-          {
-            type: 'input_text',
-            text: 'Please extract the manual text from this PDF.',
+        content: JSON.stringify({
+          appliance: {
+            nickname: input.nickname ?? null,
+            brand: input.brand ?? input.specs?.brand ?? null,
+            model: input.model ?? input.specs?.model ?? null,
+            specs: specSummary,
           },
-          {
-            type: 'input_file',
-            data: pdf,
-            mime_type: 'application/pdf',
-          },
-        ],
+          userPreferences: preferenceSummary,
+          instruction:
+            'Based on this appliance\'s features and the user\'s cooking preferences, write a short, helpful instruction for a cooking agent on how to best utilize this device for this user.',
+        }),
       },
     ],
   });
 
-  if (typeof result?.text === 'string') {
-    return result.text;
+  const message = typeof response?.choices?.[0]?.message?.content === 'string'
+    ? response.choices[0].message.content
+    : typeof response?.result === 'string'
+      ? response.result
+      : typeof response?.response === 'string'
+        ? response.response
+        : typeof response?.output_text === 'string'
+          ? response.output_text
+          : '';
+
+  return message.trim();
+}
+
+export async function summarizeCookingActions(env: Env, steps: string[]): Promise<string[]> {
+  if (!steps.length) {
+    return [];
   }
-  if (Array.isArray(result?.choices) && result.choices[0]?.message?.content) {
-    return String(result.choices[0].message.content);
+
+  const response = await env.AI.run(CHAT_MODEL, {
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are an expert recipe analyst. Identify the core cooking actions, temperatures, and time cues in a recipe. Return them as a JSON array of short bullet strings.',
+      },
+      {
+        role: 'user',
+        content: JSON.stringify({ steps }),
+      },
+    ],
+  });
+
+  const raw = typeof response?.choices?.[0]?.message?.content === 'string'
+    ? response.choices[0].message.content
+    : typeof response?.result === 'string'
+      ? response.result
+      : typeof response?.response === 'string'
+        ? response.response
+        : typeof response?.output_text === 'string'
+          ? response.output_text
+          : '[]';
+
+  const text = raw.trim().startsWith('```')
+    ? raw.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
+    : raw;
+
+  try {
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed)) {
+      return parsed.map((value) => String(value));
+    }
+  } catch (error) {
+    console.warn('Failed to parse cooking actions JSON', error);
   }
-  if (typeof result?.result === 'string') {
-    return result.result;
+  return steps.slice(0, 5).map((step, index) => `${index + 1}. ${step}`);
+}
+
+export async function generateApplianceAdaptation(
+  env: Env,
+  input: {
+    agentInstructions: string | null;
+    manualExcerpts: string[];
+    recipeTitle: string;
+    recipeSteps: string[];
   }
-  return '';
+): Promise<{ tailoredSteps: string[]; summaryOfChanges: string }> {
+  const response = await env.AI.run(CHAT_MODEL, {
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are an expert culinary assistant adapting recipes to specific appliances. Always return valid JSON with keys "tailored_steps" and "summary_of_changes".',
+      },
+      {
+        role: 'user',
+        content: `You are adapting the recipe "${input.recipeTitle}" for a user's appliance.\n\n**User's Appliance Instructions:**\n${input.agentInstructions ?? 'No additional instructions provided.'}\n\n**Relevant Excerpts from the Appliance Manual:**\n${input.manualExcerpts.map((excerpt, index) => `${index + 1}. ${excerpt}`).join('\n')}\n\n**Original Recipe Instructions:**\n${input.recipeSteps.map((step, index) => `${index + 1}. ${step}`).join('\n')}\n\nRewrite the recipe instructions to be executed using the user's appliance. Refer to the manual excerpts to use correct modes, temperatures, and timings. If the original recipe calls for a feature the appliance lacks, provide the closest alternative based on the manual. Finally, provide a brief summary of the changes you made. Respond with JSON {"tailored_steps": string[], "summary_of_changes": string}.`,
+      },
+    ],
+  });
+
+  const raw = typeof response?.choices?.[0]?.message?.content === 'string'
+    ? response.choices[0].message.content
+    : typeof response?.result === 'string'
+      ? response.result
+      : typeof response?.response === 'string'
+        ? response.response
+        : typeof response?.output_text === 'string'
+          ? response.output_text
+          : '{}';
+
+  const json = raw.trim().startsWith('```')
+    ? raw.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
+    : raw;
+
+  try {
+    const parsed = JSON.parse(json);
+    const tailoredSteps = Array.isArray(parsed?.tailored_steps)
+      ? parsed.tailored_steps.map((value: unknown) => String(value))
+      : Array.isArray(parsed?.tailoredSteps)
+        ? parsed.tailoredSteps.map((value: unknown) => String(value))
+        : [];
+    const summary = typeof parsed?.summary_of_changes === 'string'
+      ? parsed.summary_of_changes
+      : typeof parsed?.summaryOfChanges === 'string'
+        ? parsed.summaryOfChanges
+        : '';
+    return {
+      tailoredSteps,
+      summaryOfChanges: summary,
+    };
+  } catch (error) {
+    console.warn('Failed to parse appliance adaptation JSON', error);
+  }
+
+  return {
+    tailoredSteps: input.recipeSteps,
+    summaryOfChanges: 'Unable to adapt recipe with the provided manual excerpts.',
+  };
 }
 
 export async function generatePrepPhases(env: Env, recipe: NormalizedRecipe): Promise<PrepPhase[]> {
