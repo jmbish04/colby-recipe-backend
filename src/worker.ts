@@ -35,18 +35,33 @@ import {
   createMenu,
   getMenuWithItems,
   listMenuItems,
+  listMenus,
   listPantryItems,
   createPantryItem,
   updatePantryItem,
   deletePantryItem,
   getRecipesWithIngredients,
   listKitchenAppliances,
+  listFavoriteRecipeSummaries,
+  createManualRecipe,
+  updateManualRecipe,
   updateRecipePrepPhases,
   getKitchenAppliance,
   updateKitchenApplianceFields,
   deleteKitchenAppliance,
+  ManualRecipeDraft,
+  ManualRecipeUpdate,
 } from './db';
-import { ApplianceSpecs, MenuItem, RecipeDetail, RecipeSummary, UserPreferences } from './types';
+import {
+  ApplianceSpecs,
+  MenuItem,
+  RecipeDetail,
+  RecipeSummary,
+  UserPreferences,
+  Ingredient,
+  RecipeStep,
+  PrepPhase,
+} from './types';
 
 export const app = new Hono<{ Bindings: Env }>();
 
@@ -197,6 +212,403 @@ function normalizeIngredientEntry(raw: unknown): { name: string; quantity?: stri
     return { name, quantity: quantity ?? undefined };
   }
   return null;
+}
+
+function validationError(message: string): never {
+  throw Object.assign(new Error(message), { status: 400 });
+}
+
+function readFirstPresent(body: Record<string, unknown>, keys: string[]): unknown {
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(body, key)) {
+      return body[key];
+    }
+  }
+  return undefined;
+}
+
+function parseNullableString(value: unknown, field: string): string | null {
+  if (value == null) {
+    return null;
+  }
+  if (typeof value !== 'string') {
+    validationError(`${field} must be a string`);
+  }
+  const trimmed = value.trim();
+  return trimmed || null;
+}
+
+function parseOptionalNumber(value: unknown, field: string): number | null | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null || value === '') {
+    return null;
+  }
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) {
+      validationError(`${field} must be a finite number`);
+    }
+    return Math.round(value);
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const parsed = Number(trimmed);
+    if (!Number.isFinite(parsed)) {
+      validationError(`${field} must be a number`);
+    }
+    return Math.round(parsed);
+  }
+  validationError(`${field} must be a number`);
+}
+
+function parseStringArrayField(value: unknown, field: string): string[] {
+  if (value == null) {
+    return [];
+  }
+  if (Array.isArray(value) || typeof value === 'string') {
+    return parseArray(value);
+  }
+  validationError(`${field} must be an array of strings or a comma-separated string`);
+}
+
+function sanitizeIngredientValue(value: unknown, field: string): Ingredient {
+  if (typeof value === 'string') {
+    const name = value.trim();
+    if (!name) {
+      validationError(`${field} must include a name`);
+    }
+    return { name };
+  }
+  if (typeof value === 'object' && value) {
+    const record = value as Record<string, unknown>;
+    const nameSource =
+      typeof record.name === 'string'
+        ? record.name
+        : typeof record.ingredient === 'string'
+          ? record.ingredient
+          : typeof record.title === 'string'
+            ? record.title
+            : typeof record.text === 'string'
+              ? record.text
+              : undefined;
+    if (typeof nameSource !== 'string') {
+      validationError(`${field}.name must be a string`);
+    }
+    const name = nameSource.trim();
+    if (!name) {
+      validationError(`${field}.name must not be empty`);
+    }
+    const ingredient: Ingredient = { name };
+    const quantitySource =
+      record.quantity ?? record.amount ?? record.qty ?? record.measure ?? record.value;
+    if (typeof quantitySource === 'string') {
+      const quantity = quantitySource.trim();
+      if (quantity) {
+        ingredient.quantity = quantity;
+      }
+    } else if (typeof quantitySource === 'number' && Number.isFinite(quantitySource)) {
+      ingredient.quantity = String(quantitySource);
+    }
+    if (typeof record.notes === 'string') {
+      const notes = record.notes.trim();
+      if (notes) {
+        ingredient.notes = notes;
+      }
+    }
+    return ingredient;
+  }
+  validationError(`${field} must be a string or object`);
+}
+
+function parseIngredientList(value: unknown, field: string, required: boolean): Ingredient[] {
+  if (value == null) {
+    if (required) {
+      validationError(`${field} is required`);
+    }
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    validationError(`${field} must be an array`);
+  }
+  const items: Ingredient[] = [];
+  (value as unknown[]).forEach((entry, index) => {
+    const ingredient = sanitizeIngredientValue(entry, `${field}[${index}]`);
+    if (ingredient) {
+      items.push(ingredient);
+    }
+  });
+  if (required && !items.length) {
+    validationError(`${field} must include at least one ingredient`);
+  }
+  return items;
+}
+
+function sanitizeStepValue(value: unknown, field: string): RecipeStep {
+  if (typeof value === 'string') {
+    const instruction = value.trim();
+    if (!instruction) {
+      validationError(`${field} must not be empty`);
+    }
+    return { instruction };
+  }
+  if (typeof value === 'object' && value) {
+    const record = value as Record<string, unknown>;
+    const instructionSource =
+      typeof record.instruction === 'string'
+        ? record.instruction
+        : typeof record.text === 'string'
+          ? record.text
+          : typeof record.step === 'string'
+            ? record.step
+            : typeof record.description === 'string'
+              ? record.description
+              : undefined;
+    if (typeof instructionSource !== 'string') {
+      validationError(`${field}.instruction must be a string`);
+    }
+    const instruction = instructionSource.trim();
+    if (!instruction) {
+      validationError(`${field}.instruction must not be empty`);
+    }
+    const step: RecipeStep = { instruction };
+    if (typeof record.title === 'string') {
+      const title = record.title.trim();
+      if (title) {
+        step.title = title;
+      }
+    }
+    return step;
+  }
+  validationError(`${field} must be a string or object`);
+}
+
+function parseStepList(value: unknown, field: string, required: boolean): RecipeStep[] {
+  if (value == null) {
+    if (required) {
+      validationError(`${field} is required`);
+    }
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    validationError(`${field} must be an array`);
+  }
+  const steps: RecipeStep[] = [];
+  (value as unknown[]).forEach((entry, index) => {
+    const step = sanitizeStepValue(entry, `${field}[${index}]`);
+    if (step) {
+      steps.push(step);
+    }
+  });
+  if (required && !steps.length) {
+    validationError(`${field} must include at least one step`);
+  }
+  return steps;
+}
+
+function parsePrepPhaseList(value: unknown, field: string): PrepPhase[] {
+  if (value == null) {
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    validationError(`${field} must be an array`);
+  }
+  return (value as unknown[]).map((entry, index) => {
+    if (typeof entry !== 'object' || !entry) {
+      validationError(`${field}[${index}] must be an object`);
+    }
+    const record = entry as Record<string, unknown>;
+    const titleSource =
+      typeof record.phaseTitle === 'string'
+        ? record.phaseTitle
+        : typeof record.title === 'string'
+          ? record.title
+          : undefined;
+    if (typeof titleSource !== 'string') {
+      validationError(`${field}[${index}].phaseTitle must be a string`);
+    }
+    const phaseTitle = titleSource.trim();
+    if (!phaseTitle) {
+      validationError(`${field}[${index}].phaseTitle must not be empty`);
+    }
+    const ingredients = parseIngredientList(
+      (record.ingredients as unknown) ?? [],
+      `${field}[${index}].ingredients`,
+      false
+    );
+    return { phaseTitle, ingredients };
+  });
+}
+
+function parseManualRecipeDraft(body: Record<string, unknown>): ManualRecipeDraft {
+  const titleRaw = body.title;
+  if (typeof titleRaw !== 'string' || !titleRaw.trim()) {
+    validationError('title is required');
+  }
+  const draft: ManualRecipeDraft = {
+    title: titleRaw.trim(),
+    ingredients: parseIngredientList(readFirstPresent(body, ['ingredients']), 'ingredients', true),
+    steps: parseStepList(readFirstPresent(body, ['steps']), 'steps', true),
+  };
+
+  const idRaw = readFirstPresent(body, ['id']);
+  if (typeof idRaw === 'string' && idRaw.trim()) {
+    draft.id = idRaw.trim();
+  }
+
+  const descriptionRaw = readFirstPresent(body, ['description']);
+  if (descriptionRaw !== undefined) {
+    draft.description = parseNullableString(descriptionRaw, 'description');
+  }
+
+  const authorRaw = readFirstPresent(body, ['author']);
+  if (authorRaw !== undefined) {
+    draft.author = parseNullableString(authorRaw, 'author');
+  }
+
+  const cuisineRaw = readFirstPresent(body, ['cuisine']);
+  if (cuisineRaw !== undefined) {
+    draft.cuisine = parseNullableString(cuisineRaw, 'cuisine');
+  }
+
+  const tagsRaw = readFirstPresent(body, ['tags', 'tag_list', 'tagList']);
+  if (tagsRaw !== undefined) {
+    draft.tags = parseStringArrayField(tagsRaw, 'tags');
+  }
+
+  const heroImageRaw = readFirstPresent(body, ['heroImageUrl', 'hero_image_url', 'image']);
+  if (heroImageRaw !== undefined) {
+    draft.heroImageUrl = parseNullableString(heroImageRaw, 'heroImageUrl');
+  }
+
+  const yieldRaw = readFirstPresent(body, ['yield', 'servings']);
+  if (yieldRaw !== undefined) {
+    draft.yield = parseNullableString(yieldRaw, 'yield');
+  }
+
+  const prepTimeRaw = readFirstPresent(body, ['prepTimeMinutes', 'prep_time_minutes', 'prep_time', 'prepMinutes']);
+  if (prepTimeRaw !== undefined) {
+    draft.prepTimeMinutes = parseOptionalNumber(prepTimeRaw, 'prepTimeMinutes') ?? null;
+  }
+
+  const cookTimeRaw = readFirstPresent(body, ['cookTimeMinutes', 'cook_time_minutes', 'cook_time', 'cooking_time']);
+  if (cookTimeRaw !== undefined) {
+    draft.cookTimeMinutes = parseOptionalNumber(cookTimeRaw, 'cookTimeMinutes') ?? null;
+  }
+
+  const totalTimeRaw = readFirstPresent(body, ['totalTimeMinutes', 'total_time_minutes', 'total_time']);
+  if (totalTimeRaw !== undefined) {
+    draft.totalTimeMinutes = parseOptionalNumber(totalTimeRaw, 'totalTimeMinutes') ?? null;
+  }
+
+  const toolsRaw = readFirstPresent(body, ['tools', 'equipment']);
+  if (toolsRaw !== undefined) {
+    draft.tools = parseStringArrayField(toolsRaw, 'tools');
+  }
+
+  const notesRaw = readFirstPresent(body, ['notes']);
+  if (notesRaw !== undefined) {
+    const notes = parseNullableString(notesRaw, 'notes');
+    draft.notes = notes;
+  }
+
+  const prepPhasesRaw = readFirstPresent(body, ['prepPhases', 'prep_phases']);
+  if (prepPhasesRaw !== undefined) {
+    draft.prepPhases = parsePrepPhaseList(prepPhasesRaw, 'prepPhases');
+  }
+
+  return draft;
+}
+
+function parseManualRecipeUpdate(body: Record<string, unknown>): ManualRecipeUpdate {
+  const updates: ManualRecipeUpdate = {};
+
+  if (Object.prototype.hasOwnProperty.call(body, 'title')) {
+    const value = body.title;
+    if (typeof value !== 'string') {
+      validationError('title must be a string');
+    }
+    const title = value.trim();
+    if (!title) {
+      validationError('title must not be empty');
+    }
+    updates.title = title;
+  }
+
+  const descriptionRaw = readFirstPresent(body, ['description']);
+  if (descriptionRaw !== undefined) {
+    updates.description = parseNullableString(descriptionRaw, 'description');
+  }
+
+  const authorRaw = readFirstPresent(body, ['author']);
+  if (authorRaw !== undefined) {
+    updates.author = parseNullableString(authorRaw, 'author');
+  }
+
+  const cuisineRaw = readFirstPresent(body, ['cuisine']);
+  if (cuisineRaw !== undefined) {
+    updates.cuisine = parseNullableString(cuisineRaw, 'cuisine');
+  }
+
+  const tagsRaw = readFirstPresent(body, ['tags', 'tag_list', 'tagList']);
+  if (tagsRaw !== undefined) {
+    updates.tags = parseStringArrayField(tagsRaw, 'tags');
+  }
+
+  const heroImageRaw = readFirstPresent(body, ['heroImageUrl', 'hero_image_url', 'image']);
+  if (heroImageRaw !== undefined) {
+    updates.heroImageUrl = parseNullableString(heroImageRaw, 'heroImageUrl');
+  }
+
+  const yieldRaw = readFirstPresent(body, ['yield', 'servings']);
+  if (yieldRaw !== undefined) {
+    updates.yield = parseNullableString(yieldRaw, 'yield');
+  }
+
+  const prepTimeRaw = readFirstPresent(body, ['prepTimeMinutes', 'prep_time_minutes', 'prep_time', 'prepMinutes']);
+  if (prepTimeRaw !== undefined) {
+    updates.prepTimeMinutes = parseOptionalNumber(prepTimeRaw, 'prepTimeMinutes') ?? null;
+  }
+
+  const cookTimeRaw = readFirstPresent(body, ['cookTimeMinutes', 'cook_time_minutes', 'cook_time', 'cooking_time']);
+  if (cookTimeRaw !== undefined) {
+    updates.cookTimeMinutes = parseOptionalNumber(cookTimeRaw, 'cookTimeMinutes') ?? null;
+  }
+
+  const totalTimeRaw = readFirstPresent(body, ['totalTimeMinutes', 'total_time_minutes', 'total_time']);
+  if (totalTimeRaw !== undefined) {
+    updates.totalTimeMinutes = parseOptionalNumber(totalTimeRaw, 'totalTimeMinutes') ?? null;
+  }
+
+  const ingredientsRaw = readFirstPresent(body, ['ingredients']);
+  if (ingredientsRaw !== undefined) {
+    updates.ingredients = parseIngredientList(ingredientsRaw, 'ingredients', false);
+  }
+
+  const stepsRaw = readFirstPresent(body, ['steps']);
+  if (stepsRaw !== undefined) {
+    updates.steps = parseStepList(stepsRaw, 'steps', false);
+  }
+
+  const toolsRaw = readFirstPresent(body, ['tools', 'equipment']);
+  if (toolsRaw !== undefined) {
+    updates.tools = parseStringArrayField(toolsRaw, 'tools');
+  }
+
+  const notesRaw = readFirstPresent(body, ['notes']);
+  if (notesRaw !== undefined) {
+    updates.notes = parseNullableString(notesRaw, 'notes');
+  }
+
+  const prepPhasesRaw = readFirstPresent(body, ['prepPhases', 'prep_phases']);
+  if (prepPhasesRaw !== undefined) {
+    updates.prepPhases = parsePrepPhaseList(prepPhasesRaw, 'prepPhases');
+  }
+
+  return updates;
 }
 
 type ApplianceIngestionJob = {
@@ -781,6 +1193,36 @@ app.post('/api/menus/generate', async (c) => {
   });
 });
 
+app.get('/api/favorites', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  try {
+    const favorites = await listFavoriteRecipeSummaries(c.env, userId);
+    return jsonResponse(favorites);
+  } catch (error) {
+    console.error('Failed to list favorites', error);
+    return jsonResponse({ error: 'failed to load favorites' }, { status: 500 });
+  }
+});
+
+app.get('/api/menus', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  try {
+    const menus = await listMenus(c.env, userId);
+    return jsonResponse(menus);
+  } catch (error) {
+    console.error('Failed to list menus', error);
+    return jsonResponse({ error: 'failed to load menus' }, { status: 500 });
+  }
+});
+
 app.post('/api/kitchen/appliances', async (c) => {
   const userId = await requireUserId(c);
   if (!userId) {
@@ -852,6 +1294,25 @@ app.get('/api/kitchen/appliances', async (c) => {
 
   const appliances = await listKitchenAppliances(c.env, userId);
   return jsonResponse({ appliances });
+});
+
+app.get('/api/kitchen/appliances/:id', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const id = c.req.param('id');
+  if (!id) {
+    return jsonResponse({ error: 'appliance id required' }, { status: 400 });
+  }
+
+  const appliance = await getKitchenAppliance(c.env, id);
+  if (!appliance || appliance.userId !== userId) {
+    return jsonResponse({ error: 'appliance not found' }, { status: 404 });
+  }
+
+  return jsonResponse({ appliance });
 });
 
 app.get('/api/kitchen/appliances/:id/status', async (c) => {
@@ -1152,6 +1613,92 @@ app.post('/api/menus/:id/shopping-list', async (c) => {
 });
 
 // API Routes from main branch
+app.post('/api/recipes', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = await parseJsonBody<Record<string, unknown>>(c.req.raw);
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid JSON body' }, { status });
+  }
+
+  let draft: ManualRecipeDraft;
+  try {
+    draft = parseManualRecipeDraft(body);
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid recipe payload' }, { status });
+  }
+
+  try {
+    const recipe = await createManualRecipe(c.env, userId, draft);
+    return jsonResponse({ recipe }, { status: 201 });
+  } catch (error) {
+    console.error('Manual recipe creation failed', error);
+    return jsonResponse({ error: 'failed to create recipe' }, { status: 500 });
+  }
+});
+
+app.put('/api/recipes/:id', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const id = c.req.param('id');
+  if (!id) {
+    return jsonResponse({ error: 'recipe id required' }, { status: 400 });
+  }
+
+  const existing = await getRecipeById(c.env, id);
+  if (!existing) {
+    return jsonResponse({ error: 'recipe not found' }, { status: 404 });
+  }
+
+  const sourceUrl = existing.sourceUrl ?? '';
+  const ownsRecipe =
+    sourceUrl.startsWith(`manual://${userId}/`) || sourceUrl.startsWith(`user://${userId}/`);
+  if (!ownsRecipe) {
+    return jsonResponse({ error: 'recipe not editable' }, { status: 403 });
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = await parseJsonBody<Record<string, unknown>>(c.req.raw);
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid JSON body' }, { status });
+  }
+
+  let updates: ManualRecipeUpdate;
+  try {
+    updates = parseManualRecipeUpdate(body);
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid recipe payload' }, { status });
+  }
+
+  if (!Object.keys(updates).length) {
+    return jsonResponse({ recipe: existing });
+  }
+
+  try {
+    const recipe = await updateManualRecipe(c.env, id, updates);
+    if (!recipe) {
+      return jsonResponse({ error: 'recipe not found' }, { status: 404 });
+    }
+    return jsonResponse({ recipe });
+  } catch (error) {
+    console.error('Manual recipe update failed', error);
+    return jsonResponse({ error: 'failed to update recipe' }, { status: 500 });
+  }
+});
+
 app.post('/api/recipes/batch-scan', async (c) => {
   try {
     const { urls } = await c.req.json();
