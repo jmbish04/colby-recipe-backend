@@ -40,7 +40,7 @@ async function tryExtractWithPdfJs(pdf: Uint8Array): Promise<string | null> {
       const textContent = await page.getTextContent();
       const items = Array.isArray(textContent.items) ? textContent.items : [];
       const text = items
-        .map((item: any) => clean(item?.str ?? item?.text))
+        .map((item: { str?: string; text?: string }) => clean(item?.str ?? item?.text))
         .filter(Boolean)
         .join(' ')
         .trim();
