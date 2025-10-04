@@ -10,7 +10,7 @@
     "dev": "wrangler dev",
     "migrate:remote": "wrangler d1 migrations apply DB --remote",
     "deploy": "npm run migrate:remote && wrangler versions deploy",
-    "commit:gh": "git add . && git commit -m \"Update: $(date '+%Y-%m-%d %H:%M:%S')\" && git push origin master"
+    "commit:gh": "git add . && git commit -m \"Update: $(date '+%Y-%m-%d %H:%M:%S')\" && git push origin main"
   },
   "keywords": [
     "cloudflare",
