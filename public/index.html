@@ -845,7 +845,7 @@
                 </div>
                 <div class="appliance-actions">
                   ${statusButton}
-                  <button data-action="delete" data-id="${appliance.id}" class="secondary">🗑 Remove</button>
+                  <button data-action="delete" data-id="${escapeHtml(appliance.id)}" class="secondary">🗑 Remove</button>
                 </div>
               </li>`;
           })
