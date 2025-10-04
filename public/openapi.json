@@ -304,22 +304,72 @@
       "Menu": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "user_id": { "type": "string", "nullable": true },
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "title": { "type": ["string", "null"] },
+          "weekStartDate": { "type": ["string", "null"], "format": "date" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "userId", "createdAt", "updatedAt"]
+      },
+      "ManualRecipeInput": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
           "title": { "type": "string" },
-          "week_start": { "type": "string", "format": "date" },
-          "items_json": {
+          "description": { "type": ["string", "null"] },
+          "author": { "type": ["string", "null"] },
+          "cuisine": { "type": ["string", "null"] },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "heroImageUrl": { "type": ["string", "null"], "format": "uri" },
+          "yield": { "type": ["string", "null"] },
+          "prepTimeMinutes": { "type": ["integer", "null"] },
+          "cookTimeMinutes": { "type": ["integer", "null"] },
+          "totalTimeMinutes": { "type": ["integer", "null"] },
+          "ingredients": {
             "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "day": { "type": "string" },
-                "meal": { "type": "string" },
-                "recipe_id": { "type": "string" }
-              },
-              "required": ["day", "meal", "recipe_id"]
-            },
-            "description": "Serialized as JSON array"
+            "items": { "$ref": "#/components/schemas/Ingredient" }
+          },
+          "steps": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/RecipeStep" }
+          },
+          "tools": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": ["string", "null"] },
+          "prepPhases": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PrepPhase" }
+          }
+        },
+        "required": ["title", "ingredients", "steps"]
+      },
+      "ManualRecipeUpdate": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": ["string", "null"] },
+          "author": { "type": ["string", "null"] },
+          "cuisine": { "type": ["string", "null"] },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "heroImageUrl": { "type": ["string", "null"], "format": "uri" },
+          "yield": { "type": ["string", "null"] },
+          "prepTimeMinutes": { "type": ["integer", "null"] },
+          "cookTimeMinutes": { "type": ["integer", "null"] },
+          "totalTimeMinutes": { "type": ["integer", "null"] },
+          "ingredients": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Ingredient" }
+          },
+          "steps": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/RecipeStep" }
+          },
+          "tools": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": ["string", "null"] },
+          "prepPhases": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PrepPhase" }
           }
         }
       },
@@ -660,6 +710,35 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Create a manual recipe",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ManualRecipeInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created recipe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "recipe": { "$ref": "#/components/schemas/Recipe" }
+                  },
+                  "required": ["recipe"]
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid recipe payload" },
+          "401": { "description": "Authentication required" }
+        }
       }
     },
     "/api/recipes/{id}": {
@@ -690,6 +769,45 @@
           "404": {
             "description": "Not found"
           }
+        }
+      },
+      "put": {
+        "summary": "Update a manual recipe",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ManualRecipeUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated recipe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "recipe": { "$ref": "#/components/schemas/Recipe" }
+                  },
+                  "required": ["recipe"]
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid recipe payload" },
+          "401": { "description": "Authentication required" },
+          "403": { "description": "Recipe not editable" },
+          "404": { "description": "Recipe not found" }
         }
       }
     },
@@ -895,6 +1013,44 @@
               }
             }
           }
+        }
+      }
+    },
+    "/api/favorites": {
+      "get": {
+        "summary": "List favorite recipes",
+        "responses": {
+          "200": {
+            "description": "Favorited recipes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/RecipeSummary" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Authentication required" }
+        }
+      }
+    },
+    "/api/menus": {
+      "get": {
+        "summary": "List saved menus",
+        "responses": {
+          "200": {
+            "description": "User menus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Menu" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Authentication required" }
         }
       }
     },
@@ -1173,6 +1329,35 @@
       }
     },
     "/api/kitchen/appliances/{id}": {
+      "get": {
+        "summary": "Fetch a kitchen appliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appliance details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appliance": { "$ref": "#/components/schemas/KitchenAppliance" }
+                  },
+                  "required": ["appliance"]
+                }
+              }
+            }
+          },
+          "401": { "description": "Authentication required" },
+          "404": { "description": "Appliance not found" }
+        }
+      },
       "put": {
         "summary": "Update appliance metadata",
         "parameters": [

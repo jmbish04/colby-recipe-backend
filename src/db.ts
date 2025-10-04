@@ -8,6 +8,8 @@ import {
   Menu,
   MenuItem,
   NormalizedRecipe,
+  Ingredient,
+  RecipeStep,
   PantryItem,
   Rating,
   RecipeDetail,
@@ -17,6 +19,43 @@ import {
 } from './types';
 import { buildEmbeddingText, ensureRecipeId, safeDateISOString, truncate } from './utils';
 import { embedText, generatePrepPhases, normalizeRecipeFromText } from './ai';
+
+export interface ManualRecipeDraft {
+  id?: string;
+  title: string;
+  description?: string | null;
+  author?: string | null;
+  cuisine?: string | null;
+  tags?: string[];
+  heroImageUrl?: string | null;
+  yield?: string | null;
+  prepTimeMinutes?: number | null;
+  cookTimeMinutes?: number | null;
+  totalTimeMinutes?: number | null;
+  ingredients: Ingredient[];
+  steps: RecipeStep[];
+  tools?: string[];
+  notes?: string | null;
+  prepPhases?: PrepPhase[];
+}
+
+export interface ManualRecipeUpdate {
+  title?: string;
+  description?: string | null;
+  author?: string | null;
+  cuisine?: string | null;
+  tags?: string[] | null;
+  heroImageUrl?: string | null;
+  yield?: string | null;
+  prepTimeMinutes?: number | null;
+  cookTimeMinutes?: number | null;
+  totalTimeMinutes?: number | null;
+  ingredients?: Ingredient[] | null;
+  steps?: RecipeStep[] | null;
+  tools?: string[] | null;
+  notes?: string | null;
+  prepPhases?: PrepPhase[] | null;
+}
 
 export async function upsertUser(env: Env, user: User): Promise<User> {
   await env.DB.prepare(
@@ -259,6 +298,20 @@ export async function listFavorites(env: Env, userId: string): Promise<Favorite[
   return (results ?? []).map(mapFavoriteRow);
 }
 
+export async function listFavoriteRecipeSummaries(env: Env, userId: string): Promise<RecipeSummary[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT r.id, r.title, r.cuisine, r.tags, r.hero_image_url, f.created_at
+     FROM favorites f
+     JOIN recipes r ON r.id = f.recipe_id
+     WHERE f.user_id = ?
+     ORDER BY datetime(f.created_at) DESC`
+  )
+    .bind(userId)
+    .all<FavoriteSummaryRow>();
+
+  return (results ?? []).map(mapRecipeSummaryRow);
+}
+
 export async function deleteFavorite(env: Env, userId: string, recipeId: string): Promise<void> {
   await env.DB.prepare(`DELETE FROM favorites WHERE user_id = ? AND recipe_id = ?`)
     .bind(userId, recipeId)
@@ -323,23 +376,11 @@ export async function listRecipesByIds(env: Env, ids: string[]): Promise<Record<
   const stmt = env.DB.prepare(
     `SELECT id, title, cuisine, tags, hero_image_url FROM recipes WHERE id IN (${placeholders})`
   ).bind(...ids);
-  const { results } = await stmt.all<{
-    id: string;
-    title: string;
-    cuisine: string | null;
-    tags: string | null;
-    hero_image_url: string | null;
-  }>();
+  const { results } = await stmt.all<RecipeSummaryRow>();
 
   const map: Record<string, RecipeSummary> = {};
   for (const row of results ?? []) {
-    map[row.id] = {
-      id: row.id,
-      title: row.title,
-      cuisine: row.cuisine,
-      tags: row.tags ? row.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [],
-      heroImageUrl: row.hero_image_url,
-    };
+    map[row.id] = mapRecipeSummaryRow(row);
   }
   return map;
 }
@@ -354,23 +395,11 @@ export async function recentThemeRecipes(env: Env, seed: string, limit = 12): Pr
      LIMIT ?`
   ).bind(like, like, like, limit);
 
-  const { results } = await stmt.all<{
-    id: string;
-    title: string;
-    cuisine: string | null;
-    tags: string | null;
-    hero_image_url: string | null;
-  }>();
+  const { results } = await stmt.all<RecipeSummaryRow>();
 
   const mapped: RecipeSummary[] = [];
   for (const row of results ?? []) {
-    mapped.push({
-      id: row.id,
-      title: row.title,
-      cuisine: row.cuisine,
-      tags: row.tags ? row.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [],
-      heroImageUrl: row.hero_image_url,
-    });
+    mapped.push(mapRecipeSummaryRow(row));
   }
   return mapped;
 }
@@ -437,6 +466,19 @@ export async function getMenuWithItems(env: Env, id: string): Promise<(Menu & { 
   }
   const items = await listMenuItems(env, id);
   return { ...menu, items };
+}
+
+export async function listMenus(env: Env, userId: string): Promise<Menu[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT id, user_id, title, week_start_date, created_at, updated_at
+     FROM menus
+     WHERE user_id = ?
+     ORDER BY week_start_date IS NULL, datetime(week_start_date) DESC, datetime(created_at) DESC`
+  )
+    .bind(userId)
+    .all<MenuRow>();
+
+  return (results ?? []).map(mapMenuRow);
 }
 
 export async function listMenuItems(env: Env, menuId: string): Promise<MenuItem[]> {
@@ -664,6 +706,300 @@ export async function getRecipeById(env: Env, id: string): Promise<RecipeDetail 
   };
 
   return recipe;
+}
+
+export async function createManualRecipe(
+  env: Env,
+  userId: string,
+  draft: ManualRecipeDraft
+): Promise<RecipeDetail> {
+  const id = ensureRecipeId({ id: draft.id }, crypto.randomUUID());
+  const base: NormalizedRecipe = {
+    id,
+    title: draft.title,
+    description: draft.description ?? undefined,
+    author: draft.author ?? null,
+    cuisine: draft.cuisine ?? undefined,
+    tags: Array.isArray(draft.tags) ? draft.tags : [],
+    heroImageUrl: draft.heroImageUrl ?? undefined,
+    yield: draft.yield ?? undefined,
+    prepTimeMinutes: draft.prepTimeMinutes ?? null,
+    cookTimeMinutes: draft.cookTimeMinutes ?? null,
+    totalTimeMinutes: draft.totalTimeMinutes ?? null,
+    ingredients: Array.isArray(draft.ingredients) ? draft.ingredients : [],
+    steps: Array.isArray(draft.steps) ? draft.steps : [],
+    tools: Array.isArray(draft.tools) ? draft.tools : [],
+    notes: draft.notes ?? undefined,
+    sourceUrl: `manual://${userId}/${id}`,
+    prepPhases: Array.isArray(draft.prepPhases) ? draft.prepPhases : [],
+  };
+
+  if (
+    base.totalTimeMinutes == null &&
+    base.prepTimeMinutes != null &&
+    base.cookTimeMinutes != null
+  ) {
+    base.totalTimeMinutes = base.prepTimeMinutes + base.cookTimeMinutes;
+  }
+
+  let prepPhases = Array.isArray(base.prepPhases) ? base.prepPhases : [];
+  const shouldGeneratePhases =
+    (!prepPhases || prepPhases.length === 0) &&
+    base.ingredients.length > 0 &&
+    base.steps.length > 0;
+
+  if (shouldGeneratePhases) {
+    try {
+      prepPhases = await generatePrepPhases(env, base);
+    } catch (error) {
+      console.warn('Failed to generate prep phases for manual recipe', id, error);
+      prepPhases = [];
+    }
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO recipes (
+       id,
+       source_url,
+       source_domain,
+       title,
+       description,
+       author,
+       cuisine,
+       tags,
+       hero_image_url,
+       yield,
+       time_prep_min,
+       time_cook_min,
+       time_total_min,
+       ingredients_json,
+       steps_json,
+       equipment_json,
+       prep_phases_json,
+       notes
+     )
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+    .bind(
+      id,
+      base.sourceUrl,
+      'manual',
+      base.title,
+      base.description ?? null,
+      base.author ?? null,
+      base.cuisine ?? null,
+      base.tags?.length ? base.tags.join(',') : null,
+      base.heroImageUrl ?? null,
+      base.yield ?? null,
+      base.prepTimeMinutes ?? null,
+      base.cookTimeMinutes ?? null,
+      base.totalTimeMinutes ?? null,
+      JSON.stringify(base.ingredients ?? []),
+      JSON.stringify(base.steps ?? []),
+      JSON.stringify(base.tools ?? []),
+      JSON.stringify(prepPhases ?? []),
+      base.notes ?? null
+    )
+    .run();
+
+  const embedding = await embedText(env, buildEmbeddingText({ ...base, prepPhases }));
+  if (embedding.length) {
+    await env.VEC.upsert([
+      {
+        id,
+        values: embedding,
+        metadata: {
+          recipe_id: id,
+          title: base.title,
+          tags: base.tags ?? [],
+          cuisine: base.cuisine,
+        },
+      },
+    ]);
+  }
+
+  const detail = await getRecipeById(env, id);
+  if (!detail) {
+    throw new Error('Failed to load manual recipe after creation');
+  }
+
+  detail.prepPhases = prepPhases;
+  detail.tags = base.tags ?? [];
+  detail.tools = base.tools ?? [];
+
+  return detail;
+}
+
+export async function updateManualRecipe(
+  env: Env,
+  id: string,
+  updates: ManualRecipeUpdate
+): Promise<RecipeDetail | null> {
+  const existing = await getRecipeById(env, id);
+  if (!existing) {
+    return null;
+  }
+
+  const merged: NormalizedRecipe = {
+    id: existing.id,
+    title: updates.title ?? existing.title,
+    description:
+      updates.description === undefined ? existing.description : updates.description ?? undefined,
+    author: updates.author === undefined ? existing.author ?? null : updates.author ?? null,
+    cuisine: updates.cuisine === undefined ? existing.cuisine ?? undefined : updates.cuisine ?? undefined,
+    tags:
+      updates.tags === undefined
+        ? Array.isArray(existing.tags)
+          ? existing.tags
+          : []
+        : Array.isArray(updates.tags)
+          ? updates.tags
+          : [],
+    heroImageUrl:
+      updates.heroImageUrl === undefined
+        ? existing.heroImageUrl ?? undefined
+        : updates.heroImageUrl ?? undefined,
+    yield: updates.yield === undefined ? existing.yield ?? undefined : updates.yield ?? undefined,
+    prepTimeMinutes:
+      updates.prepTimeMinutes === undefined
+        ? existing.prepTimeMinutes ?? null
+        : updates.prepTimeMinutes ?? null,
+    cookTimeMinutes:
+      updates.cookTimeMinutes === undefined
+        ? existing.cookTimeMinutes ?? null
+        : updates.cookTimeMinutes ?? null,
+    totalTimeMinutes:
+      updates.totalTimeMinutes === undefined
+        ? existing.totalTimeMinutes ?? null
+        : updates.totalTimeMinutes ?? null,
+    ingredients:
+      updates.ingredients === undefined
+        ? Array.isArray(existing.ingredients)
+          ? existing.ingredients
+          : []
+        : Array.isArray(updates.ingredients)
+          ? updates.ingredients
+          : [],
+    steps:
+      updates.steps === undefined
+        ? Array.isArray(existing.steps)
+          ? existing.steps
+          : []
+        : Array.isArray(updates.steps)
+          ? updates.steps
+          : [],
+    tools:
+      updates.tools === undefined
+        ? Array.isArray(existing.tools)
+          ? (existing.tools as string[])
+          : []
+        : Array.isArray(updates.tools)
+          ? updates.tools
+          : [],
+    notes: updates.notes === undefined ? existing.notes ?? undefined : updates.notes ?? undefined,
+    sourceUrl: existing.sourceUrl,
+    prepPhases:
+      updates.prepPhases === undefined
+        ? Array.isArray(existing.prepPhases)
+          ? existing.prepPhases
+          : []
+        : Array.isArray(updates.prepPhases)
+          ? updates.prepPhases
+          : [],
+  };
+
+  if (updates.prepPhases === null) {
+    merged.prepPhases = [];
+  }
+
+  if (
+    updates.totalTimeMinutes === undefined &&
+    merged.totalTimeMinutes == null &&
+    merged.prepTimeMinutes != null &&
+    merged.cookTimeMinutes != null
+  ) {
+    merged.totalTimeMinutes = merged.prepTimeMinutes + merged.cookTimeMinutes;
+  }
+
+  const shouldRegeneratePhases =
+    updates.prepPhases === undefined &&
+    (updates.ingredients !== undefined || updates.steps !== undefined);
+
+  if (shouldRegeneratePhases) {
+    try {
+      merged.prepPhases = await generatePrepPhases(env, merged);
+    } catch (error) {
+      console.warn('Failed to regenerate prep phases for recipe', id, error);
+      merged.prepPhases = [];
+    }
+  }
+
+  await env.DB.prepare(
+    `UPDATE recipes
+     SET title = ?,
+         description = ?,
+         author = ?,
+         cuisine = ?,
+         tags = ?,
+         hero_image_url = ?,
+         yield = ?,
+         time_prep_min = ?,
+         time_cook_min = ?,
+         time_total_min = ?,
+         ingredients_json = ?,
+         steps_json = ?,
+         equipment_json = ?,
+         prep_phases_json = ?,
+         notes = ?,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = ?`
+  )
+    .bind(
+      merged.title,
+      merged.description ?? null,
+      merged.author ?? null,
+      merged.cuisine ?? null,
+      merged.tags?.length ? merged.tags.join(',') : null,
+      merged.heroImageUrl ?? null,
+      merged.yield ?? null,
+      merged.prepTimeMinutes ?? null,
+      merged.cookTimeMinutes ?? null,
+      merged.totalTimeMinutes ?? null,
+      JSON.stringify(merged.ingredients ?? []),
+      JSON.stringify(merged.steps ?? []),
+      JSON.stringify(merged.tools ?? []),
+      JSON.stringify(merged.prepPhases ?? []),
+      merged.notes ?? null,
+      id
+    )
+    .run();
+
+  const embedding = await embedText(env, buildEmbeddingText(merged));
+  if (embedding.length) {
+    await env.VEC.upsert([
+      {
+        id,
+        values: embedding,
+        metadata: {
+          recipe_id: id,
+          title: merged.title,
+          tags: merged.tags ?? [],
+          cuisine: merged.cuisine,
+        },
+      },
+    ]);
+  }
+
+  const detail = await getRecipeById(env, id);
+  if (!detail) {
+    throw new Error('Failed to load manual recipe after update');
+  }
+
+  detail.prepPhases = merged.prepPhases ?? [];
+  detail.tags = merged.tags ?? [];
+  detail.tools = merged.tools ?? [];
+
+  return detail;
 }
 
 export async function updateRecipePrepPhases(env: Env, id: string, phases: PrepPhase[]): Promise<void> {
@@ -1281,6 +1617,18 @@ type FavoriteRow = {
   created_at: string;
 };
 
+type RecipeSummaryRow = {
+  id: string;
+  title: string;
+  cuisine: string | null;
+  tags: string | null;
+  hero_image_url: string | null;
+};
+
+type FavoriteSummaryRow = RecipeSummaryRow & {
+  created_at: string;
+};
+
 type RatingRow = {
   user_id: string;
   recipe_id: string;
@@ -1367,6 +1715,26 @@ function mapFavoriteRow(row: FavoriteRow): Favorite {
     userId: row.user_id,
     recipeId: row.recipe_id,
     createdAt: row.created_at,
+  };
+}
+
+function parseTagList(value: string | null | undefined): string[] {
+  if (!value) {
+    return [];
+  }
+  return value
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+function mapRecipeSummaryRow(row: RecipeSummaryRow): RecipeSummary {
+  return {
+    id: row.id,
+    title: row.title,
+    cuisine: row.cuisine,
+    tags: parseTagList(row.tags),
+    heroImageUrl: row.hero_image_url,
   };
 }
 

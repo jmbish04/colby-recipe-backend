@@ -363,6 +363,114 @@
       <div id="imageResult" style="margin-top:1rem;"></div>
     </section>
 
+    <section id="collections">
+      <h2>Favorites &amp; menus</h2>
+      <p>Inspect the recipes and weekly menus saved for a given user session. Provide the user ID you want to scope.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:flex-end;">
+        <div style="flex:1 1 220px;">
+          <label for="collectionsUserId">User ID</label>
+          <input id="collectionsUserId" type="text" placeholder="household-123" />
+        </div>
+        <div class="actions" style="margin-top:0;">
+          <button type="button" id="loadFavorites" class="secondary">⭐ Load favorites</button>
+          <button type="button" id="loadMenus" class="secondary">🗓️ Load menus</button>
+        </div>
+      </div>
+      <div id="favoritesResponse" class="response" hidden>
+        <h3>Favorites</h3>
+        <pre></pre>
+      </div>
+      <div id="menusResponse" class="response" hidden>
+        <h3>Menus</h3>
+        <pre></pre>
+      </div>
+    </section>
+
+    <section id="manualRecipes">
+      <h2>Manual recipe studio</h2>
+      <p>Create or tweak recipes without scraping. Ingredients support optional quantities using <code>quantity | ingredient</code>.</p>
+      <form id="createRecipeForm" class="stack">
+        <h3>Create recipe</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+          <div style="flex:1 1 200px;">
+            <label for="createRecipeUser">User ID</label>
+            <input id="createRecipeUser" type="text" placeholder="household-123" required />
+          </div>
+          <div style="flex:1 1 200px;">
+            <label for="createRecipeId">Recipe ID (optional)</label>
+            <input id="createRecipeId" type="text" placeholder="manual-uuid" />
+          </div>
+        </div>
+        <label for="createRecipeTitle">Title</label>
+        <input id="createRecipeTitle" type="text" placeholder="Grandma&#39;s biscuits" required />
+        <label for="createRecipeTags">Tags (comma separated)</label>
+        <input id="createRecipeTags" type="text" placeholder="comfort,quick" />
+        <label for="createRecipeTools">Tools (comma separated)</label>
+        <input id="createRecipeTools" type="text" placeholder="cast iron,oven" />
+        <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+          <div style="flex:1 1 120px;">
+            <label for="createRecipePrepTime">Prep minutes</label>
+            <input id="createRecipePrepTime" type="number" min="0" />
+          </div>
+          <div style="flex:1 1 120px;">
+            <label for="createRecipeCookTime">Cook minutes</label>
+            <input id="createRecipeCookTime" type="number" min="0" />
+          </div>
+        </div>
+        <label for="createRecipeIngredients">Ingredients <small class="muted">One per line, e.g. <code>2 cups | Flour</code></small></label>
+        <textarea id="createRecipeIngredients" rows="4" placeholder="2 cups | All-purpose flour&#10;1 tbsp | Baking powder" required></textarea>
+        <label for="createRecipeSteps">Steps <small class="muted">One per line</small></label>
+        <textarea id="createRecipeSteps" rows="4" placeholder="Preheat the oven to 425°F&#10;Whisk dry ingredients together" required></textarea>
+        <label for="createRecipeNotes">Notes</label>
+        <textarea id="createRecipeNotes" rows="2" placeholder="Bakes best on the middle rack."></textarea>
+        <button type="submit">➕ Create recipe</button>
+      </form>
+      <form id="updateRecipeForm" class="stack">
+        <h3>Update recipe</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+          <div style="flex:1 1 200px;">
+            <label for="updateRecipeUser">User ID</label>
+            <input id="updateRecipeUser" type="text" placeholder="household-123" required />
+          </div>
+          <div style="flex:1 1 200px;">
+            <label for="updateRecipeId">Recipe ID</label>
+            <input id="updateRecipeId" type="text" placeholder="manual-uuid" required />
+          </div>
+        </div>
+        <label for="updateRecipeTitle">Title</label>
+        <input id="updateRecipeTitle" type="text" placeholder="Leave blank to keep" />
+        <label for="updateRecipeTags">Tags (comma separated)</label>
+        <input id="updateRecipeTags" type="text" placeholder="comfort,holiday" />
+        <label for="updateRecipeTools">Tools (comma separated)</label>
+        <input id="updateRecipeTools" type="text" placeholder="sheet pan,mixer" />
+        <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+          <div style="flex:1 1 120px;">
+            <label for="updateRecipePrepTime">Prep minutes</label>
+            <input id="updateRecipePrepTime" type="number" min="0" />
+          </div>
+          <div style="flex:1 1 120px;">
+            <label for="updateRecipeCookTime">Cook minutes</label>
+            <input id="updateRecipeCookTime" type="number" min="0" />
+          </div>
+          <div style="flex:1 1 120px;">
+            <label for="updateRecipeTotalTime">Total minutes</label>
+            <input id="updateRecipeTotalTime" type="number" min="0" />
+          </div>
+        </div>
+        <label for="updateRecipeIngredients">Ingredients override</label>
+        <textarea id="updateRecipeIngredients" rows="3" placeholder="New ingredient list or leave blank"></textarea>
+        <label for="updateRecipeSteps">Steps override</label>
+        <textarea id="updateRecipeSteps" rows="3" placeholder="New steps or leave blank"></textarea>
+        <label for="updateRecipeNotes">Notes</label>
+        <textarea id="updateRecipeNotes" rows="2" placeholder="Leave blank to keep"></textarea>
+        <button type="submit" class="secondary">✏️ Update recipe</button>
+      </form>
+      <div id="manualRecipeResponse" class="response" hidden>
+        <h3>Manual recipe</h3>
+        <pre></pre>
+      </div>
+    </section>
+
     <section id="appliances">
       <h2>Kitchen appliances</h2>
       <p>Upload manuals to personalize recipes for your gear. Manuals are stored securely in R2 and processed asynchronously.</p>
@@ -703,6 +811,41 @@
     const adaptBtn = document.getElementById('adaptBtn');
     const tailorRecipeId = document.getElementById('tailorRecipeId');
     const tailorApplianceId = document.getElementById('tailorApplianceId');
+    const collectionsUserId = document.getElementById('collectionsUserId');
+    const loadFavoritesBtn = document.getElementById('loadFavorites');
+    const loadMenusBtn = document.getElementById('loadMenus');
+    const favoritesResponseCard = document.getElementById('favoritesResponse');
+    const favoritesResponseBody = favoritesResponseCard?.querySelector('pre');
+    const favoritesResponseTitle = favoritesResponseCard?.querySelector('h3');
+    const menusResponseCard = document.getElementById('menusResponse');
+    const menusResponseBody = menusResponseCard?.querySelector('pre');
+    const menusResponseTitle = menusResponseCard?.querySelector('h3');
+    const createRecipeForm = document.getElementById('createRecipeForm');
+    const createRecipeUser = document.getElementById('createRecipeUser');
+    const createRecipeId = document.getElementById('createRecipeId');
+    const createRecipeTitle = document.getElementById('createRecipeTitle');
+    const createRecipeTags = document.getElementById('createRecipeTags');
+    const createRecipeTools = document.getElementById('createRecipeTools');
+    const createRecipePrepTime = document.getElementById('createRecipePrepTime');
+    const createRecipeCookTime = document.getElementById('createRecipeCookTime');
+    const createRecipeIngredients = document.getElementById('createRecipeIngredients');
+    const createRecipeSteps = document.getElementById('createRecipeSteps');
+    const createRecipeNotes = document.getElementById('createRecipeNotes');
+    const updateRecipeForm = document.getElementById('updateRecipeForm');
+    const updateRecipeUser = document.getElementById('updateRecipeUser');
+    const updateRecipeId = document.getElementById('updateRecipeId');
+    const updateRecipeTitle = document.getElementById('updateRecipeTitle');
+    const updateRecipeTags = document.getElementById('updateRecipeTags');
+    const updateRecipeTools = document.getElementById('updateRecipeTools');
+    const updateRecipePrepTime = document.getElementById('updateRecipePrepTime');
+    const updateRecipeCookTime = document.getElementById('updateRecipeCookTime');
+    const updateRecipeTotalTime = document.getElementById('updateRecipeTotalTime');
+    const updateRecipeIngredients = document.getElementById('updateRecipeIngredients');
+    const updateRecipeSteps = document.getElementById('updateRecipeSteps');
+    const updateRecipeNotes = document.getElementById('updateRecipeNotes');
+    const manualRecipeResponse = document.getElementById('manualRecipeResponse');
+    const manualRecipeResponseTitle = manualRecipeResponse?.querySelector('h3');
+    const manualRecipeResponseBody = manualRecipeResponse?.querySelector('pre');
 
     const storageKey = 'menuforge-api-key';
     
@@ -727,6 +870,58 @@
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || res.statusText);
       return data;
+    }
+
+    function splitCommaList(value = '') {
+      return value
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean);
+    }
+
+    function parseMinutesInput(input, label) {
+      if (!input) return undefined;
+      const raw = (input.value || '').trim();
+      if (!raw) return undefined;
+      const parsed = Number(raw);
+      if (!Number.isFinite(parsed)) {
+        throw new Error(`${label} must be a number`);
+      }
+      return Math.round(parsed);
+    }
+
+    function parseIngredientLines(text) {
+      return text
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          if (line.includes('|')) {
+            const [quantity, ...rest] = line.split('|');
+            const name = rest.join('|').trim();
+            const qty = (quantity || '').trim();
+            if (!name) {
+              throw new Error('Ingredient lines must include a name after "|"');
+            }
+            return qty ? { name, quantity: qty } : { name };
+          }
+          return { name: line };
+        });
+    }
+
+    function parseStepLines(text) {
+      return text
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((instruction) => ({ instruction }));
+    }
+
+    function showManualRecipe(title, payload) {
+      if (!manualRecipeResponse || !manualRecipeResponseTitle || !manualRecipeResponseBody) return;
+      manualRecipeResponse.hidden = false;
+      manualRecipeResponseTitle.textContent = title;
+      manualRecipeResponseBody.textContent = JSON.stringify(payload, null, 2);
     }
 
     async function handleChat() {
@@ -798,6 +993,180 @@
       }
     }
     imageBtn.addEventListener('click', handleImages);
+
+    async function handleLoadFavorites() {
+      if (!collectionsUserId || !favoritesResponseCard || !favoritesResponseBody || !favoritesResponseTitle) return;
+      const userId = collectionsUserId.value.trim();
+      if (!userId) {
+        favoritesResponseCard.hidden = false;
+        favoritesResponseTitle.textContent = 'Favorites';
+        favoritesResponseBody.textContent = 'User ID required';
+        return;
+      }
+      try {
+        if (loadFavoritesBtn) loadFavoritesBtn.disabled = true;
+        favoritesResponseCard.hidden = false;
+        favoritesResponseTitle.textContent = 'Favorites';
+        favoritesResponseBody.textContent = 'Loading…';
+        const data = await callJson(`/api/favorites?user_id=${encodeURIComponent(userId)}`, {
+          headers: authHeaders(),
+        });
+        const count = Array.isArray(data) ? data.length : 0;
+        favoritesResponseTitle.textContent = `${count} favorite${count === 1 ? '' : 's'}`;
+        favoritesResponseBody.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        favoritesResponseBody.textContent = err.message;
+      } finally {
+        if (loadFavoritesBtn) loadFavoritesBtn.disabled = false;
+      }
+    }
+    loadFavoritesBtn?.addEventListener('click', handleLoadFavorites);
+
+    async function handleLoadMenus() {
+      if (!collectionsUserId || !menusResponseCard || !menusResponseBody || !menusResponseTitle) return;
+      const userId = collectionsUserId.value.trim();
+      if (!userId) {
+        menusResponseCard.hidden = false;
+        menusResponseTitle.textContent = 'Menus';
+        menusResponseBody.textContent = 'User ID required';
+        return;
+      }
+      try {
+        if (loadMenusBtn) loadMenusBtn.disabled = true;
+        menusResponseCard.hidden = false;
+        menusResponseTitle.textContent = 'Menus';
+        menusResponseBody.textContent = 'Loading…';
+        const data = await callJson(`/api/menus?user_id=${encodeURIComponent(userId)}`, {
+          headers: authHeaders(),
+        });
+        const count = Array.isArray(data) ? data.length : 0;
+        menusResponseTitle.textContent = `${count} menu${count === 1 ? '' : 's'}`;
+        menusResponseBody.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        menusResponseBody.textContent = err.message;
+      } finally {
+        if (loadMenusBtn) loadMenusBtn.disabled = false;
+      }
+    }
+    loadMenusBtn?.addEventListener('click', handleLoadMenus);
+
+    function buildManualRecipePayload(options) {
+      const payload = {
+        title: options.title,
+        ingredients: parseIngredientLines(options.ingredientsText),
+        steps: parseStepLines(options.stepsText),
+      };
+      if (options.id) payload.id = options.id;
+      if (options.tags?.length) payload.tags = options.tags;
+      if (options.tools?.length) payload.tools = options.tools;
+      if (options.prepMinutes !== undefined) payload.prepTimeMinutes = options.prepMinutes;
+      if (options.cookMinutes !== undefined) payload.cookTimeMinutes = options.cookMinutes;
+      if (options.totalMinutes !== undefined) payload.totalTimeMinutes = options.totalMinutes;
+      if (options.notes) payload.notes = options.notes;
+      return payload;
+    }
+
+    async function handleCreateRecipe(event) {
+      event.preventDefault();
+      if (!createRecipeForm) return;
+      const submitBtn = createRecipeForm.querySelector('button[type="submit"]');
+      try {
+        submitBtn && (submitBtn.disabled = true);
+        const userId = createRecipeUser?.value.trim();
+        if (!userId) {
+          throw new Error('User ID required');
+        }
+        const title = createRecipeTitle?.value.trim();
+        if (!title) {
+          throw new Error('Title required');
+        }
+        const ingredientsText = (createRecipeIngredients?.value || '').trim();
+        if (!ingredientsText) {
+          throw new Error('At least one ingredient required');
+        }
+        const stepsText = (createRecipeSteps?.value || '').trim();
+        if (!stepsText) {
+          throw new Error('At least one step required');
+        }
+        const payload = buildManualRecipePayload({
+          title,
+          id: createRecipeId?.value.trim() || undefined,
+          ingredientsText,
+          stepsText,
+          tags: splitCommaList(createRecipeTags?.value || ''),
+          tools: splitCommaList(createRecipeTools?.value || ''),
+          prepMinutes: parseMinutesInput(createRecipePrepTime, 'Prep minutes'),
+          cookMinutes: parseMinutesInput(createRecipeCookTime, 'Cook minutes'),
+          notes: (createRecipeNotes?.value || '').trim() || undefined,
+        });
+
+        const data = await callJson(`/api/recipes?user_id=${encodeURIComponent(userId)}`, {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload),
+        });
+        showManualRecipe('Created recipe', data.recipe || data);
+      } catch (err) {
+        showManualRecipe('Error', { error: err.message });
+      } finally {
+        submitBtn && (submitBtn.disabled = false);
+      }
+    }
+    createRecipeForm?.addEventListener('submit', handleCreateRecipe);
+
+    async function handleUpdateRecipe(event) {
+      event.preventDefault();
+      if (!updateRecipeForm) return;
+      const submitBtn = updateRecipeForm.querySelector('button[type="submit"]');
+      try {
+        submitBtn && (submitBtn.disabled = true);
+        const userId = updateRecipeUser?.value.trim();
+        if (!userId) {
+          throw new Error('User ID required');
+        }
+        const recipeId = updateRecipeId?.value.trim();
+        if (!recipeId) {
+          throw new Error('Recipe ID required');
+        }
+        const payload = {};
+        const title = updateRecipeTitle?.value.trim();
+        if (title) payload.title = title;
+        const tags = splitCommaList(updateRecipeTags?.value || '');
+        if (tags.length) payload.tags = tags;
+        const tools = splitCommaList(updateRecipeTools?.value || '');
+        if (tools.length) payload.tools = tools;
+        const prep = parseMinutesInput(updateRecipePrepTime, 'Prep minutes');
+        if (prep !== undefined) payload.prepTimeMinutes = prep;
+        const cook = parseMinutesInput(updateRecipeCookTime, 'Cook minutes');
+        if (cook !== undefined) payload.cookTimeMinutes = cook;
+        const total = parseMinutesInput(updateRecipeTotalTime, 'Total minutes');
+        if (total !== undefined) payload.totalTimeMinutes = total;
+        const ingredientsText = (updateRecipeIngredients?.value || '').trim();
+        if (ingredientsText) {
+          payload.ingredients = parseIngredientLines(ingredientsText);
+        }
+        const stepsText = (updateRecipeSteps?.value || '').trim();
+        if (stepsText) {
+          payload.steps = parseStepLines(stepsText);
+        }
+        const notes = (updateRecipeNotes?.value || '').trim();
+        if (notes) {
+          payload.notes = notes;
+        }
+
+        const data = await callJson(`/api/recipes/${encodeURIComponent(recipeId)}?user_id=${encodeURIComponent(userId)}`, {
+          method: 'PUT',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload),
+        });
+        showManualRecipe('Updated recipe', data.recipe || data);
+      } catch (err) {
+        showManualRecipe('Error', { error: err.message });
+      } finally {
+        submitBtn && (submitBtn.disabled = false);
+      }
+    }
+    updateRecipeForm?.addEventListener('submit', handleUpdateRecipe);
 
     async function loadAppliancesList() {
       if (!appliancesList) return;
