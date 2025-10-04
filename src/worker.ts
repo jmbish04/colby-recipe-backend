@@ -5,14 +5,18 @@ import { requireApiKey } from './auth';
 import { ensureRecipeId, jsonResponse, parseArray, parseJsonBody, truncate } from './utils';
 import {
   categorizeShoppingList,
+  extractApplianceSpecs,
   extractTextFromImage,
   extractTextFromPdf,
+  generateApplianceAdaptation,
+  generateApplianceInstructions,
   generateChatMessage,
   generatePrepPhases,
   generateRecipeFlowchart,
   generateMenuPlan,
-  tailorRecipeInstructions,
   normalizeRecipeFromText,
+  summarizeCookingActions,
+  tailorRecipeInstructions,
   transcribeAudio,
   embedText,
   MenuGenerationCandidate,
@@ -39,10 +43,10 @@ import {
   listKitchenAppliances,
   updateRecipePrepPhases,
   getKitchenAppliance,
-  updateKitchenApplianceManualData,
+  updateKitchenApplianceFields,
   deleteKitchenAppliance,
 } from './db';
-import { MenuItem, RecipeDetail, RecipeSummary, UserPreferences } from './types';
+import { ApplianceSpecs, MenuItem, RecipeDetail, RecipeSummary, UserPreferences } from './types';
 
 export const app = new Hono<{ Bindings: Env }>();
 
@@ -195,38 +199,130 @@ function normalizeIngredientEntry(raw: unknown): { name: string; quantity?: stri
   return null;
 }
 
-async function processApplianceManual(
-  env: Env,
-  input: { applianceId: string; manualKey?: string | null; pdfBytes: Uint8Array; brand: string; model: string }
-): Promise<void> {
-  try {
-    const extracted = await extractTextFromPdf(env, input.pdfBytes);
-    const cleaned = extracted.trim();
-    const truncated = cleaned ? truncate(cleaned, 50000) : '';
-    const embedding = truncated ? await embedText(env, truncated) : [];
+type ApplianceIngestionJob = {
+  userId: string;
+  applianceId: string;
+  manualKey: string;
+  manualUrl?: string;
+  pdfBytes?: Uint8Array;
+  contentType?: string | null;
+  nickname?: string | null;
+};
 
-    await updateKitchenApplianceManualData(env, input.applianceId, {
-      extractedText: truncated || null,
-      manualEmbedding: embedding.length ? embedding : null,
+function chunkManualText(text: string, chunkSize = 1200, overlap = 200): string[] {
+  const normalized = text.replace(/\r\n/g, '\n');
+  const paragraphs = normalized
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  const chunks: string[] = [];
+  let current = '';
+
+  for (const paragraph of paragraphs) {
+    if ((current + '\n\n' + paragraph).trim().length > chunkSize && current) {
+      chunks.push(current.trim());
+      const overlapText = current.slice(-overlap);
+      current = overlapText + '\n\n' + paragraph;
+    } else {
+      current = current ? `${current}\n\n${paragraph}` : paragraph;
+    }
+  }
+
+  if (current.trim()) {
+    chunks.push(current.trim());
+  }
+
+  return chunks.length ? chunks : [text];
+}
+
+async function runApplianceIngestion(env: Env, job: ApplianceIngestionJob): Promise<void> {
+  await updateKitchenApplianceFields(env, job.applianceId, { processingStatus: 'PROCESSING' });
+
+  try {
+    let manualBytes = job.pdfBytes ?? null;
+    if (!manualBytes && job.manualUrl) {
+      const response = await fetch(job.manualUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to download manual: ${response.status}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      manualBytes = new Uint8Array(arrayBuffer);
+    }
+
+    if (!manualBytes) {
+      throw new Error('No manual bytes provided for ingestion');
+    }
+
+    const contentType = job.contentType ?? 'application/pdf';
+    await env.APPLIANCE_BUCKET.put(job.manualKey, manualBytes, {
+      httpMetadata: { contentType },
     });
 
-    if (embedding.length) {
-      await env.VEC.upsert([
-        {
-          id: `appliance:${input.applianceId}`,
-          values: embedding,
-          metadata: {
-            type: 'appliance_manual',
-            appliance_id: input.applianceId,
-            manual_r2_key: input.manualKey ?? undefined,
-            brand: input.brand,
-            model: input.model,
-          },
+    const manualText = (await extractTextFromPdf(env, manualBytes)).trim();
+    const textKey = job.manualKey.replace(/manual\.pdf$/i, 'extracted_text.txt');
+    await env.APPLIANCE_BUCKET.put(textKey, manualText, {
+      httpMetadata: { contentType: 'text/plain; charset=utf-8' },
+    });
+
+    const specs = await extractApplianceSpecs(env, manualText);
+    const prefs = await getUserPreferences(env, job.userId);
+    const agentInstructions = await generateApplianceInstructions(env, {
+      specs,
+      preferences: prefs,
+      nickname: job.nickname ?? null,
+      brand: specs?.brand ?? null,
+      model: specs?.model ?? null,
+    });
+
+    const chunks = chunkManualText(manualText, 1200, 200).slice(0, 40);
+    const vectors: Array<{ id: string; values: number[]; metadata: Record<string, unknown> }> = [];
+    for (let index = 0; index < chunks.length; index++) {
+      const chunk = chunks[index];
+      const embedding = await embedText(env, chunk);
+      if (!embedding.length) {
+        continue;
+      }
+      vectors.push({
+        id: `appliance:${job.applianceId}:chunk:${index}`,
+        values: embedding,
+        metadata: {
+          appliance_id: job.applianceId,
+          user_id: job.userId,
+          chunk_index: index,
+          chunk_text: truncate(chunk, 800),
         },
-      ]);
+      });
     }
+
+    if (vectors.length) {
+      await env.APPLIANCE_VEC.upsert(vectors);
+    }
+
+    const specsForStorage: ApplianceSpecs = {
+      ...(specs ?? {}),
+      vectorChunkCount: vectors.length,
+    } as ApplianceSpecs;
+
+    const updates: Parameters<typeof updateKitchenApplianceFields>[2] = {
+      ocrTextR2Key: textKey,
+      manualR2Key: job.manualKey,
+      processingStatus: 'COMPLETED',
+      agentInstructions: agentInstructions || null,
+      extractedSpecs: specsForStorage,
+    };
+
+    if (specs?.brand) {
+      updates.brand = specs.brand;
+    }
+    if (specs?.model) {
+      updates.model = specs.model;
+    }
+
+    await updateKitchenApplianceFields(env, job.applianceId, updates);
   } catch (error) {
-    console.error('Failed to process appliance manual', input.applianceId, error);
+    console.error('Smart kitchen ingestion failed', job.applianceId, error);
+    await updateKitchenApplianceFields(env, job.applianceId, { processingStatus: 'FAILED' });
   }
 }
 
@@ -694,70 +790,54 @@ app.post('/api/kitchen/appliances', async (c) => {
     return jsonResponse({ error: 'invalid form data' }, { status: 400 });
   }
 
-  const brandValue = form.get('brand');
-  const modelValue = form.get('model');
-  const manualValue = form.get('manual');
+  const manualField = form.get('manual_file') ?? form.get('manual');
+  const manualUrlField = form.get('manual_url');
+  const nicknameField = form.get('nickname');
 
-  if (typeof brandValue !== 'string' || !brandValue.trim()) {
-    return jsonResponse({ error: 'brand is required' }, { status: 400 });
-  }
-  if (typeof modelValue !== 'string' || !modelValue.trim()) {
-    return jsonResponse({ error: 'model is required' }, { status: 400 });
-  }
+  const nickname = typeof nicknameField === 'string' ? nicknameField.trim() || null : null;
 
-  let manualFile: File | null = null;
-  if (manualValue != null) {
-    if (manualValue instanceof File) {
-      manualFile = manualValue;
-    } else {
-      return jsonResponse({ error: 'manual must be a file upload' }, { status: 400 });
-    }
+  const hasFile = manualField instanceof File;
+  const hasUrl = typeof manualUrlField === 'string' && manualUrlField.trim().length > 0;
+
+  if (!hasFile && !hasUrl) {
+    return jsonResponse({ error: 'manual_file or manual_url required' }, { status: 400 });
   }
 
-  const brand = brandValue.trim();
-  const model = modelValue.trim();
+  let manualBytes: Uint8Array | undefined;
+  let manualContentType: string | null = null;
+  if (hasFile && manualField instanceof File) {
+    const arrayBuffer = await manualField.arrayBuffer();
+    manualBytes = new Uint8Array(arrayBuffer);
+    manualContentType = manualField.type || 'application/pdf';
+  } else if (typeof manualField === 'string' && manualField) {
+    return jsonResponse({ error: 'manual_file must be a file upload' }, { status: 400 });
+  }
+
+  const manualUrl = hasUrl && typeof manualUrlField === 'string' ? manualUrlField.trim() : undefined;
   const applianceId = crypto.randomUUID();
-  let manualKey: string | null = null;
-  let manualBytes: Uint8Array | null = null;
+  const manualKey = `appliances/${userId}/${applianceId}/manual.pdf`;
 
-  if (manualFile) {
-    try {
-      const arrayBuffer = await manualFile.arrayBuffer();
-      manualBytes = new Uint8Array(arrayBuffer);
-      const extensionMatch = manualFile.name?.match(/\.([a-z0-9]+)$/i);
-      const extension = extensionMatch ? `.${extensionMatch[1].toLowerCase()}` : '.pdf';
-      manualKey = `kitchen-manuals/${userId}/${applianceId}${extension}`;
-      await c.env.BUCKET.put(manualKey, manualBytes, {
-        httpMetadata: { contentType: manualFile.type || 'application/pdf' },
-      });
-    } catch (error) {
-      console.error('Failed to store manual in R2', error);
-      return jsonResponse({ error: 'failed to store manual' }, { status: 500 });
-    }
-  }
-
-  const appliance = await createKitchenAppliance(c.env, {
+  await createKitchenAppliance(c.env, {
     id: applianceId,
     userId,
-    brand,
-    model,
+    nickname,
     manualR2Key: manualKey,
+    processingStatus: 'QUEUED',
   });
 
-  if (manualBytes) {
-    const bytesCopy = new Uint8Array(manualBytes);
-    c.executionCtx.waitUntil(
-      processApplianceManual(c.env, {
-        applianceId,
-        manualKey,
-        pdfBytes: bytesCopy,
-        brand,
-        model,
-      })
-    );
-  }
+  const job: ApplianceIngestionJob = {
+    userId,
+    applianceId,
+    manualKey,
+    manualUrl,
+    pdfBytes: manualBytes,
+    contentType: manualContentType,
+    nickname,
+  };
 
-  return jsonResponse({ appliance }, { status: 201 });
+  c.executionCtx.waitUntil(runApplianceIngestion(c.env, job));
+
+  return jsonResponse({ appliance_id: applianceId, status: 'QUEUED' }, { status: 202 });
 });
 
 app.get('/api/kitchen/appliances', async (c) => {
@@ -768,6 +848,73 @@ app.get('/api/kitchen/appliances', async (c) => {
 
   const appliances = await listKitchenAppliances(c.env, userId);
   return jsonResponse({ appliances });
+});
+
+app.get('/api/kitchen/appliances/:id/status', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const id = c.req.param('id');
+  const appliance = id ? await getKitchenAppliance(c.env, id) : null;
+  if (!appliance || appliance.userId !== userId) {
+    return jsonResponse({ error: 'appliance not found' }, { status: 404 });
+  }
+
+  return jsonResponse({ status: appliance.processingStatus });
+});
+
+app.put('/api/kitchen/appliances/:id', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const id = c.req.param('id');
+  if (!id) {
+    return jsonResponse({ error: 'appliance id required' }, { status: 400 });
+  }
+
+  const appliance = await getKitchenAppliance(c.env, id);
+  if (!appliance || appliance.userId !== userId) {
+    return jsonResponse({ error: 'appliance not found' }, { status: 404 });
+  }
+
+  let body: {
+    nickname?: unknown;
+    brand?: unknown;
+    model?: unknown;
+    agentInstructions?: unknown;
+  };
+  try {
+    body = await parseJsonBody<typeof body>(c.req.raw);
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid JSON body' }, { status });
+  }
+
+  const updates: Parameters<typeof updateKitchenApplianceFields>[2] = {};
+  if (Object.prototype.hasOwnProperty.call(body, 'nickname')) {
+    updates.nickname = typeof body.nickname === 'string' ? body.nickname.trim() || null : null;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'brand')) {
+    updates.brand = typeof body.brand === 'string' ? body.brand.trim() || null : null;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'model')) {
+    updates.model = typeof body.model === 'string' ? body.model.trim() || null : null;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'agentInstructions')) {
+    updates.agentInstructions =
+      typeof body.agentInstructions === 'string' ? body.agentInstructions.trim() || null : null;
+  }
+
+  if (!Object.keys(updates).length) {
+    return jsonResponse({ appliance });
+  }
+
+  const updated = await updateKitchenApplianceFields(c.env, id, updates);
+  return jsonResponse({ appliance: updated });
 });
 
 app.delete('/api/kitchen/appliances/:id', async (c) => {
@@ -788,21 +935,46 @@ app.delete('/api/kitchen/appliances/:id', async (c) => {
 
   if (appliance.manualR2Key) {
     try {
-      await c.env.BUCKET.delete(appliance.manualR2Key);
+      await c.env.APPLIANCE_BUCKET.delete(appliance.manualR2Key);
     } catch (error) {
-      console.warn('Failed to delete manual from R2', error);
+      console.warn('Failed to delete appliance manual from R2', error);
+    }
+  }
+  if (appliance.ocrTextR2Key) {
+    try {
+      await c.env.APPLIANCE_BUCKET.delete(appliance.ocrTextR2Key);
+    } catch (error) {
+      console.warn('Failed to delete appliance OCR text from R2', error);
     }
   }
 
-  await deleteKitchenAppliance(c.env, userId, id);
+  const chunkCount = Number(appliance.extractedSpecs?.vectorChunkCount ?? 0);
+  const vectorIds: string[] = [];
+  if (Number.isFinite(chunkCount) && chunkCount > 0) {
+    for (let index = 0; index < chunkCount; index++) {
+      vectorIds.push(`appliance:${id}:chunk:${index}`);
+    }
+  } else {
+    vectorIds.push(`appliance:${id}`);
+  }
+
+  if (vectorIds.length && typeof c.env.APPLIANCE_VEC.delete === 'function') {
+    try {
+      await c.env.APPLIANCE_VEC.delete(vectorIds);
+    } catch (error) {
+      console.warn('Failed to delete appliance vectors', error);
+    }
+  }
 
   if (typeof c.env.VEC.delete === 'function') {
     try {
       await c.env.VEC.delete([`appliance:${id}`]);
     } catch (error) {
-      console.warn('Failed to delete appliance vector entry', error);
+      console.warn('Failed to delete legacy appliance vector entry', error);
     }
   }
+
+  await deleteKitchenAppliance(c.env, userId, id);
 
   return jsonResponse({ success: true });
 });
@@ -1174,8 +1346,14 @@ app.post('/api/recipes/:id/tailor', async (c) => {
     return jsonResponse({ error: 'appliance not found' }, { status: 404 });
   }
 
-  if (!appliance.extractedText) {
+  if (!appliance.ocrTextR2Key) {
     return jsonResponse({ error: 'appliance manual has not been processed yet' }, { status: 409 });
+  }
+
+  const manualObject = await c.env.APPLIANCE_BUCKET.get(appliance.ocrTextR2Key);
+  const manualText = manualObject ? await manualObject.text() : '';
+  if (!manualText) {
+    return jsonResponse({ error: 'appliance manual text unavailable' }, { status: 409 });
   }
 
   const originalSteps = recipe.steps.map((step) => step.instruction);
@@ -1184,10 +1362,13 @@ app.post('/api/recipes/:id/tailor', async (c) => {
     const tailoredSteps = await tailorRecipeInstructions(c.env, {
       title: recipe.title,
       originalSteps,
-      manualText: appliance.extractedText,
-      appliance: { brand: appliance.brand, model: appliance.model },
+      manualText,
+      appliance: {
+        brand: appliance.brand ?? 'Appliance',
+        model: appliance.model ?? 'Model',
+      },
       prepPhases: recipe.prepPhases,
-      manualEmbedding: appliance.manualEmbedding ?? null,
+      manualEmbedding: null,
     });
 
     return jsonResponse({ tailored_steps: tailoredSteps });
@@ -1195,6 +1376,93 @@ app.post('/api/recipes/:id/tailor', async (c) => {
     console.error('Failed to tailor recipe', error);
     return jsonResponse({ error: 'failed to tailor recipe' }, { status: 500 });
   }
+});
+
+app.post('/api/recipes/:id/adapt', async (c) => {
+  const userId = await requireUserId(c);
+  if (!userId) {
+    return jsonResponse({ error: 'authentication required' }, { status: 401 });
+  }
+
+  const id = c.req.param('id');
+  if (!id) {
+    return jsonResponse({ error: 'recipe id required' }, { status: 400 });
+  }
+
+  let body: { appliance_id?: unknown };
+  try {
+    body = await parseJsonBody<typeof body>(c.req.raw);
+  } catch (error: any) {
+    const status = typeof error?.status === 'number' ? error.status : 400;
+    return jsonResponse({ error: error?.message ?? 'invalid JSON body' }, { status });
+  }
+
+  const applianceId = typeof body.appliance_id === 'string' ? body.appliance_id.trim() : '';
+  if (!applianceId) {
+    return jsonResponse({ error: 'appliance_id is required' }, { status: 400 });
+  }
+
+  const recipe = await getRecipeById(c.env, id);
+  if (!recipe) {
+    return jsonResponse({ error: 'recipe not found' }, { status: 404 });
+  }
+
+  const appliance = await getKitchenAppliance(c.env, applianceId);
+  if (!appliance || appliance.userId !== userId) {
+    return jsonResponse({ error: 'appliance not found' }, { status: 404 });
+  }
+
+  if (appliance.processingStatus !== 'COMPLETED') {
+    return jsonResponse({ error: 'appliance processing incomplete' }, { status: 409 });
+  }
+
+  const originalSteps = recipe.steps.map((step) => step.instruction);
+  const actions = await summarizeCookingActions(c.env, originalSteps);
+  const queryText = actions.length ? actions.join('\n') : originalSteps.join('\n');
+  const vector = await embedText(c.env, queryText);
+
+  let matches: VectorizeMatch[] = [];
+  if (vector.length) {
+    const query = await c.env.APPLIANCE_VEC.query({
+      vector,
+      topK: 5,
+      returnMetadata: true,
+      filter: { appliance_id: applianceId, user_id: userId },
+    });
+    matches = query.matches ?? [];
+  }
+
+  let manualExcerpts: string[] = matches
+    .map((match) => {
+      const text = typeof match.metadata?.chunk_text === 'string' ? match.metadata.chunk_text : null;
+      return text ? `${text}` : null;
+    })
+    .filter((value): value is string => Boolean(value))
+    .slice(0, 5);
+
+  if (!manualExcerpts.length && appliance.ocrTextR2Key) {
+    try {
+      const object = await c.env.APPLIANCE_BUCKET.get(appliance.ocrTextR2Key);
+      const manualText = object ? await object.text() : '';
+      if (manualText) {
+        manualExcerpts = chunkManualText(manualText, 800, 100).slice(0, 5);
+      }
+    } catch (error) {
+      console.warn('Failed to load appliance manual text for adaptation', error);
+    }
+  }
+
+  const adaptation = await generateApplianceAdaptation(c.env, {
+    agentInstructions: appliance.agentInstructions ?? null,
+    manualExcerpts,
+    recipeTitle: recipe.title,
+    recipeSteps: originalSteps,
+  });
+
+  return jsonResponse({
+    tailored_steps: adaptation.tailoredSteps,
+    summary_of_changes: adaptation.summaryOfChanges,
+  });
 });
 
 app.get('/api/recipes/:id/print', async (c) => {

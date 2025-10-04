@@ -306,7 +306,17 @@ function createEnv(overrides: Partial<Env & { vectorResult?: VectorizeQueryResul
       upsert: async () => undefined,
       delete: async () => undefined,
     },
+    APPLIANCE_VEC: overrides.APPLIANCE_VEC ?? {
+      query: async () => ({ matches: [] }),
+      upsert: async () => undefined,
+      delete: async () => undefined,
+    },
     BUCKET: overrides.BUCKET ?? {
+      put: async () => undefined,
+      delete: async () => undefined,
+      get: async () => null,
+    },
+    APPLIANCE_BUCKET: overrides.APPLIANCE_BUCKET ?? {
       put: async () => undefined,
       delete: async () => undefined,
       get: async () => null,

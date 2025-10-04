@@ -144,11 +144,26 @@ export interface ShoppingListItem {
 export interface KitchenAppliance {
   id: string;
   userId: string;
-  brand: string;
-  model: string;
+  nickname?: string | null;
+  brand?: string | null;
+  model?: string | null;
+  extractedSpecs?: ApplianceSpecs | null;
   manualR2Key?: string | null;
-  extractedText?: string | null;
-  manualEmbedding?: number[] | null;
+  ocrTextR2Key?: string | null;
+  agentInstructions?: string | null;
+  processingStatus: ApplianceProcessingStatus;
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ApplianceSpecs {
+  brand?: string | null;
+  model?: string | null;
+  capacity?: string | null;
+  wattage?: string | null;
+  keyFeatures?: string[];
+  vectorChunkCount?: number;
+  [key: string]: unknown;
+}
+
+export type ApplianceProcessingStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';

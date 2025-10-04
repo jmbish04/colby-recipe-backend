@@ -102,6 +102,8 @@ export interface Env {
   AI: AiService;
   BROWSER: BrowserService;
   VEC: VectorizeIndex;
+  APPLIANCE_VEC: VectorizeIndex;
   KV: KVNamespace;
   BUCKET: R2Bucket;
+  APPLIANCE_BUCKET: R2Bucket;
 }

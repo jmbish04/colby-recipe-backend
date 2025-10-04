@@ -78,18 +78,35 @@
         "properties": {
           "id": { "type": "string" },
           "userId": { "type": "string" },
-          "brand": { "type": "string" },
-          "model": { "type": "string" },
+          "nickname": { "type": ["string", "null"] },
+          "brand": { "type": ["string", "null"] },
+          "model": { "type": ["string", "null"] },
+          "extractedSpecs": { "$ref": "#/components/schemas/ApplianceSpecs" },
           "manualR2Key": { "type": ["string", "null"] },
-          "extractedText": { "type": ["string", "null"] },
-          "manualEmbedding": {
-            "type": ["array", "null"],
-            "items": { "type": "number" }
+          "ocrTextR2Key": { "type": ["string", "null"] },
+          "agentInstructions": { "type": ["string", "null"] },
+          "processingStatus": {
+            "type": "string",
+            "enum": ["QUEUED", "PROCESSING", "COMPLETED", "FAILED"]
           },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" }
         },
-        "required": ["id", "userId", "brand", "model", "createdAt", "updatedAt"]
+        "required": ["id", "userId", "processingStatus", "createdAt", "updatedAt"]
+      },
+      "ApplianceSpecs": {
+        "type": "object",
+        "properties": {
+          "brand": { "type": ["string", "null"] },
+          "model": { "type": ["string", "null"] },
+          "capacity": { "type": ["string", "null"] },
+          "wattage": { "type": ["string", "null"] },
+          "keyFeatures": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "vectorChunkCount": { "type": ["number", "null"] }
+        }
       },
       "ChatIngredientsRequest": {
         "type": "object",
@@ -754,6 +771,55 @@
         }
       }
     },
+    "/api/recipes/{id}/adapt": {
+      "post": {
+        "summary": "Adapt a recipe using manual context",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "appliance_id": { "type": "string" }
+                },
+                "required": ["appliance_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Adapted recipe instructions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tailored_steps": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "summary_of_changes": { "type": "string" }
+                  },
+                  "required": ["tailored_steps", "summary_of_changes"]
+                }
+              }
+            }
+          },
+          "404": { "description": "Recipe or appliance not found" },
+          "409": { "description": "Appliance processing incomplete" }
+        }
+      }
+    },
     "/api/recipes/{id}/rating": {
       "get": {
         "summary": "Get the current user's rating",
@@ -1049,7 +1115,7 @@
     },
     "/api/kitchen/appliances": {
       "post": {
-        "summary": "Register a kitchen appliance and optional manual",
+        "summary": "Queue an appliance manual for ingestion",
         "requestBody": {
           "required": true,
           "content": {
@@ -1057,26 +1123,26 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "brand": { "type": "string" },
-                  "model": { "type": "string" },
-                  "manual": { "type": "string", "format": "binary" }
-                },
-                "required": ["brand", "model"]
+                  "manual_file": { "type": "string", "format": "binary" },
+                  "manual_url": { "type": "string", "format": "uri" },
+                  "nickname": { "type": "string" }
+                }
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Appliance created",
+          "202": {
+            "description": "Ingestion queued",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "appliance": { "$ref": "#/components/schemas/KitchenAppliance" }
+                    "appliance_id": { "type": "string" },
+                    "status": { "type": "string" }
                   },
-                  "required": ["appliance"]
+                  "required": ["appliance_id", "status"]
                 }
               }
             }
@@ -1107,6 +1173,49 @@
       }
     },
     "/api/kitchen/appliances/{id}": {
+      "put": {
+        "summary": "Update appliance metadata",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nickname": { "type": ["string", "null"] },
+                  "brand": { "type": ["string", "null"] },
+                  "model": { "type": ["string", "null"] },
+                  "agentInstructions": { "type": ["string", "null"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated appliance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appliance": { "$ref": "#/components/schemas/KitchenAppliance" }
+                  },
+                  "required": ["appliance"]
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "summary": "Remove a kitchen appliance",
         "parameters": [
@@ -1128,6 +1237,36 @@
                     "success": { "type": "boolean" }
                   },
                   "required": ["success"]
+                }
+              }
+            }
+          },
+          "404": { "description": "Appliance not found" }
+        }
+      }
+    },
+    "/api/kitchen/appliances/{id}/status": {
+      "get": {
+        "summary": "Check appliance processing status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current processing state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" }
+                  },
+                  "required": ["status"]
                 }
               }
             }
