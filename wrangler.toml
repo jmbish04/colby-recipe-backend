@@ -43,7 +43,7 @@ id = "472e8adbec2f4aecac8d168a3910ca08"
 # R2 BUCKET BINDING
 [[r2_buckets]]
 binding = "BUCKET"
-bucket_name = "colby-recipes"
+bucket_name = "menuforge-recipes"
 
 [[r2_buckets]]
 binding = "APPLIANCE_BUCKET"
