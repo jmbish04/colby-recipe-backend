@@ -377,12 +377,13 @@ Return the recipe IDs, day names, and meal type.`);
 
     try {
       if (request.method === 'POST' && path === '/generate') {
-        const body = await request.json() as {
-          userId: string;
-          theme?: string;
-          excludeRecipeIds?: string[];
-          weekStartDate?: string;
-        };
+        const GenerateBodySchema = z.object({
+          userId: z.string(),
+          theme: z.string().optional(),
+          excludeRecipeIds: z.array(z.string()).optional(),
+          weekStartDate: z.string().datetime().optional(),
+        });
+        const body = GenerateBodySchema.parse(await request.json());
 
         const result = await this.generateMenuPlan(body.userId, {
           theme: body.theme,
