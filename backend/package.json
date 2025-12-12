@@ -20,8 +20,7 @@
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
-    "wrangler:types": "wrangler types",
-    "cf-typegen": "wrangler types"
+    "wrangler:types": "wrangler types"
   },
   "keywords": [
     "cloudflare",
