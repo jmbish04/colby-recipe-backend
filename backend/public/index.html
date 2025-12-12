@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognitive Kitchen API</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    p {
+      font-size: 1.2rem;
+      color: #aaa;
+      margin-bottom: 2rem;
+    }
+    .endpoints {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .endpoint {
+      background: rgba(255,255,255,0.1);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+    }
+    .endpoint:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+    .endpoint code {
+      color: #48dbfb;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+    .status {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: rgba(72, 219, 251, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(72, 219, 251, 0.3);
+    }
+    .status-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #2ecc71;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Cognitive Kitchen</h1>
+    <p>AI-Powered Recipe & Menu Management API</p>
+
+    <div class="status">
+      <span class="status-dot"></span>
+      API is running on Cloudflare Workers
+    </div>
+
+    <div class="endpoints">
+      <div class="endpoint">
+        <code>GET /api</code>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #888;">API Info</p>
+      </div>
+      <div class="endpoint">
+        <code>GET /api/health/latest</code>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #888;">Health Status</p>
+      </div>
+      <div class="endpoint">
+        <code>GET /api/recipes</code>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #888;">List Recipes</p>
+      </div>
+      <div class="endpoint">
+        <code>POST /api/recipes/ingest</code>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #888;">Ingest Recipe URL</p>
+      </div>
+      <div class="endpoint">
+        <code>POST /api/agents/chef/chat</code>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #888;">Chef Assistant</p>
+      </div>
+      <div class="endpoint">
+        <code>POST /api/agents/planner/generate</code>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #888;">Generate Menu</p>
+      </div>
+    </div>
+
+    <p style="margin-top: 3rem; font-size: 0.9rem; color: #666;">
+      Powered by Cloudflare Workers, D1, Vectorize & Workers AI
+    </p>
+  </div>
+</body>
+</html>
