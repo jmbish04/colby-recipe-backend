@@ -9,6 +9,7 @@
  */
 
 import { Hono } from 'hono';
+import { z } from 'zod';
 import type { HonoEnv } from '../types';
 import { getPrismaClient, parseJsonField, parseTags } from '../lib/db';
 import { enqueueRecipeIngestion } from '../workflows/recipe-ingestion';
