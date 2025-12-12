@@ -1,0 +1,151 @@
+# ============================================================================
+# Cognitive Kitchen - Cloudflare Workers Configuration
+# ============================================================================
+# This configuration defines all bindings for the Cognitive Kitchen backend,
+# including D1 database, Vectorize indexes, AI models, KV storage, R2 buckets,
+# Durable Objects for stateful agents, and scheduled tasks.
+# ============================================================================
+
+name = "cognitive-kitchen-backend"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ============================================================================
+# STATIC ASSETS
+# ============================================================================
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# ============================================================================
+# OBSERVABILITY
+# ============================================================================
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+# ============================================================================
+# WORKERS AI BINDING
+# Models used:
+#   - @cf/openai/gpt-oss-120b (Deep reasoning)
+#   - @cf/meta/llama-3.1-70b-instruct (JSON extraction/structuring)
+#   - @cf/meta/llama-3.2-11b-vision-instruct (Vision/Receipt analysis)
+#   - @cf/baai/bge-base-en-v1.5 (Text embeddings)
+#   - @cf/openai/whisper (Audio transcription)
+# ============================================================================
+[ai]
+binding = "AI"
+
+# ============================================================================
+# BROWSER RENDERING (for URL scraping)
+# ============================================================================
+[browser]
+binding = "BROWSER"
+
+# ============================================================================
+# VECTORIZE INDEXES
+# ============================================================================
+# Primary recipe search index
+[[vectorize]]
+binding = "RECIPE_VECTORIZE"
+index_name = "recipes-index"
+
+# Appliance manuals search index
+[[vectorize]]
+binding = "APPLIANCE_VECTORIZE"
+index_name = "appliance-manuals-index"
+
+# ============================================================================
+# D1 DATABASE (SQLite)
+# Accessed via Prisma ORM with @prisma/adapter-d1
+# ============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "cognitive-kitchen"
+database_id = "a1e61fc6-cf5a-4900-9482-1089ce36f1d1"
+migrations_dir = "prisma/migrations"
+
+# ============================================================================
+# KV NAMESPACE
+# Used for:
+#   - Session storage
+#   - Agent context caching
+#   - User preference caching
+#   - Rate limiting
+# ============================================================================
+[[kv_namespaces]]
+binding = "KV"
+id = "472e8adbec2f4aecac8d168a3910ca08"
+
+# ============================================================================
+# R2 BUCKETS
+# ============================================================================
+# Recipe images and media
+[[r2_buckets]]
+binding = "RECIPE_BUCKET"
+bucket_name = "menuforge-recipes"
+
+# Appliance manuals and OCR text
+[[r2_buckets]]
+binding = "APPLIANCE_BUCKET"
+bucket_name = "menuforge-appliances"
+
+# ============================================================================
+# DURABLE OBJECTS
+# Stateful agents using Cloudflare Agents SDK
+# ============================================================================
+[durable_objects]
+bindings = [
+  # ChefAgent: Maintains conversation history, uses KV for context caching
+  { name = "CHEF_AGENT", class_name = "ChefAgent" },
+  # PlannerAgent: Scheduled menu planning agent
+  { name = "PLANNER_AGENT", class_name = "PlannerAgent" }
+]
+
+# Durable Object migrations (for production deployment)
+[[migrations]]
+tag = "v1"
+new_classes = ["ChefAgent", "PlannerAgent"]
+
+# ============================================================================
+# QUEUES
+# Used for async recipe ingestion workflow
+# ============================================================================
+[[queues.producers]]
+binding = "RECIPE_INGESTION_QUEUE"
+queue = "recipe-ingestion"
+
+[[queues.consumers]]
+queue = "recipe-ingestion"
+max_batch_size = 10
+max_batch_timeout = 30
+max_retries = 3
+dead_letter_queue = "recipe-ingestion-dlq"
+
+# ============================================================================
+# CRON TRIGGERS (Scheduled Tasks)
+# ============================================================================
+[triggers]
+crons = [
+  # Health Monitor: Every hour
+  "0 * * * *",
+  # PlannerAgent: Sunday at 8 AM UTC
+  "0 8 * * 0",
+  # Recipe crawl job: Daily at 3 AM UTC
+  "0 3 * * *"
+]
+
+# ============================================================================
+# ENVIRONMENT VARIABLES (Secrets should be set via wrangler secret)
+# ============================================================================
+[vars]
+ENVIRONMENT = "production"
+LOG_LEVEL = "info"
+
+# ============================================================================
+# LOCAL DEVELOPMENT CONFIGURATION
+# ============================================================================
+[dev]
+port = 8787
+local_protocol = "http"
