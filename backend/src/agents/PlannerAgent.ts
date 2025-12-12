@@ -200,8 +200,8 @@ export class PlannerAgent extends DurableObject<Env> {
 
         if (vectorResults.matches && vectorResults.matches.length > 0) {
           const recipeIds = vectorResults.matches
-            .map(m => m.metadata?.recipe_id as string)
-            .filter(id => id && !excludeIds.includes(id));
+            .map(m => m.metadata?.recipe_id)
+            .filter((id): id is string => typeof id === 'string' && !excludeIds.includes(id));
 
           if (recipeIds.length > 0) {
             const recipes = await prisma.recipe.findMany({
