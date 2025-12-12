@@ -12,8 +12,10 @@
  */
 
 import { DurableObject } from 'cloudflare:workers';
+import { z } from 'zod';
 import type { Env, DurableObjectState } from '../types';
 import type { ChatMessage, UserPreferences, ChefAgentState } from '../types/domain';
+import { UserPreferencesSchema } from '../types/domain';
 import { chatCompletion } from '../services/ai-pipeline';
 
 const MAX_HISTORY_LENGTH = 50;

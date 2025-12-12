@@ -10,6 +10,7 @@
  */
 
 import { Hono } from 'hono';
+import { z } from 'zod';
 import type { HonoEnv } from '../types';
 import { getPrismaClient, parseJsonField } from '../lib/db';
 import type { UserPreferences } from '../types/domain';

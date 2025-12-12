@@ -123,6 +123,18 @@ export interface MenuPlan {
 // User Preferences Types
 // ============================================================================
 
+export const UserPreferencesSchema = z.object({
+  userId: z.string(),
+  cuisines: z.array(z.string()),
+  dislikedIngredients: z.array(z.string()),
+  favoredTools: z.array(z.string()),
+  dietaryRestrictions: z.array(z.string()),
+  allergies: z.array(z.string()),
+  skillLevel: z.number().optional(),
+  defaultServings: z.number().optional(),
+  notes: z.string().nullable().optional(),
+});
+
 export interface UserPreferences {
   userId: string;
   cuisines: string[];
