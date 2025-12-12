@@ -120,11 +120,13 @@ app.use('/api/*', async (c, next) => {
     }
   }
 
-  // Check query param for user_id (development/testing)
-  const queryUserId = c.req.query('user_id');
-  if (queryUserId) {
-    c.set('userId', queryUserId);
-    return next();
+  // Check query param for user_id (development/testing ONLY)
+  if (c.env.ENVIRONMENT !== 'production') {
+    const queryUserId = c.req.query('user_id');
+    if (queryUserId) {
+      c.set('userId', queryUserId);
+      return next();
+    }
   }
 
   // Allow unauthenticated access for public endpoints
