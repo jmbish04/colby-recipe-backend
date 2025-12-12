@@ -241,7 +241,8 @@ recipes.post('/', async (c) => {
  */
 recipes.post('/ingest', async (c) => {
   try {
-    const body = await c.req.json<{ url?: string }>();
+    const IngestBodySchema = z.object({ url: z.string().url() });
+    const body = IngestBodySchema.parse(await c.req.json());
     const url = body.url?.trim();
 
     if (!url) {
