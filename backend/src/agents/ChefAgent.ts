@@ -252,11 +252,12 @@ Be conversational, helpful, and encouraging. Keep responses concise but informat
 
     try {
       if (request.method === 'POST' && path === '/chat') {
-        const body = await request.json() as {
-          message: string;
-          userId: string;
-          preferences?: UserPreferences;
-        };
+        const ChatRequestBodySchema = z.object({
+          message: z.string(),
+          userId: z.string(),
+          preferences: UserPreferencesSchema.optional(), // Assuming a Zod schema for UserPreferences exists
+        });
+        const body = ChatRequestBodySchema.parse(await request.json());
 
         const result = await this.chat(body.message, body.userId, body.preferences);
         return Response.json(result);
