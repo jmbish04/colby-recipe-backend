@@ -1,0 +1,437 @@
+// ============================================================================
+// Cognitive Kitchen - Prisma Schema
+// ============================================================================
+// This schema defines all data models for the Cognitive Kitchen application.
+// Uses Cloudflare D1 (SQLite) via @prisma/adapter-d1
+// ============================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// CORE MODELS
+// ============================================================================
+
+/// Household represents a family or group of users sharing recipes and menus
+model Household {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users       User[]
+  pantryItems PantryItem[]
+  menus       Menu[]
+
+  @@map("households")
+}
+
+/// User represents an individual account in the system
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  name       String?
+  pictureUrl String?  @map("picture_url")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Optional household membership
+  householdId String?    @map("household_id")
+  household   Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+
+  // Relations
+  preferences       UserPreference?
+  favorites         Favorite[]
+  ratings           Rating[]
+  events            Event[]
+  menusCreated      Menu[]             @relation("MenuCreator")
+  shoppingLists     ShoppingList[]
+  userAgents        UserAgent[]
+  kitchenAppliances KitchenAppliance[]
+  recipesCreated    Recipe[]           @relation("RecipeAuthor")
+
+  @@index([householdId])
+  @@map("users")
+}
+
+/// UserPreference stores detailed user preferences for personalization
+model UserPreference {
+  userId              String   @id @map("user_id")
+  cuisines            String?  // JSON array of favored cuisines
+  dislikedIngredients String?  @map("disliked_ingredients") // JSON array
+  favoredTools        String?  @map("favored_tools") // JSON array
+  dietaryRestrictions String?  @map("dietary_restrictions") // JSON array
+  allergies           String?  // JSON array
+  skillLevel          Int?     @map("skill_level") // 1-5
+  defaultServings     Int?     @map("default_servings")
+  notes               String?
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+// ============================================================================
+// RECIPE MODELS
+// ============================================================================
+
+/// Recipe stores normalized, structured recipe information
+model Recipe {
+  id              String   @id @default(uuid())
+  sourceUrl       String?  @unique @map("source_url")
+  sourceDomain    String?  @map("source_domain")
+  title           String
+  description     String?
+  authorName      String?  @map("author_name")
+  cuisine         String?
+  tags            String?  // Comma-separated tags
+  heroImageUrl    String?  @map("hero_image_url")
+  yield           String?
+  prepTimeMinutes Int?     @map("prep_time_minutes")
+  cookTimeMinutes Int?     @map("cook_time_minutes")
+  totalTimeMinutes Int?    @map("total_time_minutes")
+  ingredientsJson String?  @map("ingredients_json") // JSON array of Ingredient objects
+  stepsJson       String?  @map("steps_json") // JSON array of RecipeStep objects
+  prepPhasesJson  String?  @map("prep_phases_json") // JSON array of PrepPhase objects
+  equipmentJson   String?  @map("equipment_json") // JSON array of equipment strings
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Creator (for manually created recipes)
+  creatorId String? @map("creator_id")
+  creator   User?   @relation("RecipeAuthor", fields: [creatorId], references: [id], onDelete: SetNull)
+
+  // Relations
+  ingredients Ingredient[]
+  favorites   Favorite[]
+  ratings     Rating[]
+  events      Event[]
+  menuItems   MenuItem[]
+  ingestions  Ingestion[]
+
+  @@index([cuisine])
+  @@index([tags])
+  @@index([creatorId])
+  @@map("recipes")
+}
+
+/// Ingredient represents a single ingredient with quantity and notes
+model Ingredient {
+  id       Int     @id @default(autoincrement())
+  recipeId String  @map("recipe_id")
+  name     String
+  quantity String?
+  unit     String?
+  notes    String?
+  sortOrder Int    @default(0) @map("sort_order")
+
+  // Relations
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@map("ingredients")
+}
+
+// ============================================================================
+// PANTRY & INVENTORY
+// ============================================================================
+
+/// PantryItem tracks ingredients the user has on hand
+model PantryItem {
+  id             Int       @id @default(autoincrement())
+  householdId    String?   @map("household_id")
+  userId         String?   @map("user_id") // For backward compatibility
+  ingredientName String    @map("ingredient_name")
+  quantity       String?
+  unit           String?
+  purchaseDate   DateTime? @map("purchase_date")
+  expiryDate     DateTime? @map("expiry_date")
+  category       String?   // e.g., "produce", "dairy", "pantry"
+  location       String?   // e.g., "fridge", "freezer", "pantry"
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  household Household? @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId])
+  @@index([userId])
+  @@map("pantry_items")
+}
+
+// ============================================================================
+// MENU PLANNING
+// ============================================================================
+
+/// Menu represents a meal plan (typically weekly)
+model Menu {
+  id            String    @id @default(uuid())
+  householdId   String?   @map("household_id")
+  userId        String    @map("user_id") // Creator
+  title         String?
+  weekStartDate DateTime? @map("week_start_date")
+  theme         String?   // Optional theme for the menu
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  household     Household?     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  creator       User           @relation("MenuCreator", fields: [userId], references: [id], onDelete: Cascade)
+  items         MenuItem[]
+  shoppingLists ShoppingList[]
+
+  @@index([householdId])
+  @@index([userId])
+  @@map("menus")
+}
+
+/// MenuItem links a recipe to a specific day and meal type within a menu
+model MenuItem {
+  id        Int     @id @default(autoincrement())
+  menuId    String  @map("menu_id")
+  recipeId  String  @map("recipe_id")
+  dayOfWeek Int?    @map("day_of_week") // 0=Sunday, 6=Saturday
+  mealType  String? @map("meal_type") // breakfast, lunch, dinner, snack
+  notes     String?
+  servings  Int?    // Override default servings
+
+  // Relations
+  menu   Menu   @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([menuId])
+  @@index([recipeId])
+  @@map("menu_items")
+}
+
+// ============================================================================
+// SHOPPING LISTS
+// ============================================================================
+
+/// ShoppingList is a container for shopping list items
+model ShoppingList {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  menuId    String?  @map("menu_id")
+  title     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  menu  Menu?             @relation(fields: [menuId], references: [id], onDelete: SetNull)
+  items ShoppingListItem[]
+
+  @@index([userId])
+  @@index([menuId])
+  @@map("shopping_lists")
+}
+
+/// ShoppingListItem represents individual items to purchase
+model ShoppingListItem {
+  id             Int     @id @default(autoincrement())
+  listId         String  @map("list_id")
+  ingredientName String  @map("ingredient_name")
+  quantity       String?
+  unit           String?
+  category       String? // Aisle/category for organization
+  isChecked      Boolean @default(false) @map("is_checked")
+
+  // Relations
+  list ShoppingList @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@index([listId])
+  @@map("shopping_list_items")
+}
+
+// ============================================================================
+// USER ENGAGEMENT
+// ============================================================================
+
+/// Favorite tracks user-favorited recipes
+model Favorite {
+  userId    String   @map("user_id")
+  recipeId  String   @map("recipe_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, recipeId])
+  @@map("favorites")
+}
+
+/// Rating stores user ratings and reviews for recipes
+model Rating {
+  userId    String    @map("user_id")
+  recipeId  String    @map("recipe_id")
+  stars     Int       // 1-5
+  notes     String?
+  cookedAt  DateTime? @map("cooked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, recipeId])
+  @@map("ratings")
+}
+
+/// Event logs user interactions for implicit feedback
+model Event {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
+  eventType String   @map("event_type") // view, cook, skip, add_to_menu, search
+  recipeId  String?  @map("recipe_id")
+  sessionId String?  @map("session_id")
+  metadata  String?  // JSON object for additional context
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe? @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([recipeId])
+  @@index([eventType])
+  @@map("events")
+}
+
+// ============================================================================
+// KITCHEN APPLIANCES
+// ============================================================================
+
+/// KitchenAppliance stores smart kitchen device information and processed manuals
+model KitchenAppliance {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  nickname          String?
+  brand             String?
+  model             String?
+  extractedSpecsJson String? @map("extracted_specs_json") // JSON object
+  manualR2Key       String?  @map("manual_r2_key")
+  ocrTextR2Key      String?  @map("ocr_text_r2_key")
+  agentInstructions String?  @map("agent_instructions")
+  processingStatus  String   @default("QUEUED") @map("processing_status") // QUEUED, PROCESSING, COMPLETED, FAILED
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([processingStatus])
+  @@map("kitchen_appliances")
+}
+
+// ============================================================================
+// AI AGENTS
+// ============================================================================
+
+/// UserAgent configures AI agents for each user
+model UserAgent {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  agentType  String    @map("agent_type") // chef, planner, pantry_manager
+  isEnabled  Boolean   @default(true) @map("is_enabled")
+  configJson String?   @map("config_json") // JSON object for agent-specific settings
+  lastRunAt  DateTime? @map("last_run_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, agentType])
+  @@index([userId])
+  @@map("user_agents")
+}
+
+// ============================================================================
+// HEALTH MONITORING
+// ============================================================================
+
+/// HealthCheckLog stores results from health check runs
+model HealthCheckLog {
+  id        Int      @id @default(autoincrement())
+  timestamp DateTime @default(now())
+  status    String   // OK, ERROR
+  services  String   // JSON object with service statuses
+  latencyMs Int      @map("latency_ms")
+  details   String?  // JSON object with additional details
+  triggeredBy String @default("scheduled") @map("triggered_by") // scheduled, manual
+
+  @@index([timestamp])
+  @@index([status])
+  @@map("health_check_logs")
+}
+
+// ============================================================================
+// INGESTION & PROCESSING
+// ============================================================================
+
+/// Ingestion logs recipe ingestion process for debugging
+model Ingestion {
+  id         Int      @id @default(autoincrement())
+  sourceType String   @map("source_type") // url, image, manual
+  sourceRef  String   @map("source_ref")
+  raw        String?  // Raw input data
+  recipeJson String?  @map("recipe_json") // Normalized output
+  recipeId   String?  @map("recipe_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  recipe Recipe? @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+
+  @@index([recipeId])
+  @@map("ingestions")
+}
+
+/// CrawlQueue manages URLs queued for recipe crawling
+model CrawlQueue {
+  id        Int      @id @default(autoincrement())
+  url       String   @unique
+  status    String   @default("queued") // queued, processing, done, error
+  priority  Int      @default(0)
+  error     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([priority])
+  @@map("crawl_queue")
+}
+
+// ============================================================================
+// OBSERVABILITY
+// ============================================================================
+
+/// RequestLog stores structured API request logs
+model RequestLog {
+  id     Int    @id @default(autoincrement())
+  ts     String // ISO timestamp
+  level  String // info, warn, error
+  route  String
+  method String
+  status Int
+  ms     Int    // Duration in milliseconds
+  msg    String?
+  meta   String? // JSON object
+
+  @@index([ts])
+  @@index([route])
+  @@index([level])
+  @@map("request_logs")
+}
