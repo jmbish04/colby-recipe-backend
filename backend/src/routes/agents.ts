@@ -31,7 +31,8 @@ agents.post('/chef/chat', async (c) => {
       return c.json({ success: false, error: 'Authentication required' }, 401);
     }
 
-    const body = await c.req.json<{ message: string }>();
+    const ChatBodySchema = z.object({ message: z.string().min(1) });
+    const body = ChatBodySchema.parse(await c.req.json());
     const message = body.message?.trim();
 
     if (!message) {
