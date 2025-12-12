@@ -106,7 +106,7 @@ bindings = [
 # Durable Object migrations (for production deployment)
 [[migrations]]
 tag = "v1"
-new_classes = ["ChefAgent", "PlannerAgent"]
+new_sqlite_classes = ["ChefAgent", "PlannerAgent"]
 
 # ============================================================================
 # QUEUES
