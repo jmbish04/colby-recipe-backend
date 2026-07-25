@@ -1,0 +1,37 @@
+{
+    "files.associations": {
+        "*.css": "tailwindcss",
+        // Agent definition files in the sync orchestration layer → Markdown
+        "**/orchestration/sync/.github/agents/*.md": "markdown",
+        "**/orchestration/sync/.github/agents/*.agent.md": "markdown",
+        // Workflow templates in the sync orchestration layer → YAML
+        "**/orchestration/sync/.github/workflows/*.yml": "yaml",
+        "**/orchestration/sync/.github/workflows/*.yaml": "yaml"
+    },
+    "css.validate": false,
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-workflow.json": [
+            ".github/workflows/*.yml",
+            "**/orchestration/sync/.github/workflows/*.yml",
+            "**/orchestration/sync/.github/workflows/*.yaml"
+        ]
+    },
+    "yaml.customTags": [
+        "!reference sequence",
+        "!reference scalar",
+        "!reference map"
+    ],
+    "[yaml]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced"
+    },
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "other": "off",
+            "comments": "off",
+            "strings": "off"
+        }
+    }
+}
